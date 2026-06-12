@@ -10,7 +10,12 @@
 - Verified the app with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 - Next pass should do source-backed cleanup first, then expand the remaining entries to match the sources more closely.
 
+## Commit 3 — Source-backed cleanup pass
+- Reworked the cultural map into a cleaner, source-aligned first-pass set.
+- Removed duplicate entries and tightened several connotation/gender/literary note wordings.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: 25%.
-- The cultural map has a larger first-pass coverage set, but source-backed cleanup still needs to happen before the next expansion wave.
-- Open data sources like 汉典 and 国学大师 are the intended references for the cleanup pass.
+- Task progress: 45%.
+- The cultural map is now cleaner and more source-aligned, and the next step is to continue expansion from this baseline.
+- Open data sources like 汉典 and 国学大师 remain the reference point for the next expansion wave.
