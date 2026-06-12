@@ -15,7 +15,12 @@
 - Removed duplicate entries and tightened several connotation/gender/literary note wordings.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 
+## Commit 4 — Source-aligned expansion wave
+- Added more common, source-aligned naming characters such as `和`, `雅`, `静`, `婉`, `妍`, `婷`, `瑶`, `承`, `启`, `博`, `浩`, `然`, `辰`, `景`, `怡`, `欣`, `修`, `谦`, `诚`, `霏`, `昕`, and `淳`.
+- Kept the object shape unchanged so the UI and analyzer remain stable.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: 45%.
-- The cultural map is now cleaner and more source-aligned, and the next step is to continue expansion from this baseline.
-- Open data sources like 汉典 and 国学大师 remain the reference point for the next expansion wave.
+- Task progress: 60%.
+- The cultural map now has a broader, cleaner source-aligned base and can keep expanding from there.
+- Open data sources like 汉典 and 国学大师 should continue guiding the remaining additions and wording cleanup.
