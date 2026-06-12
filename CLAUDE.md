@@ -34,7 +34,10 @@ Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone
 
 The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web only, with a compact local model and a graceful fallback path.
 
-## Development Commands
+## Version Control
+
+- Keep `COMMIT_PROGRESS.md` updated with a short entry for each commit.
+- Treat that file as the running log of repository milestones and progress.
 
 ```bash
 cd my-vue-app
