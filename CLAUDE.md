@@ -30,7 +30,7 @@ The core data flow:
 
 Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()` so it's ready before the user submits. `loadData()` should check HTTP status before parsing JSON so fetch failures stay visible. The `analyzeName` function is safe to call immediately after — it awaits the same shared load promise.
 
-Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone-placement rules accurate for multi-vowel syllables so `CharacterCard.vue` can display readable pinyin.
+Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone-placement rules accurate for multi-vowel syllables so `CharacterCard.vue` can display readable pinyin. Normalize whitespace before formatting, preserve uppercase transliteration, and treat `v` as `ü` so common ASCII pinyin input stays readable and deterministic.
 
 The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web only, with a compact local model and a graceful fallback path.
 

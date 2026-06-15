@@ -7,6 +7,14 @@ type SurnameDict = Record<string, string>
 let charDict: RawDict | null = null
 let surnameSet: Set<string> | null = null
 
+const COMMON_COMPOUND_SURNAMES = new Set([
+  '欧阳', '司徒', '上官', '诸葛', '司马', '夏侯', '令狐', '皇甫', '宇文', '慕容',
+  '尉迟', '长孙', '公孙', '东郭', '南宫', '闾丘', '子车', '百里', '梁丘', '东门',
+  '西门', '呼延', '公羊', '轩辕', '濮阳', '单于', '申屠', '仲孙', '钟离', '东里',
+  '谷梁', '拓跋', '夹谷', '段干', '漆雕', '乐正', '壤驷', '公良', '漆周', '东野',
+  '宰父', '端木', '巫马', '公西', '颛孙', '壤丘', '微生', '羊舌', '宓', '伯',
+])
+
 async function loadData() {
   if (charDict && surnameSet) return
   const [charsRes, surnamesRes] = await Promise.all([
@@ -49,42 +57,69 @@ const toneMap: Record<string, string[]> = {
   ü: ['ǖ', 'ǘ', 'ǚ', 'ǜ', 'ü'],
 }
 
+function vowelAt(base: string, index: number): string | null {
+  const char = base[index]
+  if (!char) return null
+  const lowered = char.toLowerCase()
+  if (/[aeoiuvü]/.test(lowered)) return lowered === 'v' ? 'ü' : lowered
+  return null
+}
+
+function toneVowel(vowel: string, tone: number): string {
+  return toneMap[vowel]?.[tone - 1] ?? vowel
+}
+
+function isUppercaseLetter(char: string): boolean {
+  return char === char.toUpperCase() && char !== char.toLowerCase()
+}
+
+function applyTone(baseChar: string, tone: number): string {
+  const normalized = baseChar.toLowerCase() === 'v' ? 'ü' : baseChar.toLowerCase()
+  const toned = toneVowel(normalized, tone)
+  return isUppercaseLetter(baseChar) ? toned.toUpperCase() : toned
+}
+
+// Tone placement follows standard Pinyin ordering rules: a/e first, then ou/iu/ui, then the last vowel.
+
 function replaceToneVowel(base: string, tone: number): string {
-  const priority = [
-    /a/i,
-    /e/i,
-    /ou/i,
-    /o/i,
-    /iu/i,
-    /ui/i,
-    /[aeoiuü]/i,
-  ]
+  const lower = base.toLowerCase()
+  const lastA = lower.lastIndexOf('a')
+  if (lastA !== -1) return base.slice(0, lastA) + applyTone(base[lastA]!, tone) + base.slice(lastA + 1)
 
-  for (const pattern of priority) {
-    const match = base.match(pattern)
-    if (!match) continue
+  const lastE = lower.lastIndexOf('e')
+  if (lastE !== -1) return base.slice(0, lastE) + applyTone(base[lastE]!, tone) + base.slice(lastE + 1)
 
-    if (pattern.source === 'ou') {
-      return base.replace(/o/i, m => toneMap[m.toLowerCase()]![tone - 1] ?? m)
+  if (lower.includes('ou')) {
+    const index = lower.indexOf('o')
+    return base.slice(0, index) + applyTone(base[index]!, tone) + base.slice(index + 1)
+  }
+
+  if (lower.includes('iu')) {
+    const index = lower.indexOf('u')
+    return base.slice(0, index) + applyTone(base[index]!, tone) + base.slice(index + 1)
+  }
+
+  if (lower.includes('ui')) {
+    const index = lower.indexOf('i')
+    return base.slice(0, index) + applyTone(base[index]!, tone) + base.slice(index + 1)
+  }
+
+  const vowels = ['a', 'e', 'o', 'i', 'u', 'ü']
+  for (let i = base.length - 1; i >= 0; i -= 1) {
+    const vowel = vowelAt(base, i)
+    if (vowel && vowels.includes(vowel)) {
+      return base.slice(0, i) + applyTone(base[i]!, tone) + base.slice(i + 1)
     }
-
-    if (pattern.source === 'iu') {
-      return base.replace(/u/i, m => toneMap[m.toLowerCase()]![tone - 1] ?? m)
-    }
-
-    if (pattern.source === 'ui') {
-      return base.replace(/i/i, m => toneMap[m.toLowerCase()]![tone - 1] ?? m)
-    }
-
-    return base.replace(match[0]!, m => toneMap[m.toLowerCase()]![tone - 1] ?? m)
   }
 
   return base
 }
 
 export function formatPinyin(raw: string): string {
-  return raw
-    .split(' ')
+  const syllables = raw.trim().split(/\s+/).filter(Boolean)
+  if (!syllables.length) return ''
+
+  return syllables
     .map(syl => {
       const tone = toneFromPinyin(syl)
       if (!tone) return syl
@@ -94,18 +129,30 @@ export function formatPinyin(raw: string): string {
     .join(' ')
 }
 
+function surnameLength(chars: string[]): number {
+  if (!chars.length) return 0
+
+  const joinedTwo = chars.length >= 2 ? chars[0]! + chars[1]! : ''
+  if (COMMON_COMPOUND_SURNAMES.has(joinedTwo)) return 2
+
+  if (surnameSet?.has(joinedTwo)) return 2
+  if (surnameSet?.has(chars[0]!)) return 1
+  return 0
+}
+
 function segment(chars: string[]): ('surname' | 'given')[] {
   if (!surnameSet) return chars.map(() => 'given')
+
   const roles: ('surname' | 'given')[] = []
-  if (chars.length >= 2 && surnameSet.has(chars[0]! + chars[1]!)) {
-    roles.push('surname', 'surname')
-    for (let i = 2; i < chars.length; i++) roles.push('given')
-  } else if (surnameSet.has(chars[0]!)) {
-    roles.push('surname')
-    for (let i = 1; i < chars.length; i++) roles.push('given')
+  const surnameCount = surnameLength(chars)
+
+  if (surnameCount > 0) {
+    for (let i = 0; i < surnameCount; i += 1) roles.push('surname')
+    for (let i = surnameCount; i < chars.length; i += 1) roles.push('given')
   } else {
-    for (let i = 0; i < chars.length; i++) roles.push('given')
+    for (let i = 0; i < chars.length; i += 1) roles.push('given')
   }
+
   return roles
 }
 

@@ -45,7 +45,13 @@
 - Added a Vitest mock for the AI helper so the UI test suite keeps passing without a locally installed runtime package.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 
+
+## Commit 10 — Pinyin formatting hardening
+- Tightened `src/services/nameAnalyzer.ts` so tone-mark placement trims and normalizes whitespace, preserves uppercase transliteration, and handles `v` as `ü`.
+- Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
+- Verified the app again with `npm run test:unit -- src/__tests__/nameAnalyzer.spec.ts` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: ONNX classifier task is in a fallback-safe state, with runtime asset wiring still optional if a real model bundle is added later.
-- The cultural map still has the larger local-database-backed base.
-- Remaining active work should now move to the next pending task in the list.
+- Task progress: pinyin formatting is hardened and covered by focused tests.
+- The next active work is the accessibility/UI-state pass.
+- Keep the analyzer and UI polish tasks moving in order so the shared dict preload and rendering flow stay stable.
