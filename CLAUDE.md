@@ -38,6 +38,11 @@ The local AI layer is intentionally lazy-loaded from `src/services/localInferenc
 
 - Keep `COMMIT_PROGRESS.md` updated with a short entry for each commit.
 - Treat that file as the running log of repository milestones and progress.
+- When expanding cultural coverage, prefer the local `xls` workbook in the bundled Kangxi database folder and keep each batch source-aligned.
+- Cultural coverage now has a large local-database-backed base; the next active implementation target is the ONNX classifier in `src/services/localInference.ts`.
+- Keep following the active task plan without pausing between task-sized batches.
+- Refresh this file with any new durable workflow preferences learned during the task.
+- Keep the current checkpoint summaries aligned with the active task list so future sessions can resume cleanly.
 
 ```bash
 cd my-vue-app

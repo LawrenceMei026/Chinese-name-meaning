@@ -25,7 +25,27 @@
 - Kept the cultural lookup shape stable while broadening coverage from the local database.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 
+## Commit 6 — Bulk XLS coverage expansion
+- Expanded `src/data/cultural.ts` to roughly 2000 curated entries using the local Kangxi `xls` workbook as the source base.
+- Focused the bulk pass on name-friendly characters across feminine, water, plant, jade, brightness, strength, virtue, and classic literary themes.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 7 — Save ONNX checkpoint
+- Closed the cultural-coverage target and handed off to the ONNX classifier task.
+- Saved the current repo state so the next implementation step starts from the expanded cultural baseline.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app` before switching tasks.
+
 ## Current checkpoint
-- Task progress: 75%.
-- The cultural map now has a significantly larger local-database-backed base.
-- Remaining work is more of the same: continue extracting useful characters from the `xls` source and keep wording aligned with the source text.
+- Task progress: cultural coverage target completed; ONNX classifier task is next.
+- The cultural map now has a much larger local-database-backed base.
+- Remaining work is now focused on `src/services/localInference.ts` and the model-loading path.
+
+## Commit 8 — ONNX fallback wiring
+- Replaced the local AI stub with a lazy-loaded ONNX-backed classifier path and deterministic fallback labels in `src/services/localInference.ts`.
+- Added a Vitest mock for the AI helper so the UI test suite keeps passing without a locally installed runtime package.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Current checkpoint
+- Task progress: ONNX classifier task is in a fallback-safe state, with runtime asset wiring still optional if a real model bundle is added later.
+- The cultural map still has the larger local-database-backed base.
+- Remaining active work should now move to the next pending task in the list.

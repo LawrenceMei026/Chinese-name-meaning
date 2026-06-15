@@ -7,6 +7,15 @@ vi.mock('../services/nameAnalyzer', () => ({
   preloadDictionary: vi.fn().mockResolvedValue(undefined),
 }))
 
+vi.mock('../services/localInference', () => ({
+  runLocalAiAnalysis: vi.fn().mockResolvedValue({
+    labels: ['文雅'],
+    summary: '本地回退结果。',
+    loadedFromCache: false,
+    source: 'fallback',
+  }),
+}))
+
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks()
