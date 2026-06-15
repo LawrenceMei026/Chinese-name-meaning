@@ -6,6 +6,7 @@ type SurnameDict = Record<string, string>
 
 let charDict: RawDict | null = null
 let surnameSet: Set<string> | null = null
+let loadPromise: Promise<void> | null = null
 
 const COMMON_COMPOUND_SURNAMES = new Set([
   '欧阳', '司徒', '上官', '诸葛', '司马', '夏侯', '令狐', '皇甫', '宇文', '慕容',
@@ -17,18 +18,26 @@ const COMMON_COMPOUND_SURNAMES = new Set([
 
 async function loadData() {
   if (charDict && surnameSet) return
-  const [charsRes, surnamesRes] = await Promise.all([
-    fetch('/data/chars.json'),
-    fetch('/data/surnames.json'),
-  ])
+  if (!loadPromise) {
+    loadPromise = Promise.all([
+      fetch('/data/chars.json'),
+      fetch('/data/surnames.json'),
+    ])
+      .then(async ([charsRes, surnamesRes]) => {
+        if (!charsRes.ok || !surnamesRes.ok) {
+          throw new Error('Dictionary data failed to load')
+        }
 
-  if (!charsRes.ok || !surnamesRes.ok) {
-    throw new Error('Dictionary data failed to load')
+        charDict = await charsRes.json() as RawDict
+        const surnames = await surnamesRes.json() as SurnameDict
+        surnameSet = new Set(Object.keys(surnames))
+      })
+      .finally(() => {
+        loadPromise = null
+      })
   }
 
-  charDict = await charsRes.json() as RawDict
-  const surnames = await surnamesRes.json() as SurnameDict
-  surnameSet = new Set(Object.keys(surnames))
+  await loadPromise
 }
 
 function parseEntry(raw: [string, string | null, ...string[]]): CharEntry {

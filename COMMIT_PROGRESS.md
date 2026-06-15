@@ -45,7 +45,6 @@
 - Added a Vitest mock for the AI helper so the UI test suite keeps passing without a locally installed runtime package.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 
-
 ## Commit 10 — Pinyin formatting hardening
 - Tightened `src/services/nameAnalyzer.ts` so tone-mark placement trims and normalizes whitespace, preserves uppercase transliteration, and handles `v` as `ü`.
 - Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
@@ -61,7 +60,12 @@
 - Added `AnalysisHistoryEntry` to `src/types.ts` and extended `src/__tests__/App.spec.ts` to cover hydration, save, restore, and malformed-storage fallback.
 - Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
 
+## Commit 13 — Dictionary loading optimization
+- Shared a single in-flight preload promise in `src/services/nameAnalyzer.ts` so concurrent callers reuse one dictionary fetch.
+- Kept the analyzer behavior unchanged while reducing duplicate network work during startup races.
+- Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: analysis history persistence is complete.
-- The next active work is the dictionary loading optimization task.
+- Task progress: dictionary loading optimization is complete.
+- The next active work is whatever comes after the current task list.
 - Keep the analyzer, history, and UI flows aligned so persisted results and fresh analyses stay in sync.
