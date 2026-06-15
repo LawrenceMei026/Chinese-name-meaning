@@ -51,7 +51,17 @@
 - Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
 - Verified the app again with `npm run test:unit -- src/__tests__/nameAnalyzer.spec.ts` in `my-vue-app`.
 
+## Commit 10 — Pinyin formatting hardening
+- Tightened `src/services/nameAnalyzer.ts` so tone-mark placement trims and normalizes whitespace, preserves uppercase transliteration, and handles `v` as `ü`.
+- Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
+- Verified the app again with `npm run test:unit -- src/__tests__/nameAnalyzer.spec.ts` in `my-vue-app`.
+
+## Commit 11 — Accessibility and analyzer polish
+- Added richer empty/loading/busy states, better form semantics, and clearer focus feedback in `src/App.vue`.
+- Expanded analyzer tests to cover trimmed input, unknown surname fallback, and more pinyin tone-placement cases.
+- Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: pinyin formatting is hardened and covered by focused tests.
-- The next active work is the accessibility/UI-state pass.
-- Keep the analyzer and UI polish tasks moving in order so the shared dict preload and rendering flow stay stable.
+- Task progress: accessibility/UI states and analyzer test coverage are both complete.
+- The next active work is the analysis history feature.
+- Keep the task order moving so the shared analyzer and UI flow stay stable.

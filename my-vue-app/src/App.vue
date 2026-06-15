@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { computed, ref, onMounted } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
 import { runLocalAiAnalysis } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
@@ -12,6 +12,11 @@ const loading = ref(false)
 const aiLoading = ref(false)
 const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
+
+const inputId = 'name-input'
+const helpId = 'name-input-help'
+const errorId = 'name-input-error'
+const isBusy = computed(() => loading.value || aiLoading.value)
 
 function isChineseInput(name: string) {
   return /[一-鿿]/.test(name)
@@ -78,35 +83,54 @@ onMounted(() => { preloadDictionary().catch(() => {}) })
       <p class="subtitle">输入一个中文姓名，探索每个汉字背后的含义、文化内涵与历史渊源。</p>
     </header>
 
-    <main class="main">
+    <main class="main" :aria-busy="isBusy">
       <form class="search-form" @submit.prevent="handleSubmit">
+        <label class="sr-only" :for="inputId">请输入中文姓名或拼音</label>
         <div class="input-row">
           <input
             v-model="input"
+            :id="inputId"
             class="name-input"
             type="text"
             placeholder="例如：李明华"
             lang="zh"
             autocomplete="off"
+            inputmode="text"
+            spellcheck="false"
             :disabled="loading || aiLoading"
-            aria-label="请输入中文姓名或拼音"
+            :aria-invalid="!!error"
+            :aria-describedby="`${helpId} ${error ? errorId : ''}`.trim()"
           />
           <button class="analyze-btn" type="submit" :disabled="loading || aiLoading || !input.trim()">
             <span v-if="loading">解析中…</span>
             <span v-else>解析</span>
           </button>
         </div>
-        <p v-if="error" class="error-msg" role="alert">{{ error }}</p>
+        <p :id="helpId" class="field-help">支持 2-3 个汉字姓名，或带声调数字的拼音输入。</p>
+        <p v-if="error" :id="errorId" class="error-msg" role="alert">{{ error }}</p>
       </form>
 
-      <div v-if="loading" class="loading" aria-live="polite">
+      <div v-if="loading" class="loading" role="status" aria-live="polite" aria-atomic="true">
         <span class="spinner" aria-hidden="true"></span>
         加载汉字数据中…
       </div>
 
-      <section v-if="result" class="results" aria-label="姓名解析结果">
+      <section v-else-if="!result" class="empty-state" aria-labelledby="empty-state-title">
+        <h2 id="empty-state-title" class="empty-title">等待解析</h2>
+        <p class="empty-copy">输入中文姓名或拼音后，系统会先识别姓氏，再展示每个字的读音、含义和文化内涵。</p>
+        <ul class="empty-tips">
+          <li>支持汉字姓名与拼音</li>
+          <li>支持带声调数字的输入，如 `Li3 Ming2 Hua2`</li>
+          <li>会自动区分姓和名</li>
+        </ul>
+      </section>
+
+      <section v-if="result" class="results" aria-label="姓名解析结果" :aria-busy="aiLoading">
         <div class="result-header">
-          <h2 class="result-name">{{ result.original }}</h2>
+          <div>
+            <h2 class="result-name">{{ result.original }}</h2>
+            <p class="result-meta">共 {{ result.chars.length }} 个字</p>
+          </div>
           <div class="result-actions">
             <button class="ai-btn" type="button" @click="handleAiAnalysis" :disabled="aiLoading">
               <span v-if="aiLoading">AI 分析中…</span>
@@ -115,6 +139,7 @@ onMounted(() => { preloadDictionary().catch(() => {}) })
             <button class="reset-btn" type="button" @click="reset" aria-label="清除并重新开始">✕ 清除</button>
           </div>
         </div>
+        <div v-if="aiLoading" class="ai-status" role="status" aria-live="polite">正在调用本地模型生成补充分析…</div>
         <div class="cards">
           <CharacterCard
             v-for="(char, i) in result.chars"
@@ -197,6 +222,18 @@ body {
   gap: 0.75rem;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 .name-input {
   flex: 1;
   font-size: 1.5rem;
@@ -206,16 +243,25 @@ body {
   background: #fff;
   color: #1a1a1a;
   font-family: 'Noto Serif SC', 'Songti SC', serif;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s;
   outline: none;
 }
 
-.name-input:focus {
+.name-input:focus,
+.name-input:focus-visible {
   border-color: #8b2c2c;
+  box-shadow: 0 0 0 3px rgba(139, 44, 44, 0.15);
 }
 
 .name-input:disabled {
   opacity: 0.6;
+}
+
+.field-help {
+  margin-top: 0.5rem;
+  color: #7c6b57;
+  font-size: 0.85rem;
+  line-height: 1.5;
 }
 
 .analyze-btn,
@@ -228,7 +274,7 @@ body {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
   white-space: nowrap;
 }
 
@@ -236,12 +282,18 @@ body {
   background: #2c5f8b;
 }
 
-.analyze-btn:hover:not(:disabled) {
+.analyze-btn:hover:not(:disabled),
+.analyze-btn:focus-visible:not(:disabled) {
   background: #6e2222;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 44, 44, 0.18);
 }
 
-.ai-btn:hover:not(:disabled) {
+.ai-btn:hover:not(:disabled),
+.ai-btn:focus-visible:not(:disabled) {
   background: #234d70;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(44, 95, 139, 0.18);
 }
 
 .analyze-btn:disabled,
@@ -257,13 +309,22 @@ body {
   margin-top: 0.5rem;
 }
 
+.loading,
+.empty-state,
+.ai-status {
+  border: 1px solid #eadfce;
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 16px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 6px 18px rgba(106, 82, 54, 0.08);
+}
+
 .loading {
   display: flex;
   align-items: center;
   gap: 0.75rem;
   color: #888;
   font-size: 0.95rem;
-  padding: 1rem 0;
 }
 
 .spinner {
@@ -280,12 +341,38 @@ body {
   to { transform: rotate(360deg); }
 }
 
+.empty-state {
+  color: #4c4033;
+  margin-top: 0.5rem;
+}
+
+.empty-title {
+  font-size: 1.05rem;
+  margin-bottom: 0.5rem;
+  color: #234d70;
+}
+
+.empty-copy {
+  line-height: 1.7;
+  margin-bottom: 0.75rem;
+}
+
+.empty-tips {
+  padding-left: 1.2rem;
+  color: #6f5c4a;
+  line-height: 1.7;
+}
+
+.empty-tips li + li {
+  margin-top: 0.2rem;
+}
+
 .result-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .result-actions {
@@ -301,6 +388,12 @@ body {
   letter-spacing: 0.1em;
 }
 
+.result-meta {
+  margin-top: 0.35rem;
+  color: #7c6b57;
+  font-size: 0.9rem;
+}
+
 .reset-btn {
   background: none;
   border: 1px solid #ddd;
@@ -312,9 +405,15 @@ body {
   transition: all 0.2s;
 }
 
-.reset-btn:hover {
+.reset-btn:hover,
+.reset-btn:focus-visible {
   border-color: #aaa;
   color: #555;
+}
+
+.ai-status {
+  color: #234d70;
+  margin-bottom: 0.75rem;
 }
 
 .cards {
@@ -384,7 +483,8 @@ body {
   text-decoration: none;
 }
 
-.app-footer a:hover {
+.app-footer a:hover,
+.app-footer a:focus-visible {
   text-decoration: underline;
 }
 </style>

@@ -26,7 +26,9 @@ describe('App', () => {
 
     expect(wrapper.text()).toContain('汉字姓名解析')
     expect(wrapper.text()).toContain('输入一个中文姓名，探索每个汉字背后的含义、文化内涵与历史渊源。')
-    expect(wrapper.find('input[aria-label="请输入中文姓名或拼音"]').exists()).toBe(true)
-    expect(wrapper.find('button[type="submit"]').text()).toContain('解析')
+    expect(wrapper.find('label.sr-only').text()).toBe('请输入中文姓名或拼音')
+    expect(wrapper.find('p.field-help').text()).toContain('支持 2-3 个汉字姓名')
+    expect(wrapper.find('section.empty-state').text()).toContain('等待解析')
+    expect(wrapper.find('input#name-input').attributes('aria-invalid')).toBe('false')
   })
 })
