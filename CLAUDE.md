@@ -25,7 +25,7 @@ The core data flow:
 1. User inputs a Chinese name (characters or pinyin)
 2. App validates the input mode, then segments the name into surname + given name characters
 3. Each character is looked up for definition, pinyin, and tone (from `chars.json`)
-4. Cultural context layer adds connotations, literary references, and naming trends (from `cultural.ts`)
+4. Cultural context layer adds connotations, literary references, and naming trends (from `cultural.json` via `cultural.ts`)
 5. Results are rendered in a structured, readable layout
 
 Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()` so it's ready before the user submits. `loadData()` should check HTTP status before parsing JSON so fetch failures stay visible. The `analyzeName` function is safe to call immediately after — it awaits the same shared load promise.
@@ -43,6 +43,10 @@ The local AI layer is intentionally lazy-loaded from `src/services/localInferenc
 - Keep following the active task plan without pausing between task-sized batches.
 - Refresh this file with any new durable workflow preferences learned during the task.
 - Keep the current checkpoint summaries aligned with the active task list so future sessions can resume cleanly.
+- When a markdown edit fails, assume the file changed under you or the replacement block was too broad. Re-read the current file and patch the smallest unique snippet instead of replacing a large section.
+- Preferred fixes for failed markdown updates: 1) re-read the exact file state, 2) edit a smaller unique block, 3) avoid stale whole-file replacements, 4) if the file is already drifting, update the tail-only checkpoint text first.
+- When editing larger markdown files, prefer tail-only checkpoint updates or a small unique block over whole-file replacement; the file often changes between reads during active tasks, and stale broad replacements are the main source of failed edits.
+- If an edit tool call reports a mismatch, treat it as a signal that the file drifted. Re-read the exact region you need, then patch only that region instead of retrying the same broad block.
 
 ```bash
 cd my-vue-app
@@ -66,7 +70,8 @@ my-vue-app/
     surnames.json   # CC-CEDICT surname entries
   src/
     types.ts                    # shared interfaces
-    data/cultural.ts            # static curated cultural data (~70 characters) — all text in Mandarin
+    data/cultural.ts            # wrapper around cultural.json for synchronous lookup
+    data/cultural.json          # curated cultural metadata map in JSON
     services/nameAnalyzer.ts    # loads dict, segments name, builds result; exports preloadDictionary() and formatPinyin()
     services/localInference.ts  # lazy-loaded AI orchestration with deterministic fallback
     components/CharacterCard.vue  # all labels/strings in Mandarin

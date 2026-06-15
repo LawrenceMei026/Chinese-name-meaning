@@ -65,7 +65,17 @@
 - Kept the analyzer behavior unchanged while reducing duplicate network work during startup races.
 - Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
 
+## Commit 14 — Cultural JSON extraction
+- Moved the curated cultural lookup table into `src/data/cultural.json` and kept `src/data/cultural.ts` as a thin synchronous wrapper.
+- Preserved the analyzer API so `getCulturalData()` still works without changing the name-analysis flow.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 15 — Project README
+- Added a root `README.md` that explains the app, its analysis flow, local AI fallback, data sources, and developer scripts.
+- Documented the Mandarin-first UI, runtime assets, and verification steps so the project no longer depends on `COMMIT_PROGRESS.md` for orientation.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: dictionary loading optimization is complete.
-- The next active work is whatever comes after the current task list.
-- Keep the analyzer, history, and UI flows aligned so persisted results and fresh analyses stay in sync.
+- Task progress: project README is complete.
+- The repository now has a root README for onboarding and a running progress log for milestone history.
+- Keep the README aligned with future feature changes so newcomers can still understand the app without reading internal notes.
