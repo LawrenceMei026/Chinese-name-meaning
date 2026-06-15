@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import App from '../App.vue'
-import type { AnalyzedName } from '../types'
+import type { AnalyzedName, AiAnalysisResult } from '../types'
 
 vi.mock('../services/nameAnalyzer', () => ({
   analyzeName: vi.fn(),
@@ -24,6 +24,13 @@ const sampleResult: AnalyzedName = {
     { char: '明', role: 'given', entry: null, cultural: null },
     { char: '华', role: 'given', entry: null, cultural: null },
   ],
+}
+
+const sampleAiResult: AiAnalysisResult = {
+  labels: ['文雅'],
+  summary: '本地回退结果。',
+  loadedFromCache: false,
+  source: 'fallback',
 }
 
 describe('App', () => {
@@ -83,6 +90,7 @@ describe('App', () => {
         input: '李明华',
         createdAt: 1710000000000,
         result: sampleResult,
+        aiResult: sampleAiResult,
       },
     ]))
 
@@ -94,6 +102,28 @@ describe('App', () => {
     expect((wrapper.find('input#name-input').element as HTMLInputElement).value).toBe('李明华')
     expect(wrapper.find('.result-name').text()).toBe('李明华')
     expect(wrapper.find('.result-meta').text()).toContain('3 个字')
+    expect(wrapper.find('.ai-panel').exists()).toBe(true)
+    expect(wrapper.find('.ai-summary').text()).toContain('本地回退结果')
+  })
+
+  it('persists the AI result back into the active history entry', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    vi.mocked(analyzeName).mockResolvedValue(sampleResult)
+    vi.mocked(runLocalAiAnalysis).mockResolvedValue(sampleAiResult)
+
+    const wrapper = mount(App)
+    await wrapper.find('input#name-input').setValue('李明华')
+    await wrapper.find('form.search-form').trigger('submit.prevent')
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.history-button').trigger('click')
+    await wrapper.find('button.ai-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    const saved = JSON.parse(localStorage.getItem('analysis-history-v1') ?? '[]')
+    expect(saved[0].aiResult.summary).toBe('本地回退结果。')
+    expect(wrapper.find('.ai-panel').exists()).toBe(true)
   })
 
   it('ignores malformed history data', async () => {

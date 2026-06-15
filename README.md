@@ -61,6 +61,7 @@ The optional AI layer is lazy-loaded from `src/services/localInference.ts` and u
 
 - If the model assets are present, the worker can produce a local summary and tone labels without blocking the main thread.
 - If the assets are missing, the app falls back to deterministic labels so the base analyzer still works.
+- Saved history now restores the AI panel too when an entry already has AI output.
 
 ## Getting started
 

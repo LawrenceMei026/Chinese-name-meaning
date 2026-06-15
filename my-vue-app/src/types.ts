@@ -37,4 +37,5 @@ export interface AnalysisHistoryEntry {
   input: string
   createdAt: number
   result: AnalyzedName
+  aiResult?: AiAnalysisResult | null
 }

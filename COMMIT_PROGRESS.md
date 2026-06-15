@@ -80,12 +80,12 @@
 - Covered name submission, dictionary-backed rendering, history persistence/restoration, local AI fallback behavior, and history clearing in one pass.
 - Verified the flow with `npm run test:e2e -- --project chromium` in `my-vue-app`.
 
-## Commit 17 — Worker-backed ONNX inference
-- Moved the AI inference path into `src/workers/localInference.worker.ts` and kept `src/services/localInference.ts` as a thin facade.
-- Preserved the deterministic fallback labels and summary so the AI panel still behaves the same when the model path is unavailable.
+## Commit 18 — Restore AI from history
+- Extended saved history entries so restored analyses can bring back the AI panel when AI output was previously generated.
+- Kept the worker-backed inference path intact while making history feel like a true resume flow.
 - Verified the app again with `npm run test:unit`, `npm run type-check`, and `npm run test:e2e -- --project chromium` in `my-vue-app`.
 
 ## Current checkpoint
-- Task progress: worker-backed ONNX inference is complete.
-- The browser and unit tests still pass with the AI path off the main thread.
-- Keep the README and repository notes aligned with the worker-based inference path so future readers know the model runs off-thread.
+- Task progress: AI history restore is complete.
+- Saved analyses now restore both the base character breakdown and the AI summary when available.
+- Keep the README and repository notes aligned with the saved-history schema so future readers know AI output can be persisted too.

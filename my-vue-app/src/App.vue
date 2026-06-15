@@ -16,6 +16,7 @@ const aiLoading = ref(false)
 const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
 const history = ref<AnalysisHistoryEntry[]>([])
+const activeHistoryEntryId = ref<string | null>(null)
 
 const inputId = 'name-input'
 const helpId = 'name-input-help'
@@ -79,9 +80,21 @@ function persistHistoryEntry(entry: AnalysisHistoryEntry) {
 function restoreHistoryEntry(entry: AnalysisHistoryEntry) {
   input.value = entry.input
   result.value = entry.result
-  aiResult.value = null
+  aiResult.value = entry.aiResult ?? null
   error.value = null
   aiError.value = null
+  activeHistoryEntryId.value = entry.id
+}
+
+function updateActiveHistoryEntry(aiAnalysis: AiAnalysisResult) {
+  if (!activeHistoryEntryId.value) return
+  const index = history.value.findIndex(entry => entry.id === activeHistoryEntryId.value)
+  if (index === -1) return
+  history.value[index] = {
+    ...history.value[index]!,
+    aiResult: aiAnalysis,
+  }
+  saveHistory(history.value)
 }
 
 function clearHistory() {
@@ -103,6 +116,7 @@ async function handleSubmit() {
   aiError.value = null
   result.value = null
   aiResult.value = null
+  activeHistoryEntryId.value = null
 
   try {
     const analyzed = await analyzeName(name)
@@ -129,6 +143,7 @@ async function handleAiAnalysis() {
 
   try {
     aiResult.value = await runLocalAiAnalysis(result.value)
+    updateActiveHistoryEntry(aiResult.value)
   } catch {
     aiError.value = 'AI 深度分析暂时不可用，请稍后重试。'
   } finally {
@@ -142,6 +157,7 @@ function reset() {
   aiResult.value = null
   error.value = null
   aiError.value = null
+  activeHistoryEntryId.value = null
 }
 
 onMounted(() => {
