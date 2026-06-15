@@ -75,7 +75,12 @@
 - Documented the Mandarin-first UI, runtime assets, and verification steps so the project no longer depends on `COMMIT_PROGRESS.md` for orientation.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
 
+## Commit 16 — Full-flow e2e coverage
+- Replaced the starter Playwright spec with a full browser flow in `my-vue-app/e2e/vue.spec.ts`.
+- Covered name submission, dictionary-backed rendering, history persistence/restoration, local AI fallback behavior, and history clearing in one pass.
+- Verified the flow with `npm run test:e2e -- --project chromium` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: project README is complete.
-- The repository now has a root README for onboarding and a running progress log for milestone history.
-- Keep the README aligned with future feature changes so newcomers can still understand the app without reading internal notes.
+- Task progress: full-flow e2e coverage is complete.
+- The browser test now exercises the integrated dictionary, history, and fallback paths together.
+- Keep Playwright expectations aligned with the visible UI copy so the flow remains stable.

@@ -34,6 +34,8 @@ Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone
 
 The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web only, with a compact local model and a graceful fallback path.
 
+The end-to-end Playwright flow should stay focused on the integrated user journey: name submission, history persistence, AI fallback, and dictionary-backed rendering. Keep those visible states stable so the browser test remains a useful regression check.
+
 ## Version Control
 
 - Keep `COMMIT_PROGRESS.md` updated with a short entry for each commit.
