@@ -31,3 +31,10 @@ export interface AiAnalysisResult {
   loadedFromCache: boolean
   source: 'model' | 'fallback'
 }
+
+export interface AnalysisHistoryEntry {
+  id: string
+  input: string
+  createdAt: number
+  result: AnalyzedName
+}

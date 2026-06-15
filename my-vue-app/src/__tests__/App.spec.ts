@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import App from '../App.vue'
+import type { AnalyzedName } from '../types'
 
 vi.mock('../services/nameAnalyzer', () => ({
   analyzeName: vi.fn(),
@@ -16,9 +17,19 @@ vi.mock('../services/localInference', () => ({
   }),
 }))
 
+const sampleResult: AnalyzedName = {
+  original: '李明华',
+  chars: [
+    { char: '李', role: 'surname', entry: null, cultural: null },
+    { char: '明', role: 'given', entry: null, cultural: null },
+    { char: '华', role: 'given', entry: null, cultural: null },
+  ],
+}
+
 describe('App', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
   })
 
   it('renders the analyzer shell', () => {
@@ -30,5 +41,67 @@ describe('App', () => {
     expect(wrapper.find('p.field-help').text()).toContain('支持 2-3 个汉字姓名')
     expect(wrapper.find('section.empty-state').text()).toContain('等待解析')
     expect(wrapper.find('input#name-input').attributes('aria-invalid')).toBe('false')
+  })
+
+  it('hydrates history from localStorage and renders entries', async () => {
+    localStorage.setItem('analysis-history-v1', JSON.stringify([
+      {
+        id: 'history-1',
+        input: '李明华',
+        createdAt: 1710000000000,
+        result: sampleResult,
+      },
+    ]))
+
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('section.history').exists()).toBe(true)
+    expect(wrapper.find('.history-name').text()).toBe('李明华')
+  })
+
+  it('saves a new history entry after successful analysis', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+    vi.mocked(analyzeName).mockResolvedValue(sampleResult)
+
+    const wrapper = mount(App)
+    await wrapper.find('input#name-input').setValue('李明华')
+    await wrapper.find('form.search-form').trigger('submit.prevent')
+    await wrapper.vm.$nextTick()
+
+    const saved = JSON.parse(localStorage.getItem('analysis-history-v1') ?? '[]')
+    expect(saved).toHaveLength(1)
+    expect(saved[0].input).toBe('李明华')
+    expect(saved[0].result.original).toBe('李明华')
+    expect(wrapper.find('section.history').text()).toContain('李明华')
+  })
+
+  it('restores a selected history entry', async () => {
+    localStorage.setItem('analysis-history-v1', JSON.stringify([
+      {
+        id: 'history-1',
+        input: '李明华',
+        createdAt: 1710000000000,
+        result: sampleResult,
+      },
+    ]))
+
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+
+    await wrapper.find('.history-button').trigger('click')
+
+    expect((wrapper.find('input#name-input').element as HTMLInputElement).value).toBe('李明华')
+    expect(wrapper.find('.result-name').text()).toBe('李明华')
+    expect(wrapper.find('.result-meta').text()).toContain('3 个字')
+  })
+
+  it('ignores malformed history data', async () => {
+    localStorage.setItem('analysis-history-v1', '{bad json')
+
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('section.history').exists()).toBe(false)
   })
 })

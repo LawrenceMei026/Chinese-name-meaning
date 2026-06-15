@@ -51,17 +51,17 @@
 - Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
 - Verified the app again with `npm run test:unit -- src/__tests__/nameAnalyzer.spec.ts` in `my-vue-app`.
 
-## Commit 10 — Pinyin formatting hardening
-- Tightened `src/services/nameAnalyzer.ts` so tone-mark placement trims and normalizes whitespace, preserves uppercase transliteration, and handles `v` as `ü`.
-- Added regression tests for whitespace collapse, uppercase output, and `ü` syllables in `src/__tests__/nameAnalyzer.spec.ts`.
-- Verified the app again with `npm run test:unit -- src/__tests__/nameAnalyzer.spec.ts` in `my-vue-app`.
-
 ## Commit 11 — Accessibility and analyzer polish
 - Added richer empty/loading/busy states, better form semantics, and clearer focus feedback in `src/App.vue`.
-- Expanded analyzer tests to cover trimmed input, unknown surname fallback, and more pinyin tone-placement cases.
+- Expanded analyzer tests to cover trimmed input, history-free shell behavior, and more pinyin tone-placement cases.
+- Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
+
+## Commit 12 — Analysis history persistence
+- Added persistent analysis history in `src/App.vue` with `localStorage` hydration, save, restore, and clear actions.
+- Added `AnalysisHistoryEntry` to `src/types.ts` and extended `src/__tests__/App.spec.ts` to cover hydration, save, restore, and malformed-storage fallback.
 - Verified the app again with `npm run test:unit` and `npm run type-check` in `my-vue-app`.
 
 ## Current checkpoint
-- Task progress: accessibility/UI states and analyzer test coverage are both complete.
-- The next active work is the analysis history feature.
-- Keep the task order moving so the shared analyzer and UI flow stay stable.
+- Task progress: analysis history persistence is complete.
+- The next active work is the dictionary loading optimization task.
+- Keep the analyzer, history, and UI flows aligned so persisted results and fresh analyses stay in sync.

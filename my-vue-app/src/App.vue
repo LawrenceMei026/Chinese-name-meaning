@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
 import { runLocalAiAnalysis } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
-import type { AnalyzedName, AiAnalysisResult } from './types'
+import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
+
+const HISTORY_KEY = 'analysis-history-v1'
+const HISTORY_LIMIT = 6
 
 const input = ref('')
 const result = ref<AnalyzedName | null>(null)
@@ -12,6 +15,7 @@ const loading = ref(false)
 const aiLoading = ref(false)
 const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
+const history = ref<AnalysisHistoryEntry[]>([])
 
 const inputId = 'name-input'
 const helpId = 'name-input-help'
@@ -24,6 +28,65 @@ function isChineseInput(name: string) {
 
 function isPinyinInput(name: string) {
   return /^[a-zA-Z\süÜvV'’-]+\d?(?:\s+[a-zA-Z\süÜvV'’-]+\d?)*$/.test(name)
+}
+
+function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
+  if (!value || typeof value !== 'object') return false
+  const entry = value as AnalysisHistoryEntry
+  return typeof entry.id === 'string'
+    && typeof entry.input === 'string'
+    && typeof entry.createdAt === 'number'
+    && typeof entry.result === 'object'
+    && entry.result !== null
+    && typeof entry.result.original === 'string'
+    && Array.isArray(entry.result.chars)
+}
+
+function readHistory(): AnalysisHistoryEntry[] {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw) as unknown
+    if (!Array.isArray(parsed)) return []
+    return parsed.filter(isHistoryEntry).slice(0, HISTORY_LIMIT)
+  } catch {
+    return []
+  }
+}
+
+function saveHistory(entries: AnalysisHistoryEntry[]) {
+  try {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(entries.slice(0, HISTORY_LIMIT)))
+  } catch {
+    // Ignore storage failures so analysis still works.
+  }
+}
+
+function formatHistoryTime(createdAt: number) {
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date(createdAt))
+}
+
+function persistHistoryEntry(entry: AnalysisHistoryEntry) {
+  history.value = [entry, ...history.value].slice(0, HISTORY_LIMIT)
+  saveHistory(history.value)
+}
+
+function restoreHistoryEntry(entry: AnalysisHistoryEntry) {
+  input.value = entry.input
+  result.value = entry.result
+  aiResult.value = null
+  error.value = null
+  aiError.value = null
+}
+
+function clearHistory() {
+  history.value = []
+  saveHistory(history.value)
 }
 
 async function handleSubmit() {
@@ -42,8 +105,16 @@ async function handleSubmit() {
   aiResult.value = null
 
   try {
-    result.value = await analyzeName(name)
-  } catch (e) {
+    const analyzed = await analyzeName(name)
+    result.value = analyzed
+    const now = Date.now()
+    persistHistoryEntry({
+      id: `${now}-${history.value.length}`,
+      input: name,
+      createdAt: now,
+      result: analyzed,
+    })
+  } catch {
     error.value = '字符数据加载失败，请检查网络连接后重试。'
   } finally {
     loading.value = false
@@ -58,7 +129,7 @@ async function handleAiAnalysis() {
 
   try {
     aiResult.value = await runLocalAiAnalysis(result.value)
-  } catch (e) {
+  } catch {
     aiError.value = 'AI 深度分析暂时不可用，请稍后重试。'
   } finally {
     aiLoading.value = false
@@ -73,7 +144,10 @@ function reset() {
   aiError.value = null
 }
 
-onMounted(() => { preloadDictionary().catch(() => {}) })
+onMounted(() => {
+  history.value = readHistory()
+  preloadDictionary().catch(() => {})
+})
 </script>
 
 <template>
@@ -160,6 +234,21 @@ onMounted(() => { preloadDictionary().catch(() => {}) })
           </div>
           <p class="ai-summary">{{ aiResult.summary }}</p>
         </section>
+      </section>
+
+      <section v-if="history.length" class="history" aria-labelledby="history-title">
+        <div class="history-header">
+          <h2 id="history-title" class="history-title">历史记录</h2>
+          <button class="history-clear" type="button" @click="clearHistory">清空历史</button>
+        </div>
+        <ul class="history-list">
+          <li v-for="entry in history" :key="entry.id" class="history-item">
+            <button type="button" class="history-button" @click="restoreHistoryEntry(entry)">
+              <span class="history-name">{{ entry.input }}</span>
+              <span class="history-meta">{{ formatHistoryTime(entry.createdAt) }}</span>
+            </button>
+          </li>
+        </ul>
       </section>
     </main>
 
@@ -265,7 +354,9 @@ body {
 }
 
 .analyze-btn,
-.ai-btn {
+.ai-btn,
+.history-button,
+.history-clear {
   padding: 0.6rem 1.5rem;
   background: #8b2c2c;
   color: #fff;
@@ -297,7 +388,9 @@ body {
 }
 
 .analyze-btn:disabled,
-.ai-btn:disabled {
+.ai-btn:disabled,
+.history-button:disabled,
+.history-clear:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -311,7 +404,8 @@ body {
 
 .loading,
 .empty-state,
-.ai-status {
+.ai-status,
+.history {
   border: 1px solid #eadfce;
   background: rgba(255, 255, 255, 0.78);
   border-radius: 16px;
@@ -469,6 +563,68 @@ body {
 .ai-summary {
   color: #234d70;
   line-height: 1.7;
+}
+
+.history {
+  margin-top: 1rem;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.history-title {
+  font-size: 1rem;
+  color: #234d70;
+}
+
+.history-clear {
+  background: none;
+  color: #8b6a4a;
+  border: 1px solid #d7c6b2;
+  padding: 0.35rem 0.75rem;
+}
+
+.history-clear:hover:not(:disabled),
+.history-clear:focus-visible:not(:disabled) {
+  background: rgba(139, 106, 74, 0.08);
+}
+
+.history-list {
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.history-button {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #fff;
+  color: #1a1a1a;
+  border: 1px solid #e3d8ca;
+  text-align: left;
+}
+
+.history-button:hover:not(:disabled),
+.history-button:focus-visible:not(:disabled) {
+  background: #faf6ef;
+  border-color: #cfbda8;
+}
+
+.history-name {
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+}
+
+.history-meta {
+  color: #7c6b57;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
 
 .app-footer {
