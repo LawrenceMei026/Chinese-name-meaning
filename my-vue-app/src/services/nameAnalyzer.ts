@@ -16,12 +16,21 @@ const COMMON_COMPOUND_SURNAMES = new Set([
   '宰父', '端木', '巫马', '公西', '颛孙', '壤丘', '微生', '羊舌', '宓', '伯',
 ])
 
+function baseUrl() {
+  const locationHref = typeof window !== 'undefined' ? window.location.href : 'http://localhost/'
+  return new URL(import.meta.env.BASE_URL, locationHref).toString()
+}
+
+function dataUrl(path: string) {
+  return new URL(path, baseUrl()).toString()
+}
+
 async function loadData() {
   if (charDict && surnameSet) return
   if (!loadPromise) {
     loadPromise = Promise.all([
-      fetch('/data/chars.json'),
-      fetch('/data/surnames.json'),
+      fetch(dataUrl('data/chars.json')),
+      fetch(dataUrl('data/surnames.json')),
     ])
       .then(async ([charsRes, surnamesRes]) => {
         if (!charsRes.ok || !surnamesRes.ok) {

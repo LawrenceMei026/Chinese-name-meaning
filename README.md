@@ -51,7 +51,7 @@ my-vue-app/
 
 ## Data sources
 
-- Dictionary data comes from CC-CEDICT and is loaded at runtime from `public/data/`.
+- Dictionary data comes from CC-CEDICT and is loaded at runtime from `public/data/`, resolved relative to the Vite base path so subpath deployments keep working.
 - Cultural annotations are stored in `src/data/cultural.json` and read through `src/data/cultural.ts`.
 - The UI is written in Simplified Chinese, while CC-CEDICT definitions remain in English because of the source data.
 
@@ -62,6 +62,7 @@ The optional AI layer is lazy-loaded from `src/services/localInference.ts` and u
 - If the model assets are present, the worker can produce a local summary and tone labels without blocking the main thread.
 - If the assets are missing, the app falls back to deterministic labels so the base analyzer still works.
 - Saved history now restores the AI panel too when an entry already has AI output.
+- The worker resolves model assets relative to the app base path, which keeps the optional AI flow working when the site is deployed under a subdirectory.
 
 ## Getting started
 

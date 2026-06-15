@@ -13,7 +13,6 @@ type WorkerResponse = {
 }
 
 const MODEL_VERSION = 'onnx-v1'
-const MODEL_MANIFEST = '/models/manifest.json'
 const DEFAULT_MODEL_PATH = '/models/classifier.onnx'
 const DEFAULT_LABELS = ['文雅', '大气', '阳刚', '柔和', '古典', '现代']
 
@@ -51,8 +50,12 @@ let cachedManifest: ClassifierManifest | null = null
 let sessionPromise: Promise<SessionLike | null> | null = null
 let cachedSession: SessionLike | null = null
 
-function getBaseHref() {
-  return self.location?.href ?? 'http://localhost/'
+function baseUrl() {
+  return new URL(import.meta.env.BASE_URL, self.location.href).toString()
+}
+
+function assetUrl(path: string) {
+  return new URL(path, baseUrl()).toString()
 }
 
 async function loadOrtRuntime(): Promise<OrtRuntime | null> {
@@ -82,7 +85,7 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
 
   if (!manifestPromise) {
     manifestPromise = (async () => {
-      const res = await fetch(MODEL_MANIFEST)
+      const res = await fetch(assetUrl('models/manifest.json'))
       if (!res.ok) return null
 
       const data: unknown = await res.json().catch(() => null)
@@ -116,7 +119,7 @@ async function loadSession(): Promise<SessionLike | null> {
       if (!manifest || !ort) return null
 
       try {
-        return await ort.InferenceSession.create(new URL(manifest.modelPath ?? DEFAULT_MODEL_PATH, getBaseHref()).toString(), {
+        return await ort.InferenceSession.create(new URL(manifest.modelPath ?? DEFAULT_MODEL_PATH, baseUrl()).toString(), {
           executionProviders: ['wasm'],
         })
       } catch {

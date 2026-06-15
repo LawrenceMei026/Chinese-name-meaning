@@ -88,4 +88,5 @@
 ## Current checkpoint
 - Task progress: AI history restore is complete.
 - Saved analyses now restore both the base character breakdown and the AI summary when available.
-- Keep the README and repository notes aligned with the saved-history schema so future readers know AI output can be persisted too.
+- Current work is tightening asset URL resolution so dictionary files and the ONNX model remain reachable when the app is hosted under a subpath.
+- Keep the README and repository notes aligned with the saved-history schema and base-path-aware asset loading so future readers know both behaviors are supported.

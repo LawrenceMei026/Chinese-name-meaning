@@ -28,11 +28,11 @@ The core data flow:
 4. Cultural context layer adds connotations, literary references, and naming trends (from `cultural.json` via `cultural.ts`)
 5. Results are rendered in a structured, readable layout
 
-Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()` so it's ready before the user submits. `loadData()` should check HTTP status before parsing JSON so fetch failures stay visible. The `analyzeName` function is safe to call immediately after — it awaits the same shared load promise.
+Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()` so it's ready before the user submits. `loadData()` should check HTTP status before parsing JSON so fetch failures stay visible, and asset URLs should resolve from `import.meta.env.BASE_URL` so the app still works when served from a subpath. The `analyzeName` function is safe to call immediately after — it awaits the same shared load promise.
 
 Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone-placement rules accurate for multi-vowel syllables so `CharacterCard.vue` can display readable pinyin. Normalize whitespace before formatting, preserve uppercase transliteration, and treat `v` as `ü` so common ASCII pinyin input stays readable and deterministic.
 
-The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web in `src/workers/localInference.worker.ts`, with a compact local model and a graceful fallback path. Saved analyses can now persist the AI result too, so history restore should preserve both the base breakdown and any generated AI panel when present.
+The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web in `src/workers/localInference.worker.ts`, with a compact local model and a graceful fallback path; the worker should also resolve model assets relative to the Vite base path. Saved analyses can now persist the AI result too, so history restore should preserve both the base breakdown and any generated AI panel when present.
 
 The end-to-end Playwright flow should stay focused on the integrated user journey: name submission, history persistence, AI fallback, and dictionary-backed rendering. Keep those visible states stable so the browser test remains a useful regression check.
 

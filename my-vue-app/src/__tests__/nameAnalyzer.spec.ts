@@ -21,11 +21,12 @@ const surnamesJson = {
   阳: '',
 }
 
-vi.stubGlobal('fetch', vi.fn(async (url: string) => {
-  if (url === '/data/chars.json') {
+vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
+  const url = typeof input === 'string' ? input : input.toString()
+  if (url.endsWith('/data/chars.json')) {
     return new Response(JSON.stringify(charsJson), { status: 200 })
   }
-  if (url === '/data/surnames.json') {
+  if (url.endsWith('/data/surnames.json')) {
     return new Response(JSON.stringify(surnamesJson), { status: 200 })
   }
   return new Response('not found', { status: 404 })
