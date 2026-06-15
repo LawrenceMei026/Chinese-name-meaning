@@ -80,7 +80,12 @@
 - Covered name submission, dictionary-backed rendering, history persistence/restoration, local AI fallback behavior, and history clearing in one pass.
 - Verified the flow with `npm run test:e2e -- --project chromium` in `my-vue-app`.
 
+## Commit 17 — Worker-backed ONNX inference
+- Moved the AI inference path into `src/workers/localInference.worker.ts` and kept `src/services/localInference.ts` as a thin facade.
+- Preserved the deterministic fallback labels and summary so the AI panel still behaves the same when the model path is unavailable.
+- Verified the app again with `npm run test:unit`, `npm run type-check`, and `npm run test:e2e -- --project chromium` in `my-vue-app`.
+
 ## Current checkpoint
-- Task progress: full-flow e2e coverage is complete.
-- The browser test now exercises the integrated dictionary, history, and fallback paths together.
-- Keep Playwright expectations aligned with the visible UI copy so the flow remains stable.
+- Task progress: worker-backed ONNX inference is complete.
+- The browser and unit tests still pass with the AI path off the main thread.
+- Keep the README and repository notes aligned with the worker-based inference path so future readers know the model runs off-thread.

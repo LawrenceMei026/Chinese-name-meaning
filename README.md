@@ -20,7 +20,7 @@ The main app lives in `my-vue-app/src/App.vue`.
 3. `analyzeName()` segments the input into surname + given name characters.
 4. Each character is enriched with dictionary data and curated cultural context.
 5. Results are rendered as structured cards with pronunciation, meaning, and notes.
-6. If you open the AI analysis panel, `runLocalAiAnalysis()` loads the local ONNX pipeline on demand.
+6. If you open the AI analysis panel, `runLocalAiAnalysis()` offloads ONNX evaluation to a Web Worker and falls back to deterministic local labels when the model path is unavailable.
 
 ## Project structure
 
@@ -36,6 +36,7 @@ my-vue-app/
     data/cultural.json
     services/nameAnalyzer.ts
     services/localInference.ts
+    workers/localInference.worker.ts
     components/CharacterCard.vue
 ```
 
@@ -56,9 +57,9 @@ my-vue-app/
 
 ## Local AI
 
-The optional AI layer is lazy-loaded from `src/services/localInference.ts` and uses ONNX Runtime Web.
+The optional AI layer is lazy-loaded from `src/services/localInference.ts` and uses ONNX Runtime Web in a Web Worker.
 
-- If the model assets are present, the app can produce a local summary and tone labels.
+- If the model assets are present, the worker can produce a local summary and tone labels without blocking the main thread.
 - If the assets are missing, the app falls back to deterministic labels so the base analyzer still works.
 
 ## Getting started

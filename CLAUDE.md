@@ -32,7 +32,7 @@ Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via 
 
 Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts`; keep the tone-placement rules accurate for multi-vowel syllables so `CharacterCard.vue` can display readable pinyin. Normalize whitespace before formatting, preserve uppercase transliteration, and treat `v` as `ü` so common ASCII pinyin input stays readable and deterministic.
 
-The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web only, with a compact local model and a graceful fallback path.
+The local AI layer is intentionally lazy-loaded from `src/services/localInference.ts`. Keep it on-demand, deterministic when assets are missing, and isolated from the base analyzer so the page still works if model files are unavailable. The current direction is ONNX Runtime Web in `src/workers/localInference.worker.ts`, with a compact local model and a graceful fallback path.
 
 The end-to-end Playwright flow should stay focused on the integrated user journey: name submission, history persistence, AI fallback, and dictionary-backed rendering. Keep those visible states stable so the browser test remains a useful regression check.
 
@@ -76,6 +76,7 @@ my-vue-app/
     data/cultural.json          # curated cultural metadata map in JSON
     services/nameAnalyzer.ts    # loads dict, segments name, builds result; exports preloadDictionary() and formatPinyin()
     services/localInference.ts  # lazy-loaded AI orchestration with deterministic fallback
+    workers/localInference.worker.ts  # ONNX session and inference on a worker thread
     components/CharacterCard.vue  # all labels/strings in Mandarin
     App.vue                     # single-page input + results — all UI text in Mandarin; preloads dict on mount
 ```
