@@ -1,7 +1,9 @@
 export interface CharEntry {
   pinyin: string
-  traditional: string | null
-  definitions: string[]
+  tones: string
+  definition_cn: string
+  freq?: number
+  radical?: string
 }
 
 export interface CulturalData {

@@ -14,6 +14,9 @@ dist-ssr
 coverage
 *.local
 
+# Tauri / Rust build output
+src-tauri/target/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

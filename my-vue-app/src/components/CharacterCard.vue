@@ -11,8 +11,7 @@ const pinyin = computed(() =>
 
 const toneNumber = computed(() => {
   if (!props.data.entry) return 0
-  const match = props.data.entry.pinyin.match(/(\d)(?:\s|$)/)
-  return match ? parseInt(match[1]!) : 0
+  return parseInt(props.data.entry.tones) || 0
 })
 
 const toneLabel = computed(() => {
@@ -37,14 +36,7 @@ const elementColor = computed(() => {
 })
 
 const localGloss = computed(() => props.data.cultural?.localGloss ?? null)
-const primaryMeaning = computed(() => {
-  if (props.data.cultural?.connotation) return props.data.cultural.connotation
-  return props.data.entry?.definitions[0] ?? null
-})
-const secondaryMeaning = computed(() => {
-  if (!props.data.entry || !props.data.cultural?.connotation) return props.data.entry?.definitions.slice(0, 2) ?? []
-  return props.data.entry.definitions.slice(0, 1)
-})
+const primaryMeaning = computed(() => props.data.entry?.definition_cn ?? null)
 </script>
 
 <template>
@@ -61,11 +53,6 @@ const secondaryMeaning = computed(() => {
     <div class="meaning-block">
       <p v-if="localGloss" class="local-gloss">{{ localGloss }}</p>
       <p v-if="primaryMeaning" class="primary-meaning">{{ primaryMeaning }}</p>
-      <p v-for="(def, i) in secondaryMeaning" :key="i" class="def">{{ def }}</p>
-    </div>
-
-    <div v-if="data.entry?.traditional" class="traditional">
-      繁体字：<span class="trad-char">{{ data.entry.traditional }}</span>
     </div>
 
     <div v-if="data.cultural" class="cultural-section">

@@ -7,8 +7,8 @@ type SerializableAnalyzedName = {
     role: 'surname' | 'given'
     entry: {
       pinyin: string
-      traditional: string | null
-      definitions: string[]
+      tones: string
+      definition_cn: string
     } | null
     cultural: {
       element?: string
@@ -49,8 +49,8 @@ function toSerializableResult(result: AnalyzedName): SerializableAnalyzedName {
       entry: char.entry
         ? {
             pinyin: char.entry.pinyin,
-            traditional: char.entry.traditional,
-            definitions: [...char.entry.definitions],
+            tones: char.entry.tones,
+            definition_cn: char.entry.definition_cn,
           }
         : null,
       cultural: char.cultural
@@ -71,7 +71,7 @@ function buildFeatureText(result: AnalyzedName) {
   const charParts = result.chars.map(char => {
     const entry = char.entry
     const cultural = char.cultural
-    const meanings = entry?.definitions.slice(0, 2).join('；') ?? '未收录'
+    const meanings = entry?.definition_cn ?? '未收录'
     const culture = cultural
       ? [cultural.element ? `${cultural.element}行` : '', cultural.connotation ?? '', cultural.genderBias ?? '']
           .filter(Boolean)
@@ -103,7 +103,7 @@ function buildSummary(labels: string[], source: 'model' | 'fallback') {
   const lead = labels.slice(0, 2).join('、')
   if (!lead) return '名字整体气质平衡，适合进一步结合字义与声调判断。'
   const base = `名字整体呈现${lead}的气质，结合字义来看，和其文化意涵较为一致。`
-  return source === 'fallback' ? `${base} 当前使用的是本地规则回退结果。` : base
+  return source === 'fallback' ? `${base} 当前使用的是本地回退结果。` : base
 }
 
 function getFallbackResult(result: AnalyzedName): AiAnalysisResult {
@@ -126,15 +126,50 @@ function createWorker(): Promise<Worker | null> {
 
 async function getWorker(): Promise<Worker | null> {
   if (!workerPromise) {
-    workerPromise = createWorker()
+    workerPromise = createWorker().then(async (worker) => {
+      if (worker) {
+        console.log('[InferenceService] Worker created, testing connection...');
+        const ok = await testWorkerConnection(worker);
+        if (!ok) {
+          console.error('[InferenceService] Worker connection test failed');
+          return null;
+        }
+        console.log('[InferenceService] Worker connection test passed');
+      } else {
+        console.error('[InferenceService] Failed to create Worker');
+      }
+      return worker;
+    });
   }
   return workerPromise
+}
+
+function testWorkerConnection(worker: Worker): Promise<boolean> {
+  return new Promise((resolve) => {
+    const id = -1;
+    const timeout = setTimeout(() => {
+      worker.removeEventListener('message', handle);
+      resolve(false);
+    }, 2000);
+
+    const handle = (e: MessageEvent<WorkerResponse>) => {
+      if (e.data.id === id) {
+        clearTimeout(timeout);
+        worker.removeEventListener('message', handle);
+        resolve(e.data.payload.labels?.[0] === 'pong');
+      }
+    };
+
+    worker.addEventListener('message', handle);
+    worker.postMessage({ type: 'ping', id });
+  });
 }
 
 function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
   return new Promise(async (resolve) => {
     const worker = await getWorker()
     if (!worker) {
+      console.warn('[InferenceService] No worker available, falling back');
       resolve(null)
       return
     }
@@ -142,6 +177,7 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
     const id = nextRequestId
     nextRequestId += 1
     pendingRequests.set(id, resolve)
+    console.log('[InferenceService] Sending inference request:', id);
 
     const cleanup = () => {
       worker.removeEventListener('message', handleMessage)
@@ -152,11 +188,13 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
     const handleMessage = (event: MessageEvent<WorkerResponse>) => {
       const data = event.data
       if (data.id !== id) return
+      console.log('[InferenceService] Received worker response:', id, data.type);
       cleanup()
       resolve(data.type === 'result' ? data.payload.labels ?? null : null)
     }
 
-    const handleError = () => {
+    const handleError = (e: ErrorEvent) => {
+      console.error('[InferenceService] Worker error:', id, e.message);
       cleanup()
       resolve(null)
     }
@@ -168,6 +206,7 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
 }
 
 export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalysisResult> {
+  console.log('[InferenceService] Starting AI analysis...');
   try {
     const labels = await inferViaWorker(result)
     if (labels?.length) {

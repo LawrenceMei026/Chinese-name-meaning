@@ -5,14 +5,14 @@ vi.mock('../data/cultural', () => ({
 }))
 
 const charsJson = {
-  李: ['li3', '李', 'the surname Li'],
-  明: ['ming2', null, 'bright'],
-  华: ['hua2', null, 'magnificent'],
-  欧: ['ou1', '歐', 'Europe'],
-  阳: ['yang2', '陽', 'sun'],
-  刘: ['liu2', '劉', 'surname Liu'],
-  归: ['gui1', '歸', 'return'],
-  走: ['zou3', null, 'walk'],
+  李: { pinyin: 'li3', tones: '3', definition_cn: 'the surname Li' },
+  明: { pinyin: 'ming2', tones: '2', definition_cn: 'bright' },
+  华: { pinyin: 'hua2', tones: '2', definition_cn: 'magnificent' },
+  欧: { pinyin: 'ou1', tones: '1', definition_cn: 'Europe' },
+  阳: { pinyin: 'yang2', tones: '2', definition_cn: 'sun' },
+  刘: { pinyin: 'liu2', tones: '2', definition_cn: 'surname Liu' },
+  归: { pinyin: 'gui1', tones: '1', definition_cn: 'return' },
+  走: { pinyin: 'zou3', tones: '3', definition_cn: 'walk' },
 }
 
 const surnamesJson = {

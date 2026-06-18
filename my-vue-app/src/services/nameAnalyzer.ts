@@ -1,7 +1,7 @@
 import type { AnalyzedChar, AnalyzedName, CharEntry } from '../types'
 import { getCulturalData } from '../data/cultural'
 
-type RawDict = Record<string, [string, string | null, ...string[]]>
+type RawDict = Record<string, CharEntry>
 type SurnameDict = Record<string, string>
 
 let charDict: RawDict | null = null
@@ -49,16 +49,9 @@ async function loadData() {
   await loadPromise
 }
 
-function parseEntry(raw: [string, string | null, ...string[]]): CharEntry {
-  const [pinyin, traditional, ...definitions] = raw
-  return { pinyin, traditional: traditional ?? null, definitions }
-}
-
 function lookupChar(char: string): CharEntry | null {
   if (!charDict) return null
-  const raw = charDict[char]
-  if (!raw) return null
-  return parseEntry(raw)
+  return charDict[char] ?? null
 }
 
 function toneFromPinyin(syllable: string): number {

@@ -163,7 +163,7 @@ function buildFeatureVector(result: AnalyzedName, featureSize: number) {
       if (cultural.literaryRef) counts.literary += 1
       if (cultural.localGloss) counts.gloss += 1
     }
-    counts.meaning += char.entry?.definitions.length ?? 0
+    counts.meaning += char.entry?.definition_cn ? 1 : 0
   }
 
   const features = new Float32Array(featureSize)
@@ -226,16 +226,25 @@ async function runClassifier(result: AnalyzedName) {
   return pickModelLabels(scores, manifest.labels ?? DEFAULT_LABELS)
 }
 
-self.addEventListener('message', async (event: MessageEvent<WorkerRequest>) => {
-  if (event.data.type !== 'infer') return
+self.addEventListener('message', async (event: MessageEvent<WorkerRequest | { type: 'ping', id: number }>) => {
+  if (event.data.type === 'ping') {
+    console.log('[Worker] Received ping, sending pong');
+    self.postMessage({ id: event.data.id, type: 'result', payload: { labels: ['pong'] } });
+    return;
+  }
 
+  if (event.data.type !== 'infer') return;
+
+  console.log('[Worker] Received inference request:', event.data.id);
   try {
     const labels = await runClassifier(event.data.payload.result)
+    console.log('[Worker] Inference complete:', labels);
     const response: WorkerResponse = labels?.length
       ? { id: event.data.id, type: 'result', payload: { labels } }
       : { id: event.data.id, type: 'error', payload: { message: 'model unavailable' } }
     self.postMessage(response)
   } catch (error) {
+    console.error('[Worker] Inference failed:', error);
     const response: WorkerResponse = {
       id: event.data.id,
       type: 'error',
