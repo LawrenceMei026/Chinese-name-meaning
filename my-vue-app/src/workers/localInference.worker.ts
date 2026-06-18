@@ -136,21 +136,25 @@ async function loadSession(): Promise<SessionLike | null> {
 
 function buildFeatureVector(result: AnalyzedName, featureSize: number) {
   const counts = {
-    water: 0,
-    wood: 0,
-    fire: 0,
-    metal: 0,
-    earth: 0,
-    masculine: 0,
-    feminine: 0,
-    cultural: 0,
+    water: 0, wood: 0, fire: 0, metal: 0, earth: 0,
+    masculine: 0, feminine: 0,
     literary: 0,
-    gloss: 0,
-    meaning: 0,
+    natureRadical: 0, // 木氵山
+    humanRadical: 0,  // 亻纟文
+    abstractRadical: 0 // 忄力心
   }
 
-  for (const char of result.chars) {
+  let totalVowels = 0
+  let openVowels = 0
+  let toneChanges = 0
+  let lastTone = -1
+  let totalFreq = 0
+
+  for (const [index, char] of result.chars.entries()) {
     const cultural = char.cultural
+    const entry = char.entry
+
+    // 五行与性别
     if (cultural?.element === '水') counts.water += 1
     if (cultural?.element === '木') counts.wood += 1
     if (cultural?.element === '火') counts.fire += 1
@@ -158,37 +162,61 @@ function buildFeatureVector(result: AnalyzedName, featureSize: number) {
     if (cultural?.element === '土') counts.earth += 1
     if (cultural?.genderBias === 'masculine') counts.masculine += 1
     if (cultural?.genderBias === 'feminine') counts.feminine += 1
-    if (cultural) {
-      counts.cultural += 1
-      if (cultural.literaryRef) counts.literary += 1
-      if (cultural.localGloss) counts.gloss += 1
+    if (cultural?.literaryRef) counts.literary += 1
+
+    // 部首分类
+    const radical = entry?.radical || cultural?.localGloss || '' // 回退逻辑
+    if (/[木氵山]/.test(radical)) counts.natureRadical += 1
+    if (/[亻纟文]/.test(radical)) counts.humanRadical += 1
+    if (/[忄力心]/.test(radical)) counts.abstractRadical += 1
+
+    // 发音响亮 (a, e, o 是开口元音)
+    const pinyin = entry?.pinyin.toLowerCase() || ''
+    const vowels = pinyin.match(/[aeoiuü]/g) || []
+    totalVowels += vowels.length
+    openVowels += vowels.filter(v => /[aeo]/.test(v)).length
+
+    // 声调变化 (平仄交替: 1,2为平, 3,4为仄)
+    const currentTone = parseInt(entry?.tones || '0')
+    if (lastTone !== -1 && currentTone > 0) {
+      const lastPingZe = lastTone <= 2 ? 0 : 1
+      const currentPingZe = currentTone <= 2 ? 0 : 1
+      if (lastPingZe !== currentPingZe) toneChanges += 1
     }
-    counts.meaning += char.entry?.definition_cn ? 1 : 0
+    lastTone = currentTone
+
+    // 字频 (暂定: 0-10, 默认5)
+    totalFreq += entry?.freq || 5
   }
 
+  const len = result.chars.length || 1
   const features = new Float32Array(featureSize)
-  const base = [
-    result.chars.length,
-    result.chars.filter(char => char.role === 'surname').length,
-    result.chars.filter(char => char.role === 'given').length,
-    counts.water,
-    counts.wood,
-    counts.fire,
-    counts.metal,
-    counts.earth,
-    counts.masculine,
-    counts.feminine,
-    counts.cultural,
-    counts.literary,
-    counts.gloss,
-    counts.meaning,
-    result.original.length,
-    Number(/[一-鿿]/.test(result.original)),
-  ]
 
-  for (let i = 0; i < features.length; i += 1) {
-    features[i] = base[i] ?? 0
-  }
+  // 严格遵循修正后的 16 维映射
+  features[0] = len / 4 // 1. 姓名长度 (归一化)
+  features[1] = result.chars.filter(c => c.role === 'surname').length > 1 ? 1 : 0 // 2. 是否复姓
+  features[2] = (counts.masculine - counts.feminine) / len // 3. 性别倾向得分
+
+  let uniqueElements = 0
+  if (counts.water > 0) uniqueElements++
+  if (counts.wood > 0) uniqueElements++
+  if (counts.fire > 0) uniqueElements++
+  if (counts.metal > 0) uniqueElements++
+  if (counts.earth > 0) uniqueElements++
+  features[3] = uniqueElements / 5 // 4. 五行丰富度
+
+  features[4] = counts.literary / len // 5. 文学引用密度
+  features[5] = counts.metal / len // 6. 金
+  features[6] = counts.wood / len  // 7. 木
+  features[7] = counts.water / len // 8. 水
+  features[8] = counts.fire / len  // 9. 火
+  features[9] = counts.earth / len // 10. 土
+  features[10] = totalVowels > 0 ? openVowels / totalVowels : 0 // 11. 发音响亮度
+  features[11] = len > 1 ? toneChanges / (len - 1) : 0 // 12. 声调变化度
+  features[12] = counts.natureRadical / len // 13. 自然部首
+  features[13] = counts.humanRadical / len  // 14. 人文部首
+  features[14] = counts.abstractRadical / len // 15. 抽象部首
+  features[15] = (totalFreq / len) / 10 // 16. 字频权重
 
   return features
 }

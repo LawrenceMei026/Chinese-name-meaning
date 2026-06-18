@@ -209,7 +209,8 @@ export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalys
   console.log('[InferenceService] Starting AI analysis...');
   try {
     const labels = await inferViaWorker(result)
-    if (labels?.length) {
+    // 检查 labels 是否有效，且不包含错误标记（如单元素 ['pong']）
+    if (labels?.length && !(labels.length === 1 && labels[0] === 'pong')) {
       return {
         labels,
         summary: buildSummary(labels, 'model'),
@@ -217,8 +218,8 @@ export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalys
         source: 'model',
       }
     }
-  } catch {
-    // Fall through to deterministic local labels.
+  } catch (error) {
+    console.warn('[InferenceService] Worker inference failed:', error);
   }
 
   return getFallbackResult(result)
