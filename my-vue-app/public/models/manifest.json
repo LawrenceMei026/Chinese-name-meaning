@@ -1,0 +1,15 @@
+{
+  "version": "onnx-v1",
+  "modelPath": "/models/classifier.onnx",
+  "inputName": "input",
+  "outputName": "logits",
+  "featureSize": 16,
+  "labels": [
+    "文雅",
+    "大气",
+    "阳刚",
+    "柔和",
+    "古典",
+    "现代"
+  ]
+}

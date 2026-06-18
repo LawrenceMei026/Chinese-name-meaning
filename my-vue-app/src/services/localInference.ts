@@ -1,4 +1,4 @@
-import type { AnalyzedName, AiAnalysisResult } from '../types'
+import type { AnalyzedName, AiAnalysisResult, CharEntry, CulturalData } from '../types'
 
 type SerializableAnalyzedName = {
   original: string
@@ -99,21 +99,73 @@ function pickFallbackLabels(text: string): string[] {
   return labels.length ? [...new Set(labels)].slice(0, 3) : ['中性']
 }
 
-function buildSummary(labels: string[], source: 'model' | 'fallback') {
-  const lead = labels.slice(0, 2).join('、')
-  if (!lead) return '名字整体气质平衡，适合进一步结合字义与声调判断。'
-  const base = `名字整体呈现${lead}的气质，结合字义来看，和其文化意涵较为一致。`
-  return source === 'fallback' ? `${base} 当前使用的是本地回退结果。` : base
+function cleanDefinition(text: string): string {
+  if (!text) return ''
+  // 移除元数据：如“杰为傑的俗字”、“义同某”、“见某某”
+  let cleaned = text.replace(/.*(?:俗字|义同|见“|亦作).*[。？?！!\s]?/g, '')
+  // 移除拼音和重复字符
+  cleaned = cleaned.replace(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s\d]+/, '')
+  // 截取第一个完整句或前15个字
+  const match = cleaned.match(/^[^。；;！？!]+/)
+  return match ? match[0].trim() : cleaned.slice(0, 15).trim()
 }
 
-function getFallbackResult(result: AnalyzedName): AiAnalysisResult {
-  const labels = pickFallbackLabels(buildFeatureText(result))
-  return {
-    labels,
-    summary: buildSummary(labels, 'fallback'),
-    loadedFromCache: false,
-    source: 'fallback',
+function buildSummary(labels: string[], result: AnalyzedName, source: 'model' | 'fallback') {
+  if (labels.length === 0) return '名字整体音韵和谐，展现出一种平衡而中正的气质。'
+
+  const labelsText = labels.join('、')
+  const givenChars = result.chars.filter(c => c.role === 'given')
+
+  // 1. 提取深度字义
+  const meaningfulChar = givenChars.find(c => {
+    const def = c.entry?.definition_cn || ''
+    return def && !def.includes('俗字') && !def.includes('姓')
+  }) || givenChars[0]
+
+  const coreMeaning = cleanDefinition(meaningfulChar?.entry?.definition_cn || '')
+
+  // 2. 动态生成开篇
+  const openings = [
+    `“${result.original}”这个名字`,
+    `在“${result.original}”中`,
+    `纵观“${result.original}”的选字`
+  ]
+  const opening = openings[Math.floor(result.original.length % openings.length)]
+
+  // 3. 构建文化逻辑
+  let culturalLogic = ''
+  const element = givenChars.find(c => c.cultural?.element)?.cultural?.element
+  const litRef = givenChars.find(c => c.cultural?.literaryRef)?.cultural?.literaryRef
+
+  if (litRef) {
+    culturalLogic = `通过典故的化用，为名字注入了深厚的古典底蕴`
+  } else if (element) {
+    culturalLogic = `借助“${element}”行的意象，构建了平衡的五行能量`
+  } else {
+    culturalLogic = `通过精准的选字组合`
   }
+
+  // 4. 定制化转折
+  const descriptors: Record<string, string> = {
+    '大气': '开阔宏大的格局',
+    '文雅': '书卷润墨的雅致',
+    '柔和': '温婉细腻的质感',
+    '阳刚': '坚毅刚劲的力量',
+    '古典': '古朴隽永的余韵',
+    '现代': '清新明快的时代感'
+  }
+
+  const primaryLabel = labels[0] || '文雅'
+  const vibe = descriptors[primaryLabel] || '独特'
+
+  // 5. 组合最终叙事
+  let summary = `${opening}${culturalLogic}，${labels.length > 1 ? '在此基础上进一步' : ''}生发出${vibe}。`
+
+  if (coreMeaning && coreMeaning.length > 1) {
+    summary += ` 尤其是“${meaningfulChar?.char}”字所代表的“${coreMeaning}”之意，起到了点睛之笔的作用。`
+  }
+
+  return source === 'fallback' ? `${summary} (本地解析)` : summary
 }
 
 function createWorker(): Promise<Worker | null> {
@@ -149,14 +201,17 @@ function testWorkerConnection(worker: Worker): Promise<boolean> {
     const id = -1;
     const timeout = setTimeout(() => {
       worker.removeEventListener('message', handle);
+      console.warn('[InferenceService] Worker handshake timed out (10s)');
       resolve(false);
-    }, 2000);
+    }, 10000);
 
-    const handle = (e: MessageEvent<WorkerResponse>) => {
-      if (e.data.id === id) {
+    const handle = (e: MessageEvent<any>) => {
+      const res = e.data;
+      if (res && res.id === id) {
         clearTimeout(timeout);
         worker.removeEventListener('message', handle);
-        resolve(e.data.payload.labels?.[0] === 'pong');
+        const labels = res.payload?.labels;
+        resolve(Array.isArray(labels) && labels[0] === 'pong');
       }
     };
 
@@ -209,11 +264,10 @@ export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalys
   console.log('[InferenceService] Starting AI analysis...');
   try {
     const labels = await inferViaWorker(result)
-    // 检查 labels 是否有效，且不包含错误标记（如单元素 ['pong']）
     if (labels?.length && !(labels.length === 1 && labels[0] === 'pong')) {
       return {
         labels,
-        summary: buildSummary(labels, 'model'),
+        summary: buildSummary(labels, result, 'model'),
         loadedFromCache: true,
         source: 'model',
       }
@@ -222,5 +276,11 @@ export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalys
     console.warn('[InferenceService] Worker inference failed:', error);
   }
 
-  return getFallbackResult(result)
+  const fallbackLabels = pickFallbackLabels(buildFeatureText(result))
+  return {
+    labels: fallbackLabels,
+    summary: buildSummary(fallbackLabels, result, 'fallback'),
+    loadedFromCache: false,
+    source: 'fallback',
+  }
 }
