@@ -173,7 +173,8 @@ export async function preloadDictionary(): Promise<void> {
 
 export async function analyzeName(input: string): Promise<AnalyzedName> {
   await loadData()
-  const chars = [...input.trim()]
+  const trimmedInput = input.trim()
+  const chars = [...trimmedInput]
   const roles = segment(chars)
 
   const analyzed: AnalyzedChar[] = chars.map((char, i) => ({
@@ -183,5 +184,5 @@ export async function analyzeName(input: string): Promise<AnalyzedName> {
     cultural: getCulturalData(char),
   }))
 
-  return { original: input.trim(), chars: analyzed }
+  return { original: trimmedInput, chars: analyzed }
 }

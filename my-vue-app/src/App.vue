@@ -28,7 +28,7 @@ function isChineseInput(name: string) {
 }
 
 function isPinyinInput(name: string) {
-  return /^[a-zA-Z\süÜvV'’-]+\d?(?:\s+[a-zA-Z\süÜvV'’-]+\d?)*$/.test(name)
+  return false
 }
 
 function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
@@ -106,8 +106,8 @@ async function handleSubmit() {
   const name = input.value.trim()
   if (!name) return
 
-  if (!isChineseInput(name) && !isPinyinInput(name)) {
-    error.value = '请输入汉字姓名或拼音。'
+  if (!isChineseInput(name)) {
+    error.value = '请输入汉字姓名。'
     return
   }
 
@@ -196,7 +196,7 @@ onMounted(() => {
             <span v-else>解析</span>
           </button>
         </div>
-        <p :id="helpId" class="field-help">支持 2-3 个汉字姓名，或带声调数字的拼音输入。</p>
+        <p :id="helpId" class="field-help">支持 2-3 个汉字姓名。</p>
         <p v-if="error" :id="errorId" class="error-msg" role="alert">{{ error }}</p>
       </form>
 
