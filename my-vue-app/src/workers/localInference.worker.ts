@@ -185,6 +185,7 @@ function buildFeatureVector(result: AnalyzedName, featureSize: number) {
     if (/[木氵山]/.test(radical)) counts.natureRadical += 1
     if (/[亻纟文]/.test(radical)) counts.humanRadical += 1
     if (/[忄力心]/.test(radical)) counts.abstractRadical += 1
+  }
 
   const len = result.chars.length || 1
   const features = new Float32Array(featureSize)
