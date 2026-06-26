@@ -51,8 +51,12 @@ let sessionPromise: Promise<SessionLike | null> | null = null
 let cachedSession: SessionLike | null = null
 
 function baseUrl() {
-  const base = import.meta.env.BASE_URL || '/'
-  return new URL(base, self.location.href).toString()
+  // 在 Tauri 环境中，self.location.href 可能包含 query 干扰
+  const url = new URL(self.location.href);
+  const base = import.meta.env.BASE_URL || '/';
+
+  // 确保 base 以 / 结尾，url.origin 在 tauri 环境下可能是 tauri://localhost
+  return new URL(base, url.origin).toString();
 }
 
 function assetUrl(path: string) {
@@ -74,7 +78,8 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
 
   if (!manifestPromise) {
     manifestPromise = (async () => {
-      const url = assetUrl('models/manifest.json');
+      // 显式拼接 models/manifest.json，确保不被 Vite 的相对路径重写干扰
+      const url = new URL('models/manifest.json', baseUrl()).toString();
       console.log('[Worker] Fetching manifest from:', url);
       const res = await fetch(url)
       if (!res.ok) {
@@ -127,7 +132,9 @@ async function loadSession(): Promise<SessionLike | null> {
       }
 
       try {
-        const modelUrl = new URL(manifest.modelPath ?? DEFAULT_MODEL_PATH, baseUrl()).toString();
+        // 核心修复：确保模型路径相对于 baseUrl 解析，处理 manifest.modelPath 中可能的正斜杠
+        const cleanPath = (manifest.modelPath ?? DEFAULT_MODEL_PATH).replace(/^\//, '');
+        const modelUrl = new URL(cleanPath, baseUrl()).toString();
         console.log('[Worker] Loading ONNX model from:', modelUrl);
         // 尝试多种执行后端，并开启图优化
         return await ortInstance.InferenceSession.create(modelUrl, {
