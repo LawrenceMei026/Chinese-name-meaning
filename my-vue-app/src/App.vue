@@ -23,12 +23,9 @@ const helpId = 'name-input-help'
 const errorId = 'name-input-error'
 const isBusy = computed(() => loading.value || aiLoading.value)
 
-function isChineseInput(name: string) {
-  return /[一-鿿]/.test(name)
-}
-
-function isPinyinInput(name: string) {
-  return false
+function isValidChineseName(name: string) {
+  // 严格匹配 2-4 位纯汉字
+  return /^[一-龥]{2,4}$/.test(name)
 }
 
 function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
@@ -106,8 +103,13 @@ async function handleSubmit() {
   const name = input.value.trim()
   if (!name) return
 
-  if (!isChineseInput(name)) {
-    error.value = '请输入汉字姓名。'
+  if (!/^[一-龥]+$/.test(name)) {
+    error.value = '请输入纯汉字姓名。'
+    return
+  }
+
+  if (name.length < 2 || name.length > 4) {
+    error.value = '姓名长度应为 2-4 个汉字。'
     return
   }
 
@@ -160,6 +162,30 @@ function reset() {
   activeHistoryEntryId.value = null
 }
 
+function handleFeedback() {
+  const repoUrl = 'https://github.com/wtggfv/chinese-name-meaning/issues/new'
+  const title = encodeURIComponent('用户反馈：[在此输入简短描述]')
+
+  // 收集简单的环境信息，方便排查 AI 推理问题
+  const envInfo = {
+    userAgent: navigator.userAgent,
+    language: navigator.language,
+    platform: (navigator as any).userAgentData?.platform || 'Unknown',
+    isTauri: !!(window as any).__TAURI_INTERNALS__
+  }
+
+  const body = encodeURIComponent(
+    `## 反馈内容\n[请描述您遇到的问题或建议]\n\n` +
+    `## 环境信息\n` +
+    `- 应用版本: 1.0.0\n` +
+    `- 运行平台: ${envInfo.isTauri ? 'Tauri Desktop' : 'Web Browser'}\n` +
+    `- 操作系统: ${envInfo.platform}\n` +
+    `- 用户代理: ${envInfo.userAgent}\n`
+  )
+
+  window.open(`${repoUrl}?title=${title}&body=${body}&labels=feedback`, '_blank')
+}
+
 onMounted(() => {
   history.value = readHistory()
   preloadDictionary().catch(() => {})
@@ -175,7 +201,7 @@ onMounted(() => {
 
     <main class="main" :aria-busy="isBusy">
       <form class="search-form" @submit.prevent="handleSubmit">
-        <label class="sr-only" :for="inputId">请输入中文姓名或拼音</label>
+        <label class="sr-only" :for="inputId">请输入中文姓名</label>
         <div class="input-row">
           <input
             v-model="input"
@@ -196,7 +222,7 @@ onMounted(() => {
             <span v-else>解析</span>
           </button>
         </div>
-        <p :id="helpId" class="field-help">支持 2-3 个汉字姓名。</p>
+        <p :id="helpId" class="field-help">支持 2-4 个汉字姓名。</p>
         <p v-if="error" :id="errorId" class="error-msg" role="alert">{{ error }}</p>
       </form>
 
@@ -207,10 +233,9 @@ onMounted(() => {
 
       <section v-else-if="!result" class="empty-state" aria-labelledby="empty-state-title">
         <h2 id="empty-state-title" class="empty-title">等待解析</h2>
-        <p class="empty-copy">输入中文姓名或拼音后，系统会先识别姓氏，再展示每个字的读音、含义和文化内涵。</p>
+        <p class="empty-copy">输入中文姓名后，系统会先识别姓氏，再展示每个字的读音、含义和文化内涵。</p>
         <ul class="empty-tips">
-          <li>支持汉字姓名与拼音</li>
-          <li>支持带声调数字的输入，如 `Li3 Ming2 Hua2`</li>
+          <li>支持 2-4 个汉字姓名</li>
           <li>会自动区分姓和名</li>
         </ul>
       </section>
@@ -269,8 +294,15 @@ onMounted(() => {
     </main>
 
     <footer class="app-footer">
-      字典数据来自 <a href="https://cc-cedict.org" target="_blank" rel="noopener noreferrer">CC-CEDICT</a>,
-      证书来自 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.
+      <div class="footer-links">
+        <button class="feedback-link" @click="handleFeedback">💬 提交反馈</button>
+        <span class="divider">|</span>
+        <a href="https://github.com/wtggfv/chinese-name-meaning" target="_blank" rel="noopener noreferrer">项目源码</a>
+      </div>
+      <div class="footer-credits">
+        字典数据来自 <a href="https://cc-cedict.org" target="_blank" rel="noopener noreferrer">CC-CEDICT</a>,
+        证书来自 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.
+      </div>
     </footer>
   </div>
 </template>
@@ -648,6 +680,33 @@ body {
   text-align: center;
   font-size: 0.8rem;
   color: #aaa;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.feedback-link {
+  background: none;
+  border: none;
+  color: #8b6a4a;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.feedback-link:hover {
+  text-decoration: underline;
+}
+
+.divider {
+  color: #ddd;
 }
 
 .app-footer a {

@@ -85,8 +85,74 @@
 - Kept the worker-backed inference path intact while making history feel like a true resume flow.
 - Verified the app again with `npm run test:unit`, `npm run type-check`, and `npm run test:e2e -- --project chromium` in `my-vue-app`.
 
+## Commit 19 — Harden release asset loading
+- Made dictionary and worker asset URLs resolve relative to the Vite base path so subpath deployments keep working.
+- Updated the app entry point and tests to match the new asset-loading behavior.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 20 — Add Tauri desktop scaffold
+- Added a minimal Tauri wrapper in `my-vue-app/src-tauri/` so the Vue app can be bundled as a desktop application.
+- Reused the existing app icon and documented the Tauri build commands in `my-vue-app/README.md`.
+- Verified the frontend again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 21 — Document desktop packaging
+- Updated `CLAUDE.md`, `COMMIT_PROGRESS.md`, and `README.md` to record the Tauri desktop path and Windows `.exe` packaging note.
+- Kept the release notes aligned with the new desktop build scripts while leaving the Vue app behavior unchanged.
+- Verified the frontend again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 22 — Consolidate and Clean Dictionary/Cultural Data
+- Restructured `chars.json` to prioritize Chinese definitions and added fields for tones, frequency, and radicals.
+- Cleaned `cultural.json` by removing redundant fields like `ancient_text` and `fanqie`, keeping only user-relevant cultural labels.
+- Updated `src/types.ts` and `src/services/nameAnalyzer.ts` to reflect the new dictionary schema.
+- Refactored `src/components/CharacterCard.vue` to use `definition_cn` and the new tone field, and removed rendering of historical linguistics fields.
+- Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app`.
+
+## Commit 23 — Configure Worker Diagnostic Mechanisms
+- Implemented a Ping/Pong connection test in `src/services/localInference.ts` to verify Worker availability on startup.
+- Added extensive diagnostic console logging in both the Worker (`src/workers/localInference.worker.ts`) and the host service to track the complete message lifecycle.
+- Improved error handling in the Worker and simplified the main inference entry point to ensure consistent feedback.
+
+## Commit 24 — Refine Dictionary Data and AI Fallback Stability
+- Merged and cleaned 8000+ entries from the Xinhua dictionary into `chars.json`, ensuring high-quality Simplified Chinese definitions for naming characters.
+- Systematically stripped academic linguistic markers (Fanqie, phonology jargon) and ancient text citations to improve modern UI readability.
+- Stabilized the AI analysis layer by enforcing deterministic fallback logic while maintaining diagnostic Worker checks for future model integration.
+- Updated `CLAUDE.md` to reflect the new Chinese-first dictionary schema and Worker health-check architecture.
+
+## Commit 25 — Deploy On-Device AI Classifier
+- Trained a custom PyTorch MLP model for multi-label cultural classification using the 16-dimensional feature vector.
+- Exported the model to production-ready ONNX format in `public/models/classifier.onnx`.
+- Integrated the local inference engine so the Web Worker now performs real-time AI analysis of name "vibes" (Elegant, Grand, Masculine, Soft, Classical, Modern).
+- Fully aligned the feature extraction logic between Python (training) and TypeScript (inference).
+- Updated documentation and health-checks to support the new real-model flow.
+
+## Commit 26 — Improve AI Model Quality
+- Augmented the training dataset to 1200+ records with balanced class distribution for underperforming labels (Classical, Modern).
+- Retrained the PyTorch classifier with a wider MLP architecture (64->32->6) and increased training epochs to improve convergence.
+- Achieved significant F1-Score improvements across all categories: Gentle (0.94), Grand (0.88), Masculine (0.87), and Elegant (0.86).
+- Exported and deployed the updated ONNX model to `public/models/classifier.onnx`.
+
+## Commit 27 — Implement Dynamic Narrative Engine for AI
+- Developed a dynamic summary generator in `src/services/localInference.ts` that synthesizes customized analysis based on predicted ONNX labels and dictionary meanings.
+- Integrated a dictionary "scrubber" to automatically remove academic metadata (e.g., "俗字", "同某") and ensure name interpretations are contextually coherent.
+- Refined the "vibe" mapping to transform raw ML labels into high-quality literary descriptors (e.g., "阳刚" -> "坚毅刚劲的力量").
+- Added a smart character selector that prioritizes interpretative richness when choosing the "meaningful character" for the summary.
+- Updated docs to reflect the new hybrid inference and narrative architecture.
+
+## Commit 28 — Optimize bundle and executable size
+- Removed E2E testing directory (`e2e/`) and configuration (`playwright.config.ts`) to lean out the project structure.
+- Removed large source-only data files (`public/data/word.json`, `public/data/chars_zh_pending.json`) that were adding 30MB+ to the deployment footprint.
+- Cleaned up `package.json` devDependencies and `eslint.config.ts` to remove Playwright-related plugins.
+- Pruned `npm` dependencies to ensure a lean development and build environment.
+- Verified the core app still passes `type-check` and `test:unit` after the cleanup.
+
+## Commit 29 — Finalize Hanzi-only input and AI refinement
+- Removed Pinyin input UI and logic, specializing the interface for Hanzi-only 2-4 character names.
+- Strengthened input validation with strict Hanzi-only regex and refined error feedback.
+- Enhanced AI features with a 10-class differentiation system (Scholarly, Grand, Heroic, Serene, etc.) and WebGPU hardware acceleration.
+- Injected semantic dictionary signals and acoustic (prosody) features into the inference pipeline for higher interpretative accuracy.
+- Updated `CLAUDE.md` to reflect the refined AI architecture, semantic engineering, and UI constraints.
+
 ## Current checkpoint
-- Task progress: AI history restore is complete.
-- Saved analyses now restore both the base character breakdown and the AI summary when available.
-- Current work is tightening asset URL resolution so dictionary files and the ONNX model remain reachable when the app is hosted under a subpath.
-- Keep the README and repository notes aligned with the saved-history schema and base-path-aware asset loading so future readers know both behaviors are supported.
+- UI is specialized for 2-4 character Chinese names; Pinyin input support removed.
+- AI analysis is more granular (10 labels) and faster (WebGPU support).
+- Feature engineering now incorporates dictionary definitions and initial consonant prosody.

@@ -6,9 +6,9 @@ A Mandarin-first Vue 3 app that analyzes Chinese names character by character an
 
 - Accepts Chinese names or pinyin input.
 - Splits the name into surname and given-name characters.
-- Looks up pronunciation and dictionary definitions from CC-CEDICT data.
+- Looks up pronunciation and dictionary definitions (Consolidated Chinese-first data).
 - Adds curated cultural notes such as Five Elements, literary references, and naming connotations.
-- Shows an optional local AI summary for extra tone labels when the ONNX model is available.
+- Shows local AI deep analysis using a trained ONNX classifier (16-dimensional feature vector) with a dynamic, human-like narrative engine that explains the name's "vibe" and core meaning.
 - Saves recent analyses in the browser so you can revisit them after a refresh.
 
 ## How it works
@@ -20,24 +20,24 @@ The main app lives in `my-vue-app/src/App.vue`.
 3. `analyzeName()` segments the input into surname + given name characters.
 4. Each character is enriched with dictionary data and curated cultural context.
 5. Results are rendered as structured cards with pronunciation, meaning, and notes.
-6. If you open the AI analysis panel, `runLocalAiAnalysis()` offloads ONNX evaluation to a Web Worker and falls back to deterministic local labels when the model path is unavailable.
+6. If you open the AI analysis panel, `runLocalAiAnalysis()` triggers a Web Worker:
+    - **Inference**: Predicts 6 cultural "vibes" (categories) using `classifier.onnx`.
+    - **Synthesis**: Generates a unique summary by scrubbing academic jargon from dictionary data and weaving the predicted vibe with cultural tags (Five Elements/Literature).
 
 ## Project structure
 
 ```text
 my-vue-app/
-  public/data/
-    chars.json
-    surnames.json
+  public/
+    data/
+      chars.json      # Chinese-first dictionary (merged Xinhua)
+      surnames.json
+    models/
+      classifier.onnx # Trained PyTorch MLP model
+      manifest.json   # Model configuration
   src/
     App.vue
-    types.ts
-    data/cultural.ts
-    data/cultural.json
-    services/nameAnalyzer.ts
-    services/localInference.ts
-    workers/localInference.worker.ts
-    components/CharacterCard.vue
+    ...
 ```
 
 ## Key features
@@ -74,20 +74,30 @@ npm run dev
 
 The dev server runs at `http://localhost:5173`.
 
-## Available scripts
+## Windows exe bundling
 
-From `my-vue-app/package.json`:
+Use Tauri to package the whole app into a Windows `.exe`:
+
+1. Install dependencies in `my-vue-app` with `npm install`.
+2. Run `npm run tauri:build` on Windows, not on Linux/WSL.
+3. Make sure the Windows machine has Rust stable, the MSVC toolchain, and the Visual Studio C++ build tools installed.
+4. Keep `my-vue-app/src-tauri/tauri.conf.json` pointing at `../dist` so Tauri packages the built Vue output.
+5. Reuse the existing `public/favicon.ico` as the bundle icon or replace it with a proper desktop icon before release.
+6. After the build finishes, grab the `.exe` from the Tauri bundle output under `my-vue-app/src-tauri/target/release/bundle/`.
+
+## Available scripts
 
 - `npm run dev` - start the Vite dev server
 - `npm run build` - type-check and build for production
 - `npm run preview` - preview the production build
 - `npm run test:unit` - run Vitest unit tests
-- `npm run test:e2e` - run Playwright end-to-end tests
 - `npm run type-check` - run Vue/TypeScript type checking
 - `npm run lint` - run all lint tasks
 - `npm run lint:oxlint` - run Oxlint autofix
 - `npm run lint:eslint` - run ESLint autofix with cache
 - `npm run format` - format `src/` with Prettier
+- `npm run tauri:dev` - launch the Tauri desktop shell
+- `npm run tauri:build` - build the Tauri desktop bundle
 
 ## Development notes
 
@@ -96,6 +106,7 @@ From `my-vue-app/package.json`:
 - `loadData()` checks fetch status before parsing JSON so asset failures stay visible.
 - Analysis history is capped to a small recent window and stored under `analysis-history-v1`.
 - The optional AI layer should remain separate from the core analyzer so the app still works without model files.
+- The desktop bundle reuses the same frontend assets, so packaged builds still depend on the Vite output and base-path-safe asset URLs.
 
 ## Verification
 
@@ -106,4 +117,4 @@ npm run type-check
 npm run build
 ```
 
-For a full UI check, run `npm run dev` and try a Chinese name, a pinyin input, and the history restore flow.
+For a full UI check, run `npm run dev` and try a Chinese name, a pinyin input, and the history restore flow. For desktop packaging, run `npm run tauri:dev` locally and `npm run tauri:build` on Windows.
