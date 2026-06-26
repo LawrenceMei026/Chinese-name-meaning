@@ -10,6 +10,9 @@
     "frontendDist": "../dist"
   },
   "app": {
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' data:; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' tauri://* https://tauri.localhost;"
+    },
     "windows": [
       {
         "title": "Chinese Name Meaning Explorer",

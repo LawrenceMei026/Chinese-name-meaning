@@ -78,13 +78,33 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
 
   if (!manifestPromise) {
     manifestPromise = (async () => {
-      // 显式拼接 models/manifest.json，确保不被 Vite 的相对路径重写干扰
-      const url = new URL('models/manifest.json', baseUrl()).toString();
-      console.log('[Worker] Fetching manifest from:', url);
-      const res = await fetch(url)
-      if (!res.ok) {
-        console.error('[Worker] Failed to fetch manifest:', res.status, res.statusText);
-        return null
+      // 更加稳健的路径获取：优先尝试绝对路径解析，失败则尝试相对路径
+      const baseUrlStr = baseUrl();
+      const urls = [
+        new URL('models/manifest.json', baseUrlStr).toString(),
+        './models/manifest.json'
+      ];
+
+      let res: Response | null = null;
+      let usedUrl = '';
+
+      for (const url of urls) {
+        try {
+          console.log('[Worker] Trying manifest URL:', url);
+          const attempt = await fetch(url);
+          if (attempt.ok) {
+            res = attempt;
+            usedUrl = url;
+            break;
+          }
+        } catch (e) {
+          console.warn(`[Worker] Failed manifest attempt: ${url}`, e);
+        }
+      }
+
+      if (!res || !res.ok) {
+        console.error('[Worker] All manifest load attempts failed');
+        return null;
       }
 
       const text = await res.text();
@@ -132,11 +152,15 @@ async function loadSession(): Promise<SessionLike | null> {
       }
 
       try {
-        // 核心修复：确保模型路径相对于 baseUrl 解析，处理 manifest.modelPath 中可能的正斜杠
         const cleanPath = (manifest.modelPath ?? DEFAULT_MODEL_PATH).replace(/^\//, '');
         const modelUrl = new URL(cleanPath, baseUrl()).toString();
-        console.log('[Worker] Loading ONNX model from:', modelUrl);
-        // 尝试多种执行后端，并开启图优化
+
+        // 前端韧性增强：加载模型前，先通过二进制流验证资源是否存在
+        const check = await fetch(modelUrl);
+        if (!check.ok) throw new Error(`Model asset not found at ${modelUrl}`);
+
+        console.log('[Worker] Loading ONNX model from verified URL:', modelUrl);
+        // 如果 fetch 成功，则尝试加载 session
         return await ortInstance.InferenceSession.create(modelUrl, {
           executionProviders: ['webgpu', 'wasm'],
           graphOptimizationLevel: 'all',
