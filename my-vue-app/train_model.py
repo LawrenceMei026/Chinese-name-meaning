@@ -206,7 +206,13 @@ def train():
         input_names=['input'], output_names=['logits'],
         dynamic_axes={'input': {0: 'batch_size'}, 'logits': {0: 'batch_size'}}
     )
-    print(f"Model exported to {onnx_path}")
+
+    # 强制将权重内联到单一 ONNX 文件中
+    import onnx
+    onnx_model = onnx.load(onnx_path)
+    onnx.save_model(onnx_model, onnx_path, save_as_external_data=False)
+
+    print(f"Model exported to {onnx_path} with inlined weights")
 
 if __name__ == "__main__":
     train()

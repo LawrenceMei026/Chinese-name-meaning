@@ -158,7 +158,13 @@
 - Added a fallback retry mechanism for WASM-only inference if WebGPU initialization fails.
 - Expanded CSP `connect-src` in `tauri.conf.json` to allow `data:` and ensure protocol compatibility.
 
+## Commit 31 — Integrate Ollama for Literate AI Summary
+- Added `fetchOllamaSummary` to `src/services/localInference.ts` using local Qwen2.5.
+- Implemented literate narrative generation combining ONNX基调 predictive labels and dictionary semantics.
+- Documented environment requirements (`OLLAMA_HOST=0.0.0.0`, `OLLAMA_ORIGINS="*"`) for cross-interface operation.
+- Bundled full ONNX runtime WASM/MJS assets into `public/` for reliable dev-mode loading.
+
 ## Current checkpoint
-- UI is specialized for 2-4 character Chinese names.
-- AI inference is hardened for Tauri production environments with WASM fallback.
-- Feature engineering remains stable with Hanzi-driven semantic signals.
+- AI analysis is multi-stage: ONNX for traits -> Qwen for literary summary.
+- Core local inference is stable with complete WASM asset bundling.
+- Desktop packaging (Tauri) supports local AI API connections.

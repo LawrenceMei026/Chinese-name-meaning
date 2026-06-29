@@ -260,27 +260,67 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
   })
 }
 
+async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promise<string | null> {
+  const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
+
+  try {
+    // 使用 localhost 是最通用的，Windows 浏览器会自动尝试将其转发给 WSL
+    const ollamaUrl = 'http://localhost:11434/api/generate';
+    console.log('[InferenceService] Attempting Ollama call to:', ollamaUrl);
+
+    const response = await fetch(ollamaUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'name-expert',
+        prompt: prompt,
+        stream: false,
+        options: {
+          temperature: 0.8,
+        }
+      }),
+      signal: AbortSignal.timeout(12000)
+    });
+
+    if (!response.ok) {
+      console.warn('[InferenceService] Ollama API error. Status:', response.status);
+      return null;
+    }
+    const data = await response.json();
+    return data.response?.trim() || null;
+  } catch (e) {
+    console.warn('[InferenceService] Ollama connection failed. Is OLLAMA_HOST=0.0.0.0?');
+    return null;
+  }
+}
+
 export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalysisResult> {
   console.log('[InferenceService] Starting AI analysis...');
+  let labels: string[] = [];
+  let source: 'model' | 'fallback' = 'fallback';
+
   try {
-    const labels = await inferViaWorker(result)
-    if (labels?.length && !(labels.length === 1 && labels[0] === 'pong')) {
-      return {
-        labels,
-        summary: buildSummary(labels, result, 'model'),
-        loadedFromCache: true,
-        source: 'model',
-      }
+    const modelLabels = await inferViaWorker(result)
+    if (modelLabels?.length && !(modelLabels.length === 1 && modelLabels[0] === 'pong')) {
+      labels = modelLabels;
+      source = 'model';
     }
   } catch (error) {
     console.warn('[InferenceService] Worker inference failed:', error);
   }
 
-  const fallbackLabels = pickFallbackLabels(buildFeatureText(result))
+  if (labels.length === 0) {
+    labels = pickFallbackLabels(buildFeatureText(result));
+    source = 'fallback';
+  }
+
+  // 尝试使用 Ollama (Qwen) 生成总结
+  const ollamaSummary = await fetchOllamaSummary(labels, result);
+
   return {
-    labels: fallbackLabels,
-    summary: buildSummary(fallbackLabels, result, 'fallback'),
-    loadedFromCache: false,
-    source: 'fallback',
+    labels,
+    summary: ollamaSummary || buildSummary(labels, result, source),
+    loadedFromCache: source === 'model',
+    source: source,
   }
 }
