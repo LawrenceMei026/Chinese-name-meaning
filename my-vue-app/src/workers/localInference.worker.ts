@@ -167,10 +167,10 @@ async function loadSession(): Promise<SessionLike | null> {
       // Ensure base ends with a slash
       const wasmBase = base.endsWith('/') ? base : base + '/';
 
-      // In development, Vite might not serve WASM files from the root.
-      // We can try to force them to be looked up in the standard public directory /models
-      // or simply the root if they are copied there.
+      ortInstance.env.debug = true;
       ortInstance.env.wasm.wasmPaths = wasmBase;
+      // Force disable proxy to avoid separate worker/mjs loading if possible
+      ortInstance.env.wasm.proxy = false;
       console.log('[Worker] Set ort.env.wasm.wasmPaths to:', wasmBase);
 
       // Disable dynamic loading of modules to avoid the .mjs fetch error in some environments
