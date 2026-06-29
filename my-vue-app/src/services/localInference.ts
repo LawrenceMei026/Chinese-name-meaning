@@ -264,32 +264,42 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
   const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
 
   try {
-    // 使用 localhost 是最通用的，Windows 浏览器会自动尝试将其转发给 WSL
-    const ollamaUrl = 'http://localhost:11434/api/generate';
-    console.log('[InferenceService] Attempting Ollama call to:', ollamaUrl);
+    // 动态探测可用模型
+    const baseUrl = 'http://127.0.0.1:11434';
+    const tagsRes = await fetch(`${baseUrl}/api/tags`).catch(() => null);
+    let targetModel = 'name-expert:latest';
 
-    const response = await fetch(ollamaUrl, {
+    if (tagsRes?.ok) {
+      const tagsData = await tagsRes.json();
+      const models = tagsData.models || [];
+      const found = models.find((m: any) => m.name.includes('name-expert')) ||
+                    models.find((m: any) => m.name.includes('qwen'));
+      if (found) {
+        targetModel = found.name;
+        console.log('[InferenceService] Detected model:', targetModel);
+      }
+    }
+
+    const response = await fetch(`${baseUrl}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'name-expert:latest',
+        model: targetModel,
         prompt: prompt,
         stream: false,
-        options: {
-          temperature: 0.8,
-        }
+        options: { temperature: 0.7 }
       }),
-      signal: AbortSignal.timeout(12000)
+      signal: AbortSignal.timeout(15000)
     });
 
     if (!response.ok) {
-      console.warn('[InferenceService] Ollama API error. Status:', response.status);
+      console.warn('[InferenceService] Ollama API error. Status:', response.status, 'Model:', targetModel);
       return null;
     }
     const data = await response.json();
     return data.response?.trim() || null;
   } catch (e) {
-    console.warn('[InferenceService] Ollama connection failed. Is OLLAMA_HOST=0.0.0.0?');
+    console.warn('[InferenceService] Ollama connection failed. Check if OLLAMA_HOST=0.0.0.0');
     return null;
   }
 }
