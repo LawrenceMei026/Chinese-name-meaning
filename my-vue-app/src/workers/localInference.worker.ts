@@ -164,7 +164,10 @@ async function loadSession(): Promise<SessionLike | null> {
 
       // Configure WASM paths explicitly for Tauri environment
       const base = baseUrl();
-      ortInstance.env.wasm.wasmPaths = base;
+      // Ensure base ends with a slash for ORT
+      const wasmBase = base.endsWith('/') ? base : base + '/';
+      ortInstance.env.wasm.wasmPaths = wasmBase;
+      console.log('[Worker] Set ort.env.wasm.wasmPaths to:', wasmBase);
 
       try {
         const cleanPath = (manifest.modelPath ?? DEFAULT_MODEL_PATH).replace(/^\//, '');
@@ -172,12 +175,16 @@ async function loadSession(): Promise<SessionLike | null> {
 
         console.log('[Worker] Loading ONNX model from URL:', modelUrl);
 
-        // Try to fetch as arrayBuffer first to ensure resource is readable and handle potential external data
-        const response = await fetch(modelUrl);
+        // Try to fetch as arrayBuffer first
+        const response = await fetch(modelUrl, { cache: 'no-cache' });
         if (!response.ok) {
-          throw new Error(`Model fetch failed: ${response.status} ${response.statusText}`);
+          throw new Error(`Model fetch failed: ${response.status} ${response.statusText} for ${modelUrl}`);
         }
         const modelBuffer = await response.arrayBuffer();
+
+        if (modelBuffer.byteLength < 5000) {
+          console.warn('[Worker] Model buffer is suspiciously small (<5KB). It might be a skeleton model missing external data.');
+        }
 
         console.log('[Worker] Model buffer loaded, size:', modelBuffer.byteLength);
 
