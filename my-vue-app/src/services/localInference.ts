@@ -272,7 +272,7 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'name-expert',
+        model: 'name-expert:latest',
         prompt: prompt,
         stream: false,
         options: {

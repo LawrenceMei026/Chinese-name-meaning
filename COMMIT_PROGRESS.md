@@ -159,12 +159,13 @@
 - Expanded CSP `connect-src` in `tauri.conf.json` to allow `data:` and ensure protocol compatibility.
 
 ## Commit 31 — Integrate Ollama for Literate AI Summary
-- Added `fetchOllamaSummary` to `src/services/localInference.ts` using local Qwen2.5.
+- Added fetchOllamaSummary to src/services/localInference.ts using local Qwen2.5.
 - Implemented literate narrative generation combining ONNX基调 predictive labels and dictionary semantics.
-- Documented environment requirements (`OLLAMA_HOST=0.0.0.0`, `OLLAMA_ORIGINS="*"`) for cross-interface operation.
-- Bundled full ONNX runtime WASM/MJS assets into `public/` for reliable dev-mode loading.
+- Re-installed Ollama via official script to bypass broken Snap environment.
+- Configured OLLAMA_HOST=0.0.0.0 and OLLAMA_ORIGINS="*" for cross-platform browser connectivity.
+- Created NameExpert.modelfile to define AI expert persona with poetic Chinese output traits.
 
 ## Current checkpoint
-- AI analysis is multi-stage: ONNX for traits -> Qwen for literary summary.
-- Core local inference is stable with complete WASM asset bundling.
-- Desktop packaging (Tauri) supports local AI API connections.
+- AI analysis: Fast ONNX features + Deep Qwen summaries (via specialized NameExpert model).
+- Local environment: Fully patched Ollama with custom expert persona.
+- Production: CI/CD tags (v0.1.1) triggered with hardened asset loader.

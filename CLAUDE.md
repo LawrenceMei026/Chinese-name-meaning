@@ -36,7 +36,11 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 - **Model Loading**: The Web Worker (`localInference.worker.ts`) uses a static import of `onnxruntime-web` for stability. It attempts to use `webgpu` for acceleration with `wasm` as fallback. In Tauri production, `ort.env.wasm.wasmPaths` must be explicitly set to the origin base URL.
 - **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files). If files like `classifier.onnx.data` are generated, they must be removed and the model re-saved with `save_as_external_data=False`.
 - **Production Pathing**: In Tauri EXE environments, model loading defaults to the app's installation resource path (`tauri://*` or `https://tauri.localhost`). Fallback to `C:\Users\<user>\AppData\Local\Chinese Name Meaning Explorer` is reserved for user-specific cache data if needed.
-- **Inference Summary**: Output summaries are dynamically synthesized using a hybrid approach: combining 10-class ONNX label predictions (refined for scholarly/heroic/serene vibes) with a rule-based narrative engine that extracts core dictionary meanings and filters metadata noise.
+- **Inference Summary**: Output summaries are dynamically synthesized using a hybrid approach:
+    1. **Local ONNX**: Fast 10-class vibe prediction.
+    2. **Ollama (Local LLM)**: Specialized `name-expert` model (based on Qwen2.5) for literate, elegant summaries. Requires `OLLAMA_HOST=0.0.0.0` and `OLLAMA_ORIGINS="*"` for cross-interface access.
+    3. **Deterministic Fallback**: Rule-based narrative engine if Ollama is unavailable.
+- **Custom Model**: `NameExpert.modelfile` defines the AI persona. Create it via `ollama create name-expert -f NameExpert.modelfile`.
 - **Feature Engineering**: Inference combines acoustic features (prosody/initials), radical analysis, and semantic dictionary scanning (beauty/strength/virtue/nature).
 - **Diagnostics**: Health checks and inference lifecycle are logged via `[Worker]` and `[InferenceService]` console prefixes.
 - **Fallback**: System automatically reverts to deterministic label matching if assets are missing or handshake fails.
