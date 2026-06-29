@@ -189,43 +189,36 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
 async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promise<string | null> {
   const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
 
-  // 强制锁定在 curl 验证过的 11435 端口及 127.0.0.1 IP
-  const baseUrl = 'http://127.0.0.1:11435';
+  // 这里的策略是：同时尝试 localhost 和 127.0.0.1，谁快用谁
+  // 在 Windows + WSL 环境下，往往其中一个会被拦截，而另一个是通的
+  const urls = [
+    'http://localhost:11435/api/generate',
+    'http://127.0.0.1:11435/api/generate'
+  ];
 
-  try {
-    const response = await fetch(`${baseUrl}/api/generate`, {
+  const fetchWithTimeout = async (url: string) => {
+    const response = await fetch(url, {
       method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'name-expert',
         prompt: prompt,
         stream: false,
         options: { temperature: 0.7 }
-      })
+      }),
+      // 注意：由于模型生成很慢，这里不能设太短的 timeout
+      signal: AbortSignal.timeout(60000)
     });
-
-    if (!response.ok) {
-        console.warn(`[Ollama] Failed with status ${response.status}`);
-        return null;
-    }
+    if (!response.ok) throw new Error('Ollama error');
     const data = await response.json();
-    return data.response?.trim() || null;
+    return data.response?.trim();
+  };
+
+  try {
+    // 竞速模式：只要有一个通了就用那个
+    return await Promise.any(urls.map(url => fetchWithTimeout(url)));
   } catch (e) {
-    console.error('[Ollama] Network error or timeout. Ensure OLLAMA_HOST=0.0.0.0 is used.');
-    // 自动重试 localhost，万一宿主机转发突然生效了
-    if (!baseUrl.includes('localhost')) {
-        try {
-            const res = await fetch('http://localhost:11435/api/generate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ model: 'name-expert', prompt, stream: false })
-            });
-            if (res.ok) { const d = await res.json(); return d.response?.trim(); }
-        } catch {}
-    }
+    console.error('[Ollama] All connection attempts failed. Possible CORS or WSL firewall issue.');
     return null;
   }
 }

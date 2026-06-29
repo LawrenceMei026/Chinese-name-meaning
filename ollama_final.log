@@ -246,3 +246,42 @@ slot print_timing: id  0 | task 0 |    graphs reused =        101
 slot      release: id  0 | task 0 | stop processing: n_tokens = 402, truncated = 0
 srv  update_slots: all slots are idle
 [GIN] 2026/06/29 - 17:30:33 | 200 |         1m41s |             ::1 | POST     "/api/generate"
+[GIN] 2026/06/29 - 17:31:42 | 204 |   10.390251ms |             ::1 | OPTIONS  "/api/generate"
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 0.834 (> 0.100 thold), f_keep = 0.726
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.800
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 103 | processing task, is_child = 0
+slot   operator(): id  0 | task 103 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 350
+slot   operator(): id  0 | task 103 | cached n_tokens = 292, memory_seq_rm [292, end)
+slot init_sampler: id  0 | task 103 | init sampler, took 0.06 ms, tokens: text = 350, total = 350
+slot print_timing: id  0 | task 103 | prompt eval time =    5051.07 ms /    58 tokens (   87.09 ms per token,    11.48 tokens per second)
+slot print_timing: id  0 | task 103 |        eval time =   21247.05 ms /    84 tokens (  252.94 ms per token,     3.95 tokens per second)
+slot print_timing: id  0 | task 103 |       total time =   26298.12 ms /   142 tokens
+slot print_timing: id  0 | task 103 |    graphs reused =        183
+slot      release: id  0 | task 103 | stop processing: n_tokens = 433, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/06/29 - 17:32:05 | 200 |  26.56659925s |             ::1 | POST     "/api/generate"
+slot get_availabl: id  0 | task -1 | selected slot by LCP similarity, sim_best = 1.000 (> 0.100 thold), f_keep = 0.808
+slot launch_slot_: id  0 | task -1 | sampler chain: logits -> penalties -> ?dry -> ?top-n-sigma -> top-k -> ?typical -> top-p -> ?min-p -> ?xtc -> temp-ext -> dist 
+slot launch_slot_: id  0 | task -1 | sampler params: 
+	repeat_last_n = 64, repeat_penalty = 1.100, frequency_penalty = 0.000, presence_penalty = 0.000
+	dry_multiplier = 0.000, dry_base = 1.750, dry_allowed_length = 2, dry_penalty_last_n = 4096
+	top_k = 40, top_p = 0.900, min_p = 0.000, xtc_probability = 0.000, xtc_threshold = 0.100, typical_p = 1.000, top_n_sigma = -1.000, temp = 0.800
+	mirostat = 0, mirostat_lr = 0.100, mirostat_ent = 5.000, adaptive_target = -1.000, adaptive_decay = 0.900
+slot launch_slot_: id  0 | task 188 | processing task, is_child = 0
+slot   operator(): id  0 | task 188 | new prompt, n_ctx_slot = 4096, n_keep = 4, task.n_tokens = 350
+slot   operator(): id  0 | task 188 | need to evaluate at least 1 token for each active slot (n_past = 350, task.n_tokens() = 350)
+slot   operator(): id  0 | task 188 | n_past was set to 349
+slot   operator(): id  0 | task 188 | cached n_tokens = 349, memory_seq_rm [349, end)
+slot init_sampler: id  0 | task 188 | init sampler, took 0.07 ms, tokens: text = 350, total = 350
+slot print_timing: id  0 | task 188 | prompt eval time =     203.51 ms /     1 tokens (  203.51 ms per token,     4.91 tokens per second)
+slot print_timing: id  0 | task 188 |        eval time =   22576.67 ms /    93 tokens (  242.76 ms per token,     4.12 tokens per second)
+slot print_timing: id  0 | task 188 |       total time =   22780.19 ms /    94 tokens
+slot print_timing: id  0 | task 188 |    graphs reused =        276
+slot      release: id  0 | task 188 | stop processing: n_tokens = 442, truncated = 0
+srv  update_slots: all slots are idle
+[GIN] 2026/06/29 - 17:33:35 | 200 | 23.044819775s |             ::1 | POST     "/api/generate"
