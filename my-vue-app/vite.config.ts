@@ -17,4 +17,12 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  optimizeDeps: {
+    exclude: ['onnxruntime-web']
+  },
+  build: {
+    rollupOptions: {
+      external: [],
+    },
+  },
 })

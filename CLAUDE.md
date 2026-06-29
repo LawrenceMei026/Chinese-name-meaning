@@ -34,7 +34,8 @@ Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via 
 
 The local AI layer is managed by `src/services/localInference.ts`. It includes a health-check mechanism (Ping/Pong) with a 10s timeout to verify Worker availability.
 - **Model Loading**: The Web Worker (`localInference.worker.ts`) uses a static import of `onnxruntime-web` for stability. It attempts to use `webgpu` for acceleration with `wasm` as fallback. In Tauri production, `ort.env.wasm.wasmPaths` must be explicitly set to the origin base URL.
-- **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files).
+- **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files). If files like `classifier.onnx.data` are generated, they must be removed and the model re-saved with `save_as_external_data=False`.
+- **Production Pathing**: In Tauri EXE environments, model loading defaults to the app's installation resource path (`tauri://*` or `https://tauri.localhost`). Fallback to `C:\Users\<user>\AppData\Local\Chinese Name Meaning Explorer` is reserved for user-specific cache data if needed.
 - **Inference Summary**: Output summaries are dynamically synthesized using a hybrid approach: combining 10-class ONNX label predictions (refined for scholarly/heroic/serene vibes) with a rule-based narrative engine that extracts core dictionary meanings and filters metadata noise.
 - **Feature Engineering**: Inference combines acoustic features (prosody/initials), radical analysis, and semantic dictionary scanning (beauty/strength/virtue/nature).
 - **Diagnostics**: Health checks and inference lifecycle are logged via `[Worker]` and `[InferenceService]` console prefixes.
@@ -43,6 +44,8 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 ## CI/CD 
 
 - **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`.
+- **GitHub Connection**: Repository is connected to GitHub (`LawrenceMei026/Chinese-name-meaning`). Pushes to `main` and tags are handled via authenticated Git flow.
+- **Current Version**: `v0.1.1` (Current release tag triggering the active build).
 - **Trigger**: Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push origin v1.0.0`).
 - **Target**: Build and package for `windows-latest` (producing `.msi` and `.exe`).
 

@@ -162,12 +162,22 @@ async function loadSession(): Promise<SessionLike | null> {
         return null
       }
 
-      // Configure WASM paths explicitly for Tauri environment
+      // Configure WASM paths explicitly for Tauri/Vite environment
       const base = baseUrl();
-      // Ensure base ends with a slash for ORT
+      // Ensure base ends with a slash
       const wasmBase = base.endsWith('/') ? base : base + '/';
+
+      // In development, Vite might not serve WASM files from the root.
+      // We can try to force them to be looked up in the standard public directory /models
+      // or simply the root if they are copied there.
       ortInstance.env.wasm.wasmPaths = wasmBase;
       console.log('[Worker] Set ort.env.wasm.wasmPaths to:', wasmBase);
+
+      // Disable dynamic loading of modules to avoid the .mjs fetch error in some environments
+      // and force the use of local WASM files
+      if (typeof (ortInstance.env as any).wasm !== 'undefined') {
+        (ortInstance.env as any).wasm.numThreads = 1; // Simplify for debugging
+      }
 
       try {
         const cleanPath = (manifest.modelPath ?? DEFAULT_MODEL_PATH).replace(/^\//, '');
