@@ -263,24 +263,39 @@ function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
 async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promise<string | null> {
   const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
 
-  try {
-    // 使用 localhost 是 Windows 穿透到 WSL 的唯一标准途径
-    const baseUrl = 'http://localhost:11434';
-    console.log('[InferenceService] Attempting Ollama call to:', baseUrl);
-    let targetModel = 'name-expert:latest';
+  // 候选地址列表：增加 11435 作为备选，解决 11434 端口冲突问题
+  const baseUrls = [
+    'http://localhost:11434',
+    'http://localhost:11435',
+    'http://127.0.0.1:11434',
+    'http://127.0.0.1:11435'
+  ];
 
-    if (tagsRes?.ok) {
-      const tagsData = await tagsRes.json();
-      const models = tagsData.models || [];
-      const found = models.find((m: any) => m.name.includes('name-expert')) ||
-                    models.find((m: any) => m.name.includes('qwen'));
-      if (found) {
-        targetModel = found.name;
-        console.log('[InferenceService] Detected model:', targetModel);
+  let bestUrl = '';
+  let targetModel = 'name-expert:latest';
+
+  for (const url of baseUrls) {
+    try {
+      const ctrl = new AbortController();
+      const tid = setTimeout(() => ctrl.abort(), 800);
+      const res = await fetch(`${url}/api/tags`, { signal: ctrl.signal });
+      clearTimeout(tid);
+
+      if (res.ok) {
+        bestUrl = url;
+        const data = await res.json();
+        const found = (data.models || []).find((m: any) => m.name.includes('name-expert')) ||
+                      (data.models || []).find((m: any) => m.name.includes('qwen'));
+        if (found) targetModel = found.name;
+        break;
       }
-    }
+    } catch { continue; }
+  }
 
-    const response = await fetch(`${baseUrl}/api/generate`, {
+  if (!bestUrl) return null;
+
+  try {
+    const response = await fetch(`${bestUrl}/api/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -292,14 +307,11 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
       signal: AbortSignal.timeout(15000)
     });
 
-    if (!response.ok) {
-      console.warn('[InferenceService] Ollama API error. Status:', response.status, 'Model:', targetModel);
-      return null;
-    }
+    if (!response.ok) return null;
     const data = await response.json();
     return data.response?.trim() || null;
   } catch (e) {
-    console.warn('[InferenceService] Ollama connection failed. Check if OLLAMA_HOST=0.0.0.0');
+    console.warn('[InferenceService] Ollama final request failed');
     return null;
   }
 }
@@ -324,7 +336,7 @@ export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalys
     source = 'fallback';
   }
 
-  // 尝试使用 Ollama (Qwen) 生成总结
+  // 尝试使用 Ollama
   const ollamaSummary = await fetchOllamaSummary(labels, result);
 
   return {

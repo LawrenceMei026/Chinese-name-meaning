@@ -21,6 +21,16 @@ A webpage that analyzes Chinese names and explains their meanings with cultural 
 - Tone (声调) affects meaning — homophone characters can have very different connotations
 - Dictionary data is optimized for modern Chinese readability: academic linguistic markers (Fanqie, ancient phonetics) and historical philology notes (e.g., "x-is-phonetic") are stripped to keep definitions concise.
 
+## AI Infrastructure
+
+- **Local ONNX**: Performs fast 10-class "vibe" prediction (Scholarly, Grand, etc.) in a Web Worker.
+- **Ollama Integration**: Uses `name-expert:latest` (custom Qwen2.5) for literary summary generation.
+- **Network Requirements**: 
+  - WSL-to-Windows: Must use `OLLAMA_HOST=0.0.0.0` and `OLLAMA_ORIGINS="*"` on the server side.
+  - Client side uses `http://localhost:11434` to leverage Windows auto-port-forwarding.
+- **Dynamic Detection**: Analysis service automatically probes `/api/tags` to resolve exact model names and connectivity status.
+- **WASM Assets**: Essential `onnxruntime-web` binaries are bundled in `public/` for reliable offline/dev operation.
+
 ## Architecture Notes
 
 The core data flow:
