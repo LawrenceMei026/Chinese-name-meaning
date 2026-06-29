@@ -264,9 +264,9 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
   const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
 
   try {
-    // 动态探测可用模型
-    const baseUrl = 'http://127.0.0.1:11434';
-    const tagsRes = await fetch(`${baseUrl}/api/tags`).catch(() => null);
+    // 使用 localhost 是 Windows 穿透到 WSL 的唯一标准途径
+    const baseUrl = 'http://localhost:11434';
+    console.log('[InferenceService] Attempting Ollama call to:', baseUrl);
     let targetModel = 'name-expert:latest';
 
     if (tagsRes?.ok) {
