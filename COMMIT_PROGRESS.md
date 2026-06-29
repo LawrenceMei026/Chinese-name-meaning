@@ -152,7 +152,13 @@
 - Injected semantic dictionary signals and acoustic (prosody) features into the inference pipeline for higher interpretative accuracy.
 - Updated `CLAUDE.md` to reflect the refined AI architecture, semantic engineering, and UI constraints.
 
+## Commit 30 — Fix model loading in Tauri production
+- Removed external `.data` weights to enforce single-file ONNX model integrity.
+- Configured explicit `ort.env.wasm.wasmPaths` in the Worker to resolve relative to the Tauri origin.
+- Added a fallback retry mechanism for WASM-only inference if WebGPU initialization fails.
+- Expanded CSP `connect-src` in `tauri.conf.json` to allow `data:` and ensure protocol compatibility.
+
 ## Current checkpoint
-- UI is specialized for 2-4 character Chinese names; Pinyin input support removed.
-- AI analysis is more granular (10 labels) and faster (WebGPU support).
-- Feature engineering now incorporates dictionary definitions and initial consonant prosody.
+- UI is specialized for 2-4 character Chinese names.
+- AI inference is hardened for Tauri production environments with WASM fallback.
+- Feature engineering remains stable with Hanzi-driven semantic signals.

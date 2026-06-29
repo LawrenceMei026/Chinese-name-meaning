@@ -33,12 +33,18 @@ The core data flow:
 Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()`. The dictionary includes content merged from multiple Chinese sources (like Xinhua Dictionary) and is periodically cleaned via Python scripts to remove academic jargon. Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts` for display only; the app does not support pinyin as input.
 
 The local AI layer is managed by `src/services/localInference.ts`. It includes a health-check mechanism (Ping/Pong) with a 10s timeout to verify Worker availability.
-- **Model Loading**: The Web Worker (`localInference.worker.ts`) uses a static import of `onnxruntime-web` for stability. It attempts to use `webgpu` for acceleration with `wasm` as fallback.
-- **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files). If regenerating, use `onnx.save_model(model, path, save_as_external_data=False)` to ensure a single-file deployment (< 100KB).
+- **Model Loading**: The Web Worker (`localInference.worker.ts`) uses a static import of `onnxruntime-web` for stability. It attempts to use `webgpu` for acceleration with `wasm` as fallback. In Tauri production, `ort.env.wasm.wasmPaths` must be explicitly set to the origin base URL.
+- **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files).
 - **Inference Summary**: Output summaries are dynamically synthesized using a hybrid approach: combining 10-class ONNX label predictions (refined for scholarly/heroic/serene vibes) with a rule-based narrative engine that extracts core dictionary meanings and filters metadata noise.
 - **Feature Engineering**: Inference combines acoustic features (prosody/initials), radical analysis, and semantic dictionary scanning (beauty/strength/virtue/nature).
 - **Diagnostics**: Health checks and inference lifecycle are logged via `[Worker]` and `[InferenceService]` console prefixes.
 - **Fallback**: System automatically reverts to deterministic label matching if assets are missing or handshake fails.
+
+## CI/CD 
+
+- **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`.
+- **Trigger**: Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push origin v1.0.0`).
+- **Target**: Build and package for `windows-latest` (producing `.msi` and `.exe`).
 
 ## Version Control
 

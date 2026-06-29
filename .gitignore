@@ -80,3 +80,4 @@ public/data/word.json
 public/data/chars_zh_pending.json
 *.7z
 *.zip
+*:Zone.Identifier

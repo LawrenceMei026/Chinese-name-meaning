@@ -51,12 +51,22 @@ let sessionPromise: Promise<SessionLike | null> | null = null
 let cachedSession: SessionLike | null = null
 
 function baseUrl() {
-  // 在 Tauri 环境中，self.location.href 可能包含 query 干扰
-  const url = new URL(self.location.href);
-  const base = import.meta.env.BASE_URL || '/';
+  // In Tauri/Vite environment, we need to handle both dev server and production custom protocols
+  if (typeof self !== 'undefined' && self.location) {
+    const url = new URL(self.location.href);
 
-  // 确保 base 以 / 结尾，url.origin 在 tauri 环境下可能是 tauri://localhost
-  return new URL(base, url.origin).toString();
+    // Tauri production check: usually starts with tauri:// or https://tauri.localhost
+    const isTauri = url.protocol === 'tauri:' || url.hostname === 'tauri.localhost';
+
+    if (isTauri) {
+      // In Tauri production, base path should generally be the root of the origin
+      return url.origin + (import.meta.env.BASE_URL || '/');
+    }
+  }
+
+  // Fallback for standard web/dev environments
+  const base = import.meta.env.BASE_URL || '/';
+  return new URL(base, self.location.origin).toString();
 }
 
 function assetUrl(path: string) {
@@ -91,7 +101,8 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
       for (const url of urls) {
         try {
           console.log('[Worker] Trying manifest URL:', url);
-          const attempt = await fetch(url);
+          // In Tauri production, using 'same-origin' can help avoid some protocol issues
+          const attempt = await fetch(url, { mode: 'cors' });
           if (attempt.ok) {
             res = attempt;
             usedUrl = url;
@@ -151,22 +162,38 @@ async function loadSession(): Promise<SessionLike | null> {
         return null
       }
 
+      // Configure WASM paths explicitly for Tauri environment
+      const base = baseUrl();
+      ortInstance.env.wasm.wasmPaths = base;
+
       try {
         const cleanPath = (manifest.modelPath ?? DEFAULT_MODEL_PATH).replace(/^\//, '');
-        const modelUrl = new URL(cleanPath, baseUrl()).toString();
+        const modelUrl = new URL(cleanPath, base).toString();
 
-        // 前端韧性增强：加载模型前，先通过二进制流验证资源是否存在
-        const check = await fetch(modelUrl);
-        if (!check.ok) throw new Error(`Model asset not found at ${modelUrl}`);
+        console.log('[Worker] Loading ONNX model from URL:', modelUrl);
 
-        console.log('[Worker] Loading ONNX model from verified URL:', modelUrl);
-        // 如果 fetch 成功，则尝试加载 session
-        return await ortInstance.InferenceSession.create(modelUrl, {
-          executionProviders: ['webgpu', 'wasm'],
-          graphOptimizationLevel: 'all',
-          enableMemPattern: true,
-          enableCpuMemArena: true
-        })
+        // Try to fetch as arrayBuffer first to ensure resource is readable and handle potential external data
+        const response = await fetch(modelUrl);
+        if (!response.ok) {
+          throw new Error(`Model fetch failed: ${response.status} ${response.statusText}`);
+        }
+        const modelBuffer = await response.arrayBuffer();
+
+        console.log('[Worker] Model buffer loaded, size:', modelBuffer.byteLength);
+
+        try {
+          return await ortInstance.InferenceSession.create(modelBuffer, {
+            executionProviders: ['webgpu', 'wasm'],
+            graphOptimizationLevel: 'all',
+            enableMemPattern: true,
+            enableCpuMemArena: true
+          })
+        } catch (sessionErr) {
+          console.warn('[Worker] Primary session creation (webgpu) failed, retrying with wasm only:', sessionErr);
+          return await ortInstance.InferenceSession.create(modelBuffer, {
+            executionProviders: ['wasm']
+          })
+        }
       } catch (err) {
         console.error('[Worker] ONNX Session creation failed:', err);
         return null
