@@ -178,7 +178,7 @@
 - Implemented `generate_internal_summary` with ChatML prompt templates and streaming inference logic.
 - Configured Llama-compatible architecture and embedded tokenizer source for robust local generation.
 
-## Commit 34 — Fix CI/CD build and node version
-- Updated GitHub Action to use Node.js 24 to resolve deprecation warnings.
-- Added debug logging to `release.yml` to help diagnose Tauri build failures.
-- Kept the native inference engine and model downloader logic intact.
+## Commit 35 — Harden Windows build with CMake
+- Integrated CMake installation into the GitHub Action workflow for Windows.
+- Ensured a robust C++ build environment for the `llm` native crate.
+- Optimized the release pipeline to handle complex Rust FFI dependencies.
