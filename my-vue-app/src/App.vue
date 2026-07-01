@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
-import { runLocalAiAnalysis } from './services/localInference'
+import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
 
@@ -17,6 +17,14 @@ const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
 const history = ref<AnalysisHistoryEntry[]>([])
 const activeHistoryEntryId = ref<string | null>(null)
+
+// Native Model 状态
+const modelReady = ref(true)
+const downloadWindowOpen = ref(false)
+const downloadProgress = ref(0)
+const downloadMeta = ref({ downloaded: '0MB', total: '0MB' })
+const isDownloading = ref(false)
+const lowMemoryWarning = ref(false)
 
 const inputId = 'name-input'
 const helpId = 'name-input-help'
@@ -186,9 +194,41 @@ function handleFeedback() {
   window.open(`${repoUrl}?title=${title}&body=${body}&labels=feedback`, '_blank')
 }
 
-onMounted(() => {
+async function handleActionDownload() {
+  isDownloading.value = true
+  try {
+    await startModelDownload((p) => {
+      downloadProgress.value = Math.round(p.progress)
+      downloadMeta.value = {
+        downloaded: (p.downloaded / 1024 / 1024).toFixed(1) + 'MB',
+        total: (p.total_size / 1024 / 1024).toFixed(1) + 'MB'
+      }
+    })
+    modelReady.value = true
+    downloadWindowOpen.value = false
+  } catch (e) {
+    alert('下载失败，请检查网络设置。')
+  } finally {
+    isDownloading.value = false
+  }
+}
+
+onMounted(async () => {
   history.value = readHistory()
   preloadDictionary().catch(() => {})
+
+  // Tauri 环境下的模型与内存检查
+  if ((window as any).__TAURI_INTERNALS__) {
+    const mem = await checkSystemMemory()
+    if (mem < 6) {
+      lowMemoryWarning.value = true
+    }
+    const hasModel = await checkNativeModel()
+    if (!hasModel) {
+      modelReady.value = false
+      downloadWindowOpen.value = true
+    }
+  }
 })
 </script>
 
@@ -198,6 +238,45 @@ onMounted(() => {
       <h1 class="title">汉字姓名解析</h1>
       <p class="subtitle">输入一个中文姓名，探索每个汉字背后的含义、文化内涵与历史渊源。</p>
     </header>
+
+    <!-- 模型下载引导层 -->
+    <div v-if="downloadWindowOpen" class="model-overlay">
+      <div class="model-modal">
+        <h2 class="modal-title">初始化智能引擎</h2>
+        <p class="modal-desc">为了提供更精准的姓名意境分析，我们需要下载一个轻量级的本地 AI 模型（约 300MB）。</p>
+
+        <div v-if="isDownloading" class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" :style="{ width: downloadProgress + '%' }"></div>
+          </div>
+          <div class="progress-text">
+            <span>正在载入资源... {{ downloadProgress }}%</span>
+            <span>{{ downloadMeta.downloaded }} / {{ downloadMeta.total }}</span>
+          </div>
+        </div>
+
+        <div v-if="lowMemoryWarning" class="mem-warning">
+          ⚠️ 检测到系统内存不足 6GB，AI 分析可能会比较缓慢或导致应用卡顿。
+        </div>
+
+        <div class="modal-actions">
+          <button
+            class="download-btn"
+            :disabled="isDownloading"
+            @click="handleActionDownload"
+          >
+            {{ isDownloading ? '正在下载...' : '立即下载并启动' }}
+          </button>
+          <button
+            v-if="!isDownloading"
+            class="skip-btn"
+            @click="downloadWindowOpen = false"
+          >
+            稍后提醒（使用基础模式）
+          </button>
+        </div>
+      </div>
+    </div>
 
     <main class="main" :aria-busy="isBusy">
       <form class="search-form" @submit.prevent="handleSubmit">
@@ -332,6 +411,109 @@ body {
 .app-header {
   text-align: center;
   margin-bottom: 2.5rem;
+}
+
+/* 模型下载浮层样式 */
+.model-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.model-modal {
+  background: #fff;
+  border-radius: 20px;
+  max-width: 500px;
+  width: 100%;
+  padding: 2.5rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-title {
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  margin-bottom: 1rem;
+}
+
+.modal-desc {
+  color: #666;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+}
+
+.progress-container {
+  margin-bottom: 2rem;
+}
+
+.progress-bar {
+  height: 8px;
+  background: #eee;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #8b2c2c;
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.mem-warning {
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  color: #795548;
+  padding: 0.75rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.download-btn {
+  padding: 1rem;
+  background: #8b2c2c;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.skip-btn {
+  background: none;
+  border: none;
+  color: #888;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.skip-btn:hover {
+  color: #555;
 }
 
 .title {

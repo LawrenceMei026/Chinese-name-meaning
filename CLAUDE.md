@@ -24,12 +24,12 @@ A webpage that analyzes Chinese names and explains their meanings with cultural 
 ## AI Infrastructure
 
 - **Local ONNX**: Performs fast 10-class "vibe" prediction (Scholarly, Grand, etc.) in a Web Worker.
-- **Ollama Integration**: Uses `name-expert:latest` (custom Qwen2.5) for literary summary generation.
-- **Network Requirements**: 
-  - WSL-to-Windows: Must use `OLLAMA_HOST=0.0.0.0` and `OLLAMA_ORIGINS="*"` on the server side.
-  - Client side uses `http://localhost:11434` to leverage Windows auto-port-forwarding.
-- **Dynamic Detection**: Analysis service automatically probes `/api/tags` to resolve exact model names and connectivity status.
-- **WASM Assets**: Essential `onnxruntime-web` binaries are bundled in `public/` for reliable offline/dev operation.
+- **Internal LLM (Native)**: 
+  - **Engine**: Powered by Rust `llm` crate (GGUF format).
+  - **Distribution**: EXE includes only the downloader. Model is pulled on first run to `%AppData%\Chinese Name Meaning Explorer\models`.
+  - **Fallback**: Automatic switch to deterministic rule engine if RAM < 6GB or loading fails.
+  - **Architecture**: Bridged via Tauri Commands (`download_model`, `generate_internal_summary`).
+- **Legacy Ollama**: Previous integration via `Racing Mode` (localhost/127.0.0.1) remains documented as a developer-mode fallback.
 
 ## Architecture Notes
 

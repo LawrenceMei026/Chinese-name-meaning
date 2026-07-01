@@ -1,6 +1,8 @@
 [package]
-name = "my-vue-app"
-version = "0.0.0"
+name = "chinese-name-meaning-explorer"
+version = "0.1.1"
+description = "A Chinese Name Meaning Explorer with internal LLM"
+authors = ["Qingyang Mei"]
 edition = "2021"
 
 [build-dependencies]
@@ -8,3 +10,17 @@ tauri-build = { version = "2", features = [] }
 
 [dependencies]
 tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+reqwest = { version = "0.11", features = ["stream"] }
+futures-util = "0.3"
+dirs = "5.0"
+llm = { git = "https://github.com/rustformers/llm.git", branch = "main" }
+sysinfo = "0.30"
+tauri-plugin-shell = "2.0.0"
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]

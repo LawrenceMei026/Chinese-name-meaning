@@ -1,3 +1,5 @@
+import { invoke } from '@tauri-apps/api/core';
+import { listen } from '@tauri-apps/api/event';
 import type { AnalyzedName, AiAnalysisResult, CharEntry, CulturalData } from '../types'
 
 type SerializableAnalyzedName = {
@@ -215,11 +217,50 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
   };
 
   try {
+    // 优先尝试 Tauri Native LLM
+    const isTauri = !!(window as any).__TAURI_INTERNALS__;
+    if (isTauri) {
+      try {
+        const hasModel = await invoke<boolean>('check_model_exists');
+        if (hasModel) {
+          const context = buildFeatureText(result);
+          const tauriSummary = await invoke<string>('generate_internal_summary', {
+            name: result.original,
+            context
+          });
+          return tauriSummary;
+        }
+      } catch (e) {
+        console.error('[Inference] Tauri native LLM failed:', e);
+      }
+    }
+
     // 竞速模式：只要有一个通了就用那个
     return await Promise.any(urls.map(url => fetchWithTimeout(url)));
   } catch (e) {
     console.error('[Ollama] All connection attempts failed. Possible CORS or WSL firewall issue.');
     return null;
+  }
+}
+
+export async function checkNativeModel() {
+  if (!(window as any).__TAURI_INTERNALS__) return true;
+  return await invoke<boolean>('check_model_exists');
+}
+
+export async function checkSystemMemory() {
+  if (!(window as any).__TAURI_INTERNALS__) return 16; // Web 模式默认返回足够
+  return await invoke<number>('check_memory');
+}
+
+export async function startModelDownload(onProgress: (p: { progress: number; total_size: u64; downloaded: u64 }) => void) {
+  const unlisten = await listen<{ progress: number; total_size: u64; downloaded: u64 }>('download-progress', (event) => {
+    onProgress(event.payload);
+  });
+  try {
+    return await invoke<string>('download_model');
+  } finally {
+    unlisten();
   }
 }
 

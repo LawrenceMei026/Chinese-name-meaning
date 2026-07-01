@@ -165,7 +165,14 @@
 - Configured OLLAMA_HOST=0.0.0.0 and OLLAMA_ORIGINS="*" for cross-platform browser connectivity.
 - Created NameExpert.modelfile to define AI expert persona with poetic Chinese output traits.
 
+## Commit 32 — Native LLM Architecture (EXE as Downloader)
+- Implemented a Rust-based native AI backend in `src-tauri` using the `llm` crate for zero-dependency inference.
+- Developed an "EXE as Downloader" strategy in `main.rs` that pulls model weights to `%AppData%` on demand.
+- Added a splash screen modal in `App.vue` with real-time download progress and hardware RAM pre-checks (>6GB).
+- Bridged Tauri commands in `localInference.ts` to prioritize native inference with automatic fallback to Ollama/Rule-engine.
+- Updated `tauri.conf.json` to allow necessary protocol connections and local resource access.
+
 ## Current checkpoint
-- AI analysis: Fast ONNX features + Deep Qwen summaries (via specialized NameExpert model).
-- Local environment: Fully patched Ollama with custom expert persona.
-- Production: CI/CD tags (v0.1.1) triggered with hardened asset loader.
+- Architecture: Transitioned from external Ollama dependency to high-performance Native LLM (Rust).
+- UI: Added model manager splash screen and system memory diagnostics.
+- Model: Supports Qwen 0.5B/1.5B (GGUF) via local download path.
