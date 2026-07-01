@@ -172,7 +172,13 @@
 - Bridged Tauri commands in `localInference.ts` to prioritize native inference with automatic fallback to Ollama/Rule-engine.
 - Updated `tauri.conf.json` to allow necessary protocol connections and local resource access.
 
+## Commit 33 — Deep Integration of llm Crate for Native Inference
+- Fully implemented the `llm` crate initialization and inference engine in `main.rs`.
+- Added `AppState` to manage model lifecycle, supporting on-demand loading of Qwen2.5 GGUF weights.
+- Implemented `generate_internal_summary` with ChatML prompt templates and streaming inference logic.
+- Configured Llama-compatible architecture and embedded tokenizer source for robust local generation.
+
 ## Current checkpoint
-- Architecture: Transitioned from external Ollama dependency to high-performance Native LLM (Rust).
-- UI: Added model manager splash screen and system memory diagnostics.
-- Model: Supports Qwen 0.5B/1.5B (GGUF) via local download path.
+- AI Engine: Fully functional Native Rust inference (zero external dependencies).
+- Model: Optimized for Qwen2.5-0.5B-Instruct (GGUF).
+- UI: Seamless integration between Vue frontend and Rust AI backend.
