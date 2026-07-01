@@ -236,7 +236,7 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promi
     }
 
     // 竞速模式：只要有一个通了就用那个
-    return await Promise.any(urls.map(url => fetchWithTimeout(url)));
+    return await (Promise as any).any(urls.map(url => fetchWithTimeout(url)));
   } catch (e) {
     console.error('[Ollama] All connection attempts failed. Possible CORS or WSL firewall issue.');
     return null;
