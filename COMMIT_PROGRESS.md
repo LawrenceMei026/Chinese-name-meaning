@@ -178,7 +178,7 @@
 - Implemented `generate_internal_summary` with ChatML prompt templates and streaming inference logic.
 - Configured Llama-compatible architecture and embedded tokenizer source for robust local generation.
 
-## Current checkpoint
-- AI Engine: Fully functional Native Rust inference (zero external dependencies).
-- Model: Optimized for Qwen2.5-0.5B-Instruct (GGUF).
-- UI: Seamless integration between Vue frontend and Rust AI backend.
+## Commit 34 — Fix CI/CD build and node version
+- Updated GitHub Action to use Node.js 24 to resolve deprecation warnings.
+- Added debug logging to `release.yml` to help diagnose Tauri build failures.
+- Kept the native inference engine and model downloader logic intact.

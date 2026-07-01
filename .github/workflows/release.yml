@@ -21,7 +21,7 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
 
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
@@ -34,6 +34,9 @@ jobs:
 
       - name: install frontend dependencies
         run: cd my-vue-app && npm install
+
+      - name: Debug Cargo.toml
+        run: cat my-vue-app/src-tauri/Cargo.toml
 
       - uses: tauri-apps/tauri-action@v0
         env:
