@@ -253,8 +253,8 @@ export async function checkSystemMemory() {
   return await invoke<number>('check_memory');
 }
 
-export async function startModelDownload(onProgress: (p: { progress: number; total_size: u64; downloaded: u64 }) => void) {
-  const unlisten = await listen<{ progress: number; total_size: u64; downloaded: u64 }>('download-progress', (event) => {
+export async function startModelDownload(onProgress: (p: { progress: number; total_size: number; downloaded: number }) => void) {
+  const unlisten = await listen<{ progress: number; total_size: number; downloaded: number }>('download-progress', (event: any) => {
     onProgress(event.payload);
   });
   try {
