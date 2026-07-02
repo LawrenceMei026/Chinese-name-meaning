@@ -178,7 +178,7 @@
 - Implemented `generate_internal_summary` with ChatML prompt templates and streaming inference logic.
 - Configured Llama-compatible architecture and embedded tokenizer source for robust local generation.
 
-## Commit 35 — Harden Windows build with CMake
-- Integrated CMake installation into the GitHub Action workflow for Windows.
-- Ensured a robust C++ build environment for the `llm` native crate.
-- Optimized the release pipeline to handle complex Rust FFI dependencies.
+## Commit 38 — Finalize documentation and CI readiness
+- Synchronized `CLAUDE.md` with the full Native LLM and CMake-based CI architecture.
+- Summarized the transition to zero-dependency Rust inference and the "EXE as Downloader" distribution model.
+- Prepared the repo for stable release verification.

@@ -310,3 +310,5 @@ srv  update_slots: all slots are idle
 [GIN] 2026/06/29 - 17:36:14 | 200 | 39.964697391s |             ::1 | POST     "/api/generate"
 time=2026-06-30T11:03:42.742+08:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h43m20.27494327s consecutive_failures=0
 time=2026-06-30T20:10:41.973+08:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=4h45m11.830542147s consecutive_failures=0
+time=2026-07-01T15:43:18.280+08:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h37m32.906861474s consecutive_failures=0
+time=2026-07-02T08:36:55.615+08:00 level=INFO source=model_recommendations.go:177 msg="model recommendations cache sleep scheduled" wait=3h50m38.252259178s consecutive_failures=0

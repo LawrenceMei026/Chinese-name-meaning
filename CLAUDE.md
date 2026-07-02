@@ -25,8 +25,9 @@ A webpage that analyzes Chinese names and explains their meanings with cultural 
 
 - **Local ONNX**: Performs fast 10-class "vibe" prediction (Scholarly, Grand, etc.) in a Web Worker.
 - **Internal LLM (Native)**: 
-  - **Engine**: Powered by Rust `llm` crate (GGUF format).
+  - **Engine**: Powered by Rust `llm` crate (GGUF format) with ChatML templates.
   - **Distribution**: EXE includes only the downloader. Model is pulled on first run to `%AppData%\Chinese Name Meaning Explorer\models`.
+  - **Inference**: High-performance, zero-dependency local generation for poetic Chinese analysis.
   - **Fallback**: Automatic switch to deterministic rule engine if RAM < 6GB or loading fails.
   - **Architecture**: Bridged via Tauri Commands (`download_model`, `generate_internal_summary`).
 - **Legacy Ollama**: Previous integration via `Racing Mode` (localhost/127.0.0.1) remains documented as a developer-mode fallback.
@@ -57,7 +58,7 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 
 ## CI/CD 
 
-- **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`.
+- **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`. Requires Node.js 24 and CMake for Windows LLM builds.
 - **GitHub Connection**: Repository is connected to GitHub (`LawrenceMei026/Chinese-name-meaning`). Pushes to `main` and tags are handled via authenticated Git flow.
 - **Current Version**: `v0.1.1` (Current release tag triggering the active build).
 - **Trigger**: Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push origin v1.0.0`).
