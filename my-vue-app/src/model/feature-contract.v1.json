@@ -1,0 +1,57 @@
+{
+  "version": "name-features-v1",
+  "size": 16,
+  "characterScope": "given",
+  "features": [
+    "name_length_quarters",
+    "reserved_zero",
+    "gender_bias",
+    "element_diversity",
+    "literary_ratio",
+    "metal_ratio",
+    "wood_ratio",
+    "water_ratio",
+    "fire_ratio",
+    "earth_ratio",
+    "open_vowel_ratio",
+    "tone_class_change_ratio",
+    "nature_score",
+    "human_virtue_score",
+    "abstract_strength_score",
+    "strong_beauty_score"
+  ],
+  "elements": ["水", "木", "火", "金", "土"],
+  "radicals": {
+    "nature": ["木", "氵", "山"],
+    "human": ["亻", "纟", "文"],
+    "abstract": ["忄", "力", "心"]
+  },
+  "semantics": {
+    "beauty": ["美", "秀", "丽", "华", "雅"],
+    "strength": ["强", "刚", "劲", "力", "伟"],
+    "virtue": ["德", "贤", "善", "诚", "礼"],
+    "nature": ["山", "川", "云", "雨", "林"]
+  },
+  "phonetics": {
+    "vowels": ["a", "e", "o", "i", "u", "ü"],
+    "openVowels": ["a", "e", "o"],
+    "strongInitials": ["b", "p", "d", "k", "g", "t"],
+    "pingTones": [1, 2],
+    "toneVowelMap": {
+      "ā": "a", "á": "a", "ǎ": "a", "à": "a",
+      "ē": "e", "é": "e", "ě": "e", "è": "e",
+      "ō": "o", "ó": "o", "ǒ": "o", "ò": "o",
+      "ī": "i", "í": "i", "ǐ": "i", "ì": "i",
+      "ū": "u", "ú": "u", "ǔ": "u", "ù": "u",
+      "ǖ": "ü", "ǘ": "ü", "ǚ": "ü", "ǜ": "ü"
+    }
+  },
+  "weights": {
+    "lengthDivisor": 4,
+    "elementDiversityDivisor": 5,
+    "radical": 0.5,
+    "semantic": 0.5,
+    "strongInitial": 0.4,
+    "beauty": 0.6
+  }
+}

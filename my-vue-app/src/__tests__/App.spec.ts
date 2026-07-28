@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import App from '../App.vue'
+import packageJson from '../../package.json'
 import type { AnalyzedName, AiAnalysisResult } from '../types'
 
 vi.mock('../services/nameAnalyzer', () => ({
@@ -44,10 +45,21 @@ describe('App', () => {
 
     expect(wrapper.text()).toContain('汉字姓名解析')
     expect(wrapper.text()).toContain('输入一个中文姓名，探索每个汉字背后的含义、文化内涵与历史渊源。')
-    expect(wrapper.find('label.sr-only').text()).toBe('请输入中文姓名或拼音')
-    expect(wrapper.find('p.field-help').text()).toContain('支持 2-3 个汉字姓名')
+    expect(wrapper.find('label.sr-only').text()).toBe('请输入中文姓名')
+    expect(wrapper.find('p.field-help').text()).toContain('支持 2-4 个汉字姓名')
     expect(wrapper.find('section.empty-state').text()).toContain('等待解析')
     expect(wrapper.find('input#name-input').attributes('aria-invalid')).toBe('false')
+  })
+
+  it('uses the package version in feedback diagnostics', async () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const wrapper = mount(App)
+
+    await wrapper.find('button.feedback-link').trigger('click')
+
+    const feedbackUrl = new URL(String(openSpy.mock.calls[0]?.[0]))
+    expect(feedbackUrl.searchParams.get('body')).toContain(`- 应用版本: ${packageJson.version}`)
+    openSpy.mockRestore()
   })
 
   it('hydrates history from localStorage and renders entries', async () => {

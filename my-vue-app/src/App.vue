@@ -31,11 +31,6 @@ const helpId = 'name-input-help'
 const errorId = 'name-input-error'
 const isBusy = computed(() => loading.value || aiLoading.value)
 
-function isValidChineseName(name: string) {
-  // 严格匹配 2-4 位纯汉字
-  return /^[一-龥]{2,4}$/.test(name)
-}
-
 function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
   if (!value || typeof value !== 'object') return false
   const entry = value as AnalysisHistoryEntry
@@ -185,7 +180,7 @@ function handleFeedback() {
   const body = encodeURIComponent(
     `## 反馈内容\n[请描述您遇到的问题或建议]\n\n` +
     `## 环境信息\n` +
-    `- 应用版本: 1.0.0\n` +
+    `- 应用版本: ${__APP_VERSION__}\n` +
     `- 运行平台: ${envInfo.isTauri ? 'Tauri Desktop' : 'Web Browser'}\n` +
     `- 操作系统: ${envInfo.platform}\n` +
     `- 用户代理: ${envInfo.userAgent}\n`

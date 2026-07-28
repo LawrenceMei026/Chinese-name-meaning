@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
-import type { AnalyzedName, AiAnalysisResult, CharEntry, CulturalData } from '../types'
+import type { AnalyzedName, AiAnalysisResult } from '../types'
 
 type SerializableAnalyzedName = {
   original: string
@@ -11,6 +11,7 @@ type SerializableAnalyzedName = {
       pinyin: string
       tones: string
       definition_cn: string
+      radical?: string
     } | null
     cultural: {
       element?: string
@@ -36,11 +37,9 @@ type WorkerResponse = {
 }
 
 const MODEL_VERSION = 'onnx-v1'
-const DEFAULT_LABELS = ['文雅', '大气', '阳刚', '柔和', '古典', '现代']
 
 let workerPromise: Promise<Worker | null> | null = null
 let nextRequestId = 1
-const pendingRequests = new Map<number, (labels: string[] | null) => void>()
 
 function toSerializableResult(result: AnalyzedName): SerializableAnalyzedName {
   return {
@@ -53,6 +52,7 @@ function toSerializableResult(result: AnalyzedName): SerializableAnalyzedName {
             pinyin: char.entry.pinyin,
             tones: char.entry.tones,
             definition_cn: char.entry.definition_cn,
+            radical: char.entry.radical,
           }
         : null,
       cultural: char.cultural

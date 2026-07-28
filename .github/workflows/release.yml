@@ -23,6 +23,11 @@ jobs:
         with:
           node-version: 24
 
+      - name: setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
 
@@ -39,17 +44,25 @@ jobs:
           sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libayatana-appindicator3-dev librsvg2-dev
 
       - name: install frontend dependencies
-        run: cd my-vue-app && npm install
+        working-directory: my-vue-app
+        run: npm ci
 
-      - name: Debug Cargo.toml
-        run: cat my-vue-app/src-tauri/Cargo.toml
+      - name: verify release version
+        working-directory: my-vue-app
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: npm run check:version -- "$env:RELEASE_TAG"
+
+      - name: verify feature contract
+        working-directory: my-vue-app
+        run: npm run test:features
 
       - uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tagName: v__VERSION__ # 自动使用 package.json 中的版本号
-          releaseName: "Chinese Name Meaning v__VERSION__"
+          tagName: ${{ github.ref_name }}
+          releaseName: "Chinese Name Meaning ${{ github.ref_name }}"
           releaseBody: "See the assets below for the installable binaries."
           releaseDraft: true
           prerelease: false

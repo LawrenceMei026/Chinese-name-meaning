@@ -4,9 +4,11 @@ import os
 import torch
 import torch.nn as nn
 import torch.optim as optim
-from torch.utils.data import Dataset, DataLoader
 import numpy as np
-import re
+
+from feature_extractor import FEATURE_CONTRACT, FEATURE_SIZE, build_feature_vector as extract_feature_vector
+
+RANDOM_SEED = 20260728
 
 # 扩展后的 10 个差异化标签
 LABELS = [
@@ -16,7 +18,7 @@ LABELS = [
 ]
 
 # 资源路径
-BASE_DIR = "/home/wtggfv/projects/chinese-name-meaning/my-vue-app"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CHARS_PATH = os.path.join(BASE_DIR, "public/data/chars.json")
 CULTURAL_PATH = os.path.join(BASE_DIR, "src/data/cultural.json")
 
@@ -30,94 +32,16 @@ def load_data_files():
 chars_dict, cultural_dict = load_data_files()
 
 def build_feature_vector(name_chars):
-    # 与 localInference.worker.ts 的优化逻辑同步
-    counts = {
-        'water': 0, 'wood': 0, 'fire': 0, 'metal': 0, 'earth': 0,
-        'masculine': 0, 'feminine': 0,
-        'literary': 0,
-        'natureRadical': 0,
-        'humanRadical': 0,
-        'abstractRadical': 0
-    }
-
-    total_vowels = 0
-    open_vowels = 0
-    tone_changes = 0
-    last_tone = -1
-    total_freq = 0
-    strong_initials = 0
-
-    # 语义得分
-    semantic_scores = {'beauty': 0, 'strength': 0, 'virtue': 0, 'nature': 0}
-
-    for char in name_chars:
-        entry = chars_dict.get(char, {})
-        cultural = cultural_dict.get(char, {})
-
-        if cultural.get('element') == '水': counts['water'] += 1
-        if cultural.get('element') == '木': counts['wood'] += 1
-        if cultural.get('element') == '火': counts['fire'] += 1
-        if cultural.get('element') == '金': counts['metal'] += 1
-        if cultural.get('element') == '土': counts['earth'] += 1
-
-        gender = cultural.get('genderBias')
-        if gender == 'masculine': counts['masculine'] += 1
-        elif gender == 'feminine': counts['feminine'] += 1
-        if cultural.get('literaryRef'): counts['literary'] += 1
-
-        radical = entry.get('radical') or cultural.get('localGloss', '')
-        if any(r in radical for r in '木氵山'): counts['natureRadical'] += 1
-        if any(r in radical for r in '亻纟文'): counts['humanRadical'] += 1
-        if any(r in radical for r in '忄力心'): counts['abstractRadical'] += 1
-
-        # 语义扫描
-        def_cn = entry.get('definition_cn', '')
-        if any(r in def_cn for r in '美秀丽华雅'): semantic_scores['beauty'] += 1
-        if any(r in def_cn for r in '强刚劲力伟'): semantic_scores['strength'] += 1
-        if any(r in def_cn for r in '德贤善诚礼'): semantic_scores['virtue'] += 1
-        if any(r in def_cn for r in '山川云雨林'): semantic_scores['nature'] += 1
-
-        pinyin = entry.get('pinyin', '').lower()
-        # 塞音特征
-        initials = pinyin.split('a')[0].split('e')[0].split('i')[0].split('o')[0].split('u')[0].split('ü')[0]
-        if any(r in initials for r in 'bpdkgt'): strong_initials += 1
-
-        vowels = [c for c in pinyin if c in 'aeoiuü']
-        total_vowels += len(vowels)
-        open_vowels += sum(1 for v in vowels if v in 'aeo')
-
-        tones_str = str(entry.get('tones', '0'))
-        current_tone = int(tones_str[0]) if tones_str and tones_str[0].isdigit() else 0
-        if last_tone != -1 and current_tone > 0:
-            last_pz = 0 if last_tone <= 2 else 1
-            curr_pz = 0 if current_tone <= 2 else 1
-            if last_pz != curr_pz: tone_changes += 1
-        last_tone = current_tone
-        total_freq += entry.get('freq', 5)
-
-    length = len(name_chars) or 1
-    features = np.zeros(16, dtype=np.float32)
-
-    features[0] = length / 4
-    features[1] = 0
-    features[2] = (counts['masculine'] - counts['feminine']) / length
-    features[3] = sum(1 for k in ['water', 'wood', 'fire', 'metal', 'earth'] if counts[k] > 0) / 5
-    features[4] = counts['literary'] / length
-    features[5] = counts['metal'] / length
-    features[6] = counts['wood'] / length
-    features[7] = counts['water'] / length
-    features[8] = counts['fire'] / length
-    features[9] = counts['earth'] / length
-    features[10] = open_vowels / total_vowels if total_vowels > 0 else 0
-    features[11] = tone_changes / (length - 1) if length > 1 else 0
-
-    # 融合特征
-    features[12] = (counts['natureRadical'] / length + (semantic_scores['nature'] / length)) / 2
-    features[13] = (counts['humanRadical'] / length + (semantic_scores['virtue'] / length)) / 2
-    features[14] = (counts['abstractRadical'] / length + (semantic_scores['strength'] / length)) / 2
-    features[15] = (strong_initials / length) * 0.4 + (semantic_scores['beauty'] / length) * 0.6
-
-    return features
+    chars = [
+        {
+            'char': char,
+            'role': 'given',
+            'entry': chars_dict.get(char),
+            'cultural': cultural_dict.get(char),
+        }
+        for char in name_chars
+    ]
+    return np.asarray(extract_feature_vector(chars), dtype=np.float32)
 
 # 针对 10 个标签的语料池
 POOLS = {
@@ -160,19 +84,23 @@ class NameClassifier(nn.Module):
     def __init__(self):
         super(NameClassifier, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(16, 64),
+            nn.Linear(FEATURE_SIZE, 64),
             nn.BatchNorm1d(64),
             nn.ReLU(),
             nn.Dropout(0.1),
             nn.Linear(64, 32),
             nn.ReLU(),
-            nn.Linear(32, 10), # 输出 10 维
+            nn.Linear(32, len(LABELS)),
             nn.Sigmoid()
         )
     def forward(self, x):
         return self.net(x)
 
 def train():
+    random.seed(RANDOM_SEED)
+    np.random.seed(RANDOM_SEED)
+    torch.manual_seed(RANDOM_SEED)
+
     raw_X, raw_y = generate_dataset(3000)
     indices = np.arange(len(raw_X))
     np.random.shuffle(indices)
@@ -199,17 +127,22 @@ def train():
 
     onnx_path = os.path.join(BASE_DIR, "public/models/classifier.onnx")
     model.eval()
-    dummy_input = torch.randn(1, 16)
+    dummy_input = torch.randn(1, FEATURE_SIZE)
     torch.onnx.export(
         model, dummy_input, onnx_path,
         export_params=True, opset_version=12,
         input_names=['input'], output_names=['logits'],
-        dynamic_axes={'input': {0: 'batch_size'}, 'logits': {0: 'batch_size'}}
+        dynamic_axes={'input': {0: 'batch_size'}, 'logits': {0: 'batch_size'}},
+        dynamo=False,
     )
 
     # 强制将权重内联到单一 ONNX 文件中
     import onnx
     onnx_model = onnx.load(onnx_path)
+    del onnx_model.metadata_props[:]
+    metadata = onnx_model.metadata_props.add()
+    metadata.key = 'feature_contract_version'
+    metadata.value = FEATURE_CONTRACT['version']
     onnx.save_model(onnx_model, onnx_path, save_as_external_data=False)
 
     print(f"Model exported to {onnx_path} with inlined weights")

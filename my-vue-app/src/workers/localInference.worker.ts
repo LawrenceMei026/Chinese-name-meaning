@@ -1,5 +1,6 @@
 import type { AnalyzedName } from '../types'
 import * as ort from 'onnxruntime-web'
+import { FEATURE_CONTRACT, buildFeatureVector } from '../model/nameFeatures'
 
 type OrtRuntime = typeof ort
 
@@ -30,6 +31,7 @@ type ClassifierManifest = {
   inputName?: string
   outputName?: string
   featureSize?: number
+  featureContractVersion?: string
   labels?: string[]
 }
 
@@ -69,10 +71,6 @@ function baseUrl() {
   return new URL(base, self.location.origin).toString();
 }
 
-function assetUrl(path: string) {
-  return new URL(path, baseUrl()).toString()
-}
-
 async function loadOrtRuntime(): Promise<OrtRuntime | null> {
   return ort as any
 }
@@ -96,8 +94,6 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
       ];
 
       let res: Response | null = null;
-      let usedUrl = '';
-
       for (const url of urls) {
         try {
           console.log('[Worker] Trying manifest URL:', url);
@@ -105,7 +101,6 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
           const attempt = await fetch(url, { mode: 'cors' });
           if (attempt.ok) {
             res = attempt;
-            usedUrl = url;
             break;
           }
         } catch (e) {
@@ -132,6 +127,7 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
           inputName: typeof manifest.inputName === 'string' && manifest.inputName.trim() ? manifest.inputName : 'input',
           outputName: typeof manifest.outputName === 'string' && manifest.outputName.trim() ? manifest.outputName : 'logits',
           featureSize: Number.isFinite(manifest.featureSize) && (manifest.featureSize ?? 0) > 0 ? Math.floor(manifest.featureSize ?? 0) : 16,
+          featureContractVersion: typeof manifest.featureContractVersion === 'string' ? manifest.featureContractVersion : undefined,
           labels: normaliseLabels(manifest.labels),
         }
       } catch (err) {
@@ -227,138 +223,6 @@ async function loadSession(): Promise<SessionLike | null> {
   return cachedSession
 }
 
-function buildFeatureVector(result: AnalyzedName, featureSize: number) {
-  const counts = {
-    water: 0, wood: 0, fire: 0, metal: 0, earth: 0,
-    masculine: 0, feminine: 0,
-    literary: 0,
-    natureRadical: 0,
-    humanRadical: 0,
-    abstractRadical: 0
-  }
-
-  let totalVowels = 0
-  let openVowels = 0
-  let toneChanges = 0
-  let lastTone = -1
-  let totalFreq = 0
-
-  for (const char of result.chars) {
-    const cultural = char.cultural
-    const entry = char.entry
-
-    if (cultural?.element === '水') counts.water += 1
-    if (cultural?.element === '木') counts.wood += 1
-    if (cultural?.element === '火') counts.fire += 1
-    if (cultural?.element === '金') counts.metal += 1
-    if (cultural?.element === '土') counts.earth += 1
-    if (cultural?.genderBias === 'masculine') counts.masculine += 1
-    if (cultural?.genderBias === 'feminine') counts.feminine += 1
-    if (cultural?.literaryRef) counts.literary += 1
-
-    const radical = entry?.radical || cultural?.localGloss || ''
-    if (/[木氵山]/.test(radical)) counts.natureRadical += 1
-    if (/[亻纟文]/.test(radical)) counts.humanRadical += 1
-    if (/[忄力心]/.test(radical)) counts.abstractRadical += 1
-  }
-
-  const len = result.chars.length || 1
-  const features = new Float32Array(featureSize)
-
-  // 用于在循环中暂存特征
-  const tempFeatures = {
-    strongInitials: 0
-  }
-
-  for (const char of result.chars) {
-    const cultural = char.cultural
-    const entry = char.entry
-
-    if (cultural?.element === '水') counts.water += 1
-    if (cultural?.element === '木') counts.wood += 1
-    if (cultural?.element === '火') counts.fire += 1
-    if (cultural?.element === '金') counts.metal += 1
-    if (cultural?.element === '土') counts.earth += 1
-    if (cultural?.genderBias === 'masculine') counts.masculine += 1
-    if (cultural?.genderBias === 'feminine') counts.feminine += 1
-    if (cultural?.literaryRef) counts.literary += 1
-
-    const radical = entry?.radical || cultural?.localGloss || ''
-    if (/[木氵山]/.test(radical)) counts.natureRadical += 1
-    if (/[亻纟文]/.test(radical)) counts.humanRadical += 1
-    if (/[忄力心]/.test(radical)) counts.abstractRadical += 1
-
-    // 语义分析：对释义进行关键词扫描，增强字义贴合度
-    const definition = entry?.definition_cn || ''
-    const semanticWeights = {
-      beauty: (definition.match(/[美秀丽华雅]/g) || []).length,
-      strength: (definition.match(/[强刚劲力伟]/g) || []).length,
-      virtue: (definition.match(/[德贤善诚礼]/g) || []).length,
-      nature: (definition.match(/[山川云雨林]/g) || []).length,
-    }
-
-    const pinyin = entry?.pinyin.toLowerCase() || ''
-    // 识别声母特征 (b, p, d, t, k, g 等塞音通常给人较强硬、响亮的感觉)
-    const initials = pinyin.split(/[aeoiuü]/)[0] || ''
-    if (/[bpdkgt]/.test(initials)) tempFeatures.strongInitials += 1
-
-    const vowels = pinyin.match(/[aeoiuü]/g) || []
-    totalVowels += vowels.length
-    openVowels += vowels.filter(v => /[aeo]/.test(v)).length
-
-    const currentTone = parseInt(entry?.tones || '0')
-    if (lastTone !== -1 && currentTone > 0) {
-      const lastPingZe = lastTone <= 2 ? 0 : 1
-      const currentPingZe = currentTone <= 2 ? 0 : 1
-      if (lastPingZe !== currentPingZe) toneChanges += 1
-    }
-    lastTone = currentTone
-    totalFreq += entry?.freq || 5
-  }
-
-  features[0] = len / 4
-  features[1] = result.chars.filter(c => c.role === 'surname').length > 1 ? 1 : 0
-  features[2] = (counts.masculine - counts.feminine) / len
-
-  let uniqueElements = 0
-  if (counts.water > 0) uniqueElements++
-  if (counts.wood > 0) uniqueElements++
-  if (counts.fire > 0) uniqueElements++
-  if (counts.metal > 0) uniqueElements++
-  if (counts.earth > 0) uniqueElements++
-  features[3] = uniqueElements / 5
-
-  features[4] = counts.literary / len
-  features[5] = counts.metal / len
-  features[6] = counts.wood / len
-  features[7] = counts.water / len
-  features[8] = counts.fire / len
-  features[9] = counts.earth / len
-  features[10] = totalVowels > 0 ? openVowels / totalVowels : 0
-  features[11] = len > 1 ? toneChanges / (len - 1) : 0
-  // 集成语义得分到特征向量中，使输出更贴合汉字释义
-  const semanticScores = {
-    beauty: 0, strength: 0, virtue: 0, nature: 0
-  }
-
-  for (const char of result.chars) {
-    const entry = char.entry
-    const def = entry?.definition_cn || ''
-    if (/[美秀丽华雅]/.test(def)) semanticScores.beauty += 1
-    if (/[强刚劲力伟]/.test(def)) semanticScores.strength += 1
-    if (/[德贤善诚礼]/.test(def)) semanticScores.virtue += 1
-    if (/[山川云雨林]/.test(def)) semanticScores.nature += 1
-  }
-
-  features[12] = (counts.natureRadical / len + (semanticScores.nature / len)) / 2
-  features[13] = (counts.humanRadical / len + (semanticScores.virtue / len)) / 2
-  features[14] = (counts.abstractRadical / len + (semanticScores.strength / len)) / 2
-  // 将审美得分与塞音强度结合
-  features[15] = (tempFeatures.strongInitials / len) * 0.4 + (semanticScores.beauty / len) * 0.6
-
-  return features
-}
-
 function getOutputTensor(outputs: Record<string, { data: ArrayLike<number> }>, outputName?: string) {
   if (outputName && outputs[outputName]) return outputs[outputName]!
   const first = Object.values(outputs)[0]
@@ -379,8 +243,19 @@ async function runClassifier(result: AnalyzedName) {
   const ortInstance = await loadOrtRuntime()
   if (!manifest || !session || !ortInstance) return null
 
-  const featureSize = manifest.featureSize ?? 16
-  const features = buildFeatureVector(result, featureSize)
+  if (manifest.featureSize !== FEATURE_CONTRACT.size
+    || manifest.featureContractVersion !== FEATURE_CONTRACT.version) {
+    console.error('[Worker] Model feature contract mismatch', {
+      expectedVersion: FEATURE_CONTRACT.version,
+      actualVersion: manifest.featureContractVersion,
+      expectedSize: FEATURE_CONTRACT.size,
+      actualSize: manifest.featureSize,
+    })
+    return null
+  }
+
+  const featureSize = FEATURE_CONTRACT.size
+  const features = buildFeatureVector(result.chars)
   const inputName = manifest.inputName ?? session.inputNames[0] ?? 'input'
   const outputName = manifest.outputName ?? session.outputNames[0]
 

@@ -1,0 +1,67 @@
+{
+  "contractVersion": "name-features-v1",
+  "cases": [
+    {
+      "name": "balanced categories",
+      "chars": [
+        {
+          "char": "甲",
+          "role": "surname",
+          "entry": { "pinyin": "bā", "tones": "1", "definition_cn": "美山", "radical": "木" },
+          "cultural": { "element": "木", "genderBias": "masculine", "literaryRef": "典故" }
+        },
+        {
+          "char": "乙",
+          "role": "given",
+          "entry": { "pinyin": "dè", "tones": "4", "definition_cn": "德", "radical": "亻" },
+          "cultural": { "element": "水", "genderBias": "feminine" }
+        },
+        {
+          "char": "丙",
+          "role": "given",
+          "entry": { "pinyin": "lǐ", "tones": "2", "definition_cn": "强", "radical": "忄" },
+          "cultural": { "element": "金", "genderBias": "neutral", "literaryRef": "典故" }
+        }
+      ],
+      "expected": [
+        0.5, 0, -0.5, 0.4, 0.5, 0.5, 0, 0.5,
+        0, 0, 0.5, 1, 0, 0.5, 0.5, 0.2
+      ]
+    },
+    {
+      "name": "single character fallback radical",
+      "chars": [
+        {
+          "char": "丁",
+          "role": "given",
+          "entry": { "pinyin": "guang", "tones": "3", "definition_cn": "美强德山" },
+          "cultural": {
+            "element": "火",
+            "genderBias": "masculine",
+            "literaryRef": "典故",
+            "localGloss": "心"
+          }
+        }
+      ],
+      "expected": [0.25, 0, 1, 0.2, 1, 0, 0, 0, 1, 0, 0.5, 0, 0.5, 0.5, 1, 1]
+    },
+    {
+      "name": "unknown tones do not create transitions",
+      "chars": [
+        {
+          "char": "戊",
+          "role": "given",
+          "entry": { "pinyin": "ān", "tones": "0", "definition_cn": "" },
+          "cultural": null
+        },
+        {
+          "char": "己",
+          "role": "given",
+          "entry": { "pinyin": "yí", "tones": "2", "definition_cn": "" },
+          "cultural": null
+        }
+      ],
+      "expected": [0.5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.5, 0, 0, 0, 0, 0]
+    }
+  ]
+}

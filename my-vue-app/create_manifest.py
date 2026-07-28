@@ -1,27 +1,25 @@
 
 import json
-import os
+from pathlib import Path
 
-# Configuration
-MODEL_DIR = '/home/wtggfv/projects/chinese-name-meaning/my-vue-app/public/models'
-MANIFEST_PATH = os.path.join(MODEL_DIR, 'manifest.json')
-LABELS = ['文雅', '大气', '阳刚', '柔和', '古典', '现代']
-INPUT_SIZE = 16
+from feature_extractor import FEATURE_CONTRACT, FEATURE_SIZE
 
-# Ensure output directory exists
-os.makedirs(MODEL_DIR, exist_ok=True)
+MODEL_DIR = Path(__file__).resolve().parent / 'public/models'
+MANIFEST_PATH = MODEL_DIR / 'manifest.json'
+LABELS = ['书卷', '宏伟', '豪迈', '恬静', '典雅', '新颖', '灵动', '坚毅', '自然', '深邃']
 
 def create_manifest():
-    # Create manifest
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
     manifest = {
         "version": "onnx-v1",
         "modelPath": "/models/classifier.onnx",
         "inputName": "input",
         "outputName": "logits",
-        "featureSize": INPUT_SIZE,
+        "featureSize": FEATURE_SIZE,
+        "featureContractVersion": FEATURE_CONTRACT["version"],
         "labels": LABELS
     }
-    with open(MANIFEST_PATH, 'w', encoding='utf-8') as f:
+    with MANIFEST_PATH.open('w', encoding='utf-8') as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)
     print(f"Manifest created: {MANIFEST_PATH}")
 

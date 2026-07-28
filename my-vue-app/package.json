@@ -5,9 +5,12 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "run-p type-check \"build-only {@}\" --",
+    "build": "npm run check:version && run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
+    "test:features": "node scripts/test-python-features.mjs && vitest --run src/__tests__/nameFeatures.spec.ts",
+    "check:version": "node scripts/check-version.mjs",
+    "version": "node scripts/sync-version.mjs && npm run check:version",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
