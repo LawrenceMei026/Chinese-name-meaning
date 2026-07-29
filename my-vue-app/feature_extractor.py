@@ -9,6 +9,7 @@ with CONTRACT_PATH.open("r", encoding="utf-8") as contract_file:
     FEATURE_CONTRACT = json.load(contract_file)
 
 FEATURE_SIZE = FEATURE_CONTRACT["size"]
+FEATURE_LABELS = FEATURE_CONTRACT["labels"]
 
 
 def _contains_any(value, candidates):

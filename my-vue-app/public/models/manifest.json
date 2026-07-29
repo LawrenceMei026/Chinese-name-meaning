@@ -4,6 +4,7 @@
   "inputName": "input",
   "outputName": "logits",
   "featureSize": 16,
+  "outputSize": 10,
   "featureContractVersion": "name-features-v1",
   "labels": [
     "书卷",

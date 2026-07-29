@@ -1,7 +1,14 @@
 {
   "version": "name-features-v1",
   "size": 16,
+  "labels": ["书卷", "宏伟", "豪迈", "恬静", "典雅", "新颖", "灵动", "坚毅", "自然", "深邃"],
   "characterScope": "given",
+  "input": {
+    "characterFields": ["char", "role", "entry", "cultural"],
+    "entryFields": ["pinyin", "tones", "definition_cn", "radical"],
+    "culturalFields": ["element", "genderBias", "literaryRef", "localGloss"],
+    "excludedEntryFields": ["freq"]
+  },
   "features": [
     "name_length_quarters",
     "reserved_zero",

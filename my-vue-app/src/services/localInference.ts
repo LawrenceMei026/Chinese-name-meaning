@@ -1,33 +1,13 @@
 import { invoke } from '@tauri-apps/api/core';
 import { listen } from '@tauri-apps/api/event';
+import { FEATURE_CONTRACT, pickFallbackLabels, toFeatureInput } from '../model/nameFeatures'
+import type { FeatureInput } from '../model/nameFeatures'
 import type { AnalyzedName, AiAnalysisResult } from '../types'
-
-type SerializableAnalyzedName = {
-  original: string
-  chars: Array<{
-    char: string
-    role: 'surname' | 'given'
-    entry: {
-      pinyin: string
-      tones: string
-      definition_cn: string
-      radical?: string
-    } | null
-    cultural: {
-      element?: string
-      elementEmoji?: string
-      connotation?: string
-      genderBias?: 'masculine' | 'feminine' | 'neutral'
-      literaryRef?: string
-      localGloss?: string
-    } | null
-  }>
-}
 
 type WorkerRequest = {
   id: number
   type: 'infer'
-  payload: { result: SerializableAnalyzedName }
+  payload: { result: FeatureInput }
 }
 
 type WorkerResponse = {
@@ -37,36 +17,122 @@ type WorkerResponse = {
 }
 
 const MODEL_VERSION = 'onnx-v1'
+const WORKER_TIMEOUT_MS = 10_000
+const OLLAMA_TIMEOUT_MS = 45_000
+const NATIVE_TIMEOUT_MS = 60_000
+const NATIVE_CANCEL_GRACE_MS = 5_000
+const NATIVE_CANCEL_COMMAND_TIMEOUT_MS = 2_000
+const RETRY_DELAY_MS = 250
+const MAX_ATTEMPTS = 2
+const OLLAMA_URLS = [
+  'http://localhost:11434/api/generate',
+  'http://127.0.0.1:11434/api/generate',
+] as const
+const isTauri = () => '__TAURI_INTERNALS__' in window
 
 let workerPromise: Promise<Worker | null> | null = null
+let currentWorker: Worker | null = null
 let nextRequestId = 1
+const pendingByWorker = new Map<Worker, Set<() => void>>()
+let workerQueue = Promise.resolve()
 
-function toSerializableResult(result: AnalyzedName): SerializableAnalyzedName {
-  return {
-    original: result.original,
-    chars: result.chars.map(char => ({
-      char: char.char,
-      role: char.role,
-      entry: char.entry
-        ? {
-            pinyin: char.entry.pinyin,
-            tones: char.entry.tones,
-            definition_cn: char.entry.definition_cn,
-            radical: char.entry.radical,
-          }
-        : null,
-      cultural: char.cultural
-        ? {
-            element: char.cultural.element,
-            elementEmoji: char.cultural.elementEmoji,
-            connotation: char.cultural.connotation,
-            genderBias: char.cultural.genderBias,
-            literaryRef: char.cultural.literaryRef,
-            localGloss: char.cultural.localGloss,
-          }
-        : null,
-    })),
+export type InferenceOptions = {
+  signal?: AbortSignal
+}
+
+function abortError() {
+  return new DOMException('Inference cancelled', 'AbortError')
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) throw abortError()
+}
+
+function delay(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const finish = () => {
+      clearTimeout(timeout)
+      signal?.removeEventListener('abort', cancel)
+    }
+    const cancel = () => {
+      finish()
+      reject(abortError())
+    }
+    const timeout = setTimeout(() => {
+      finish()
+      resolve()
+    }, ms)
+    signal?.addEventListener('abort', cancel, { once: true })
+  })
+}
+
+function raceWithSignal<T>(promise: Promise<T>, signal?: AbortSignal): Promise<T> {
+  throwIfAborted(signal)
+  if (!signal) return promise
+  return new Promise<T>((resolve, reject) => {
+    const cancel = () => {
+      cleanup()
+      reject(abortError())
+    }
+    const cleanup = () => signal.removeEventListener('abort', cancel)
+    signal.addEventListener('abort', cancel, { once: true })
+    promise.then(
+      value => { cleanup(); resolve(value) },
+      error => { cleanup(); reject(error) },
+    )
+  })
+}
+
+function invalidateWorker(worker: Worker) {
+  worker.terminate()
+  if (currentWorker === worker) {
+    currentWorker = null
+    workerPromise = null
   }
+  const pending = pendingByWorker.get(worker)
+  pendingByWorker.delete(worker)
+  pending?.forEach(fail => fail())
+}
+
+async function withWorkerSlot<T>(operation: () => Promise<T>, signal?: AbortSignal): Promise<T> {
+  const previous = workerQueue
+  let settled = false
+  let resolveResult!: (value: T) => void
+  let rejectResult!: (reason: unknown) => void
+  const result = new Promise<T>((resolve, reject) => {
+    resolveResult = resolve
+    rejectResult = reject
+  })
+  const cancel = () => {
+    if (settled) return
+    settled = true
+    rejectResult(abortError())
+  }
+  signal?.addEventListener('abort', cancel, { once: true })
+  if (signal?.aborted) cancel()
+
+  const queued = previous.then(async () => {
+    if (signal?.aborted) {
+      signal.removeEventListener('abort', cancel)
+      return
+    }
+    try {
+      const value = await operation()
+      if (!settled) {
+        settled = true
+        resolveResult(value)
+      }
+    } catch (error) {
+      if (!settled) {
+        settled = true
+        rejectResult(error)
+      }
+    } finally {
+      signal?.removeEventListener('abort', cancel)
+    }
+  })
+  workerQueue = queued.then(() => undefined, () => undefined)
+  return result
 }
 
 function buildFeatureText(result: AnalyzedName) {
@@ -88,17 +154,6 @@ function buildFeatureText(result: AnalyzedName) {
     ...charParts,
     `模型版本：${MODEL_VERSION}`,
   ].join('\n')
-}
-
-function pickFallbackLabels(text: string): string[] {
-  const labels: string[] = []
-  if (/[明华文雅诗书兰慕]/.test(text)) labels.push('文雅')
-  if (/[山海江川峰岳远志伟豪强鹏鸿瀚]/.test(text)) labels.push('大气')
-  if (/[龙武刚勇阳天雄骏锐锋]/.test(text)) labels.push('阳刚')
-  if (/[月雪云雨莲梅兰花秀柔姝婉妍婷嫣娜萱霏霁霜溪汐沐湉]/.test(text)) labels.push('柔和')
-  if (/[古春秋竹松桐柏葭菁蘅蕴]/.test(text)) labels.push('古典')
-  if (/[新现代睿卓敏颖]/.test(text)) labels.push('现代')
-  return labels.length ? [...new Set(labels)].slice(0, 3) : ['中性']
 }
 
 function cleanDefinition(text: string): string {
@@ -125,8 +180,19 @@ function buildSummary(labels: string[], result: AnalyzedName, source: 'model' | 
   if (litRef) { culturalLogic = `通过典故的化用，为名字注入了深厚的古典底蕴` }
   else if (element) { culturalLogic = `借助“${element}”行的意象，构建了平衡的五行能量` }
   else { culturalLogic = `通过精准的选字组合` }
-  const descriptors: Record<string, string> = { '大气': '开阔宏大的格局', '文雅': '书卷润墨的雅致', '柔和': '温婉细腻的质感', '阳刚': '坚毅刚劲的力量', '古典': '古朴隽永的余韵', '现代': '清新明快的时代感' }
-  const primaryLabel = labels[0] || '文雅'
+  const descriptors: Record<(typeof FEATURE_CONTRACT.labels)[number], string> = {
+    '书卷': '书卷润墨的雅致',
+    '宏伟': '开阔宏大的格局',
+    '豪迈': '昂扬洒脱的气魄',
+    '恬静': '温婉沉静的质感',
+    '典雅': '古朴隽永的余韵',
+    '新颖': '清新别致的时代感',
+    '灵动': '轻盈鲜活的灵气',
+    '坚毅': '坚定刚劲的力量',
+    '自然': '山水相生的清润',
+    '深邃': '含蓄悠远的意境',
+  }
+  const primaryLabel = labels[0] || '书卷'
   const vibe = descriptors[primaryLabel] || '独特'
   let summary = `${opening}${culturalLogic}，${labels.length > 1 ? '在此基础上进一步' : ''}生发出${vibe}。`
   if (coreMeaning && coreMeaning.length > 1) { summary += ` 尤其是“${meaningfulChar?.char}”字所代表的“${coreMeaning}”之意，起到了点睛之笔的作用。` }
@@ -140,13 +206,27 @@ function createWorker(): Promise<Worker | null> {
 
 async function getWorker(): Promise<Worker | null> {
   if (!workerPromise) {
-    workerPromise = createWorker().then(async (worker) => {
-      if (worker) {
-        const ok = await testWorkerConnection(worker);
-        if (!ok) return null;
-      }
-      return worker;
-    });
+    const creation = createWorker()
+      .then(async (worker) => {
+        if (!worker) return null
+        try {
+          const ok = await testWorkerConnection(worker)
+          if (!ok) {
+            worker.terminate()
+            return null
+          }
+          currentWorker = worker
+          return worker
+        } catch {
+          worker.terminate()
+          return null
+        }
+      })
+      .catch(() => null)
+    workerPromise = creation
+    const worker = await creation
+    if (!worker && workerPromise === creation) workerPromise = null
+    return worker
   }
   return workerPromise
 }
@@ -154,107 +234,240 @@ async function getWorker(): Promise<Worker | null> {
 function testWorkerConnection(worker: Worker): Promise<boolean> {
   return new Promise((resolve) => {
     const id = -1;
-    const timeout = setTimeout(() => resolve(false), 10000);
-    const handle = (e: MessageEvent<any>) => {
+    const finish = (connected: boolean) => {
+      clearTimeout(timeout)
+      worker.removeEventListener('message', handle)
+      worker.removeEventListener('error', handleError)
+      resolve(connected)
+    }
+    const timeout = setTimeout(() => finish(false), WORKER_TIMEOUT_MS)
+    const handle = (e: MessageEvent<WorkerResponse>) => {
       const res = e.data;
       if (res && res.id === id) {
-        clearTimeout(timeout);
-        worker.removeEventListener('message', handle);
-        resolve(res.payload?.labels?.[0] === 'pong');
+        finish(res.payload?.labels?.[0] === 'pong')
       }
-    };
-    worker.addEventListener('message', handle);
-    worker.postMessage({ type: 'ping', id });
-  });
-}
-
-function inferViaWorker(result: AnalyzedName): Promise<string[] | null> {
-  return new Promise(async (resolve) => {
-    const worker = await getWorker()
-    if (!worker) { resolve(null); return; }
-    const id = nextRequestId++;
-    const cleanup = () => {
-      worker.removeEventListener('message', handleMessage)
-      worker.removeEventListener('error', handleError)
     }
-    const handleMessage = (event: MessageEvent<WorkerResponse>) => {
-      if (event.data.id !== id) return
-      cleanup(); resolve(event.data.type === 'result' ? event.data.payload.labels ?? null : null)
-    }
-    const handleError = () => { cleanup(); resolve(null); }
-    worker.addEventListener('message', handleMessage)
+    const handleError = () => finish(false)
+    worker.addEventListener('message', handle)
     worker.addEventListener('error', handleError)
-    worker.postMessage({ id, type: 'infer', payload: { result: toSerializableResult(result) } } satisfies WorkerRequest)
+    try {
+      worker.postMessage({ type: 'ping', id })
+    } catch {
+      finish(false)
+    }
   })
 }
 
-async function fetchOllamaSummary(labels: string[], result: AnalyzedName): Promise<string | null> {
-  const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
+async function inferWorkerAttempt(result: AnalyzedName, signal?: AbortSignal): Promise<string[] | null> {
+  return withWorkerSlot(async () => {
+    throwIfAborted(signal)
+    const worker = await raceWithSignal(getWorker(), signal)
+    if (!worker) return null
+    throwIfAborted(signal)
 
-  // 这里的策略是：同时尝试 localhost 和 127.0.0.1，谁快用谁
-  // 在 Windows + WSL 环境下，往往其中一个会被拦截，而另一个是通的
-  const urls = [
-    'http://localhost:11435/api/generate',
-    'http://127.0.0.1:11435/api/generate'
-  ];
-
-  const fetchWithTimeout = async (url: string) => {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'name-expert',
-        prompt: prompt,
-        stream: false,
-        options: { temperature: 0.7 }
-      }),
-      // 注意：由于模型生成很慢，这里不能设太短的 timeout
-      signal: AbortSignal.timeout(60000)
-    });
-    if (!response.ok) throw new Error('Ollama error');
-    const data = await response.json();
-    return data.response?.trim();
-  };
-
-  try {
-    // 优先尝试 Tauri Native LLM
-    const isTauri = !!(window as any).__TAURI_INTERNALS__;
-    if (isTauri) {
-      try {
-        const hasModel = await invoke<boolean>('check_model_exists');
-        if (hasModel) {
-          const context = buildFeatureText(result);
-          const tauriSummary = await invoke<string>('generate_internal_summary', {
-            name: result.original,
-            context
-          });
-          return tauriSummary;
-        }
-      } catch (e) {
-        console.error('[Inference] Tauri native LLM failed:', e);
+    return new Promise((resolve) => {
+      const id = nextRequestId++;
+      let settled = false
+      const pending = pendingByWorker.get(worker) ?? new Set<() => void>()
+      pendingByWorker.set(worker, pending)
+      const cleanup = () => {
+        clearTimeout(timeout)
+        worker.removeEventListener('message', handleMessage)
+        worker.removeEventListener('error', handleError)
+        signal?.removeEventListener('abort', handleAbort)
+        pending.delete(settleFailure)
+        if (pending.size === 0) pendingByWorker.delete(worker)
       }
-    }
+      const settle = (labels: string[] | null) => {
+        if (settled) return
+        settled = true
+        cleanup()
+        resolve(labels)
+      }
+      const handleMessage = (event: MessageEvent<WorkerResponse>) => {
+        if (event.data.id !== id) return
+        settle(event.data.type === 'result' ? event.data.payload.labels ?? null : null)
+      }
+      const settleFailure = () => settle(null)
+      const handleAbort = () => invalidateWorker(worker)
+      const failWorker = () => invalidateWorker(worker)
+      const handleError = () => failWorker()
+      const timeout = setTimeout(failWorker, WORKER_TIMEOUT_MS)
+      pending.add(settleFailure)
+      worker.addEventListener('message', handleMessage)
+      worker.addEventListener('error', handleError)
+      signal?.addEventListener('abort', handleAbort, { once: true })
+      try {
+        worker.postMessage({ id, type: 'infer', payload: { result: toFeatureInput(result) } } satisfies WorkerRequest)
+      } catch {
+        failWorker()
+      }
+    })
+  }, signal)
+}
 
-    // 竞速模式：只要有一个通了就用那个
-    return await (Promise as any).any(urls.map(url => fetchWithTimeout(url)));
-  } catch (e) {
-    console.error('[Ollama] All connection attempts failed. Possible CORS or WSL firewall issue.');
-    return null;
+async function inferViaWorker(result: AnalyzedName, signal?: AbortSignal): Promise<string[] | null> {
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    const labels = await inferWorkerAttempt(result, signal)
+    throwIfAborted(signal)
+    if (labels?.length) return labels
+    if (attempt + 1 < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS, signal)
+  }
+  return null
+}
+
+function requestController(timeoutMs: number, signal?: AbortSignal) {
+  const controller = new AbortController()
+  let timedOut = false
+  const cancel = () => controller.abort(signal?.reason)
+  const timeout = setTimeout(() => {
+    timedOut = true
+    controller.abort(new DOMException('Inference timed out', 'TimeoutError'))
+  }, timeoutMs)
+  signal?.addEventListener('abort', cancel, { once: true })
+  return {
+    controller,
+    didTimeout: () => timedOut,
+    cleanup() {
+      clearTimeout(timeout)
+      signal?.removeEventListener('abort', cancel)
+    },
   }
 }
 
+async function cancelNativeSummary(requestId: string) {
+  return new Promise<boolean>((resolve) => {
+    let settled = false
+    const finish = (cancelled: boolean) => {
+      if (settled) return
+      settled = true
+      clearTimeout(timeout)
+      resolve(cancelled)
+    }
+    const timeout = setTimeout(() => finish(false), NATIVE_CANCEL_COMMAND_TIMEOUT_MS)
+    void invoke('cancel_internal_summary', { requestId }).then(
+      () => finish(true),
+      () => finish(false),
+    )
+  })
+}
+
+type NativeSummaryResult = {
+  summary: string | null
+  timedOut: boolean
+}
+
+async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ available: boolean; timedOut: boolean }> {
+  throwIfAborted(signal)
+  const modelCheck = requestController(WORKER_TIMEOUT_MS, signal)
+  const aborted = new Promise<never>((_, reject) => {
+    modelCheck.controller.signal.addEventListener('abort', () => reject(modelCheck.controller.signal.reason ?? abortError()), { once: true })
+  })
+  try {
+    return {
+      available: await Promise.race([invoke<boolean>('check_model_exists'), aborted]),
+      timedOut: false,
+    }
+  } catch {
+    throwIfAborted(signal)
+    return { available: false, timedOut: modelCheck.didTimeout() }
+  } finally {
+    modelCheck.cleanup()
+  }
+}
+
+async function fetchNativeSummary(result: AnalyzedName, signal?: AbortSignal): Promise<NativeSummaryResult> {
+  if (!isTauri()) return { summary: null, timedOut: false }
+  const model = await checkNativeModelForInference(signal)
+  if (!model.available) return { summary: null, timedOut: model.timedOut }
+
+  const context = buildFeatureText(result)
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+    throwIfAborted(signal)
+    const requestId = crypto.randomUUID()
+    const request = requestController(NATIVE_TIMEOUT_MS, signal)
+    const generation = invoke<string>('generate_internal_summary', {
+      requestId,
+      name: result.original,
+      context,
+    })
+    const aborted = new Promise<never>((_, reject) => {
+      request.controller.signal.addEventListener('abort', () => reject(request.controller.signal.reason ?? abortError()), { once: true })
+    })
+    try {
+      return { summary: await Promise.race([generation, aborted]), timedOut: false }
+    } catch {
+      if (request.controller.signal.aborted) {
+        if (signal?.aborted) {
+          void cancelNativeSummary(requestId)
+          throw abortError()
+        }
+        const cancellationSent = await cancelNativeSummary(requestId)
+        if (!cancellationSent) return { summary: null, timedOut: true }
+        const stopped = await Promise.race([
+          generation.then(() => true, () => true),
+          delay(NATIVE_CANCEL_GRACE_MS).then(() => false),
+        ])
+        if (!stopped) return { summary: null, timedOut: true }
+        if (attempt + 1 < MAX_ATTEMPTS) {
+          await delay(RETRY_DELAY_MS, signal)
+          continue
+        }
+        return { summary: null, timedOut: request.didTimeout() }
+      }
+      if (attempt + 1 >= MAX_ATTEMPTS) return { summary: null, timedOut: false }
+      await delay(RETRY_DELAY_MS, signal)
+    } finally {
+      request.cleanup()
+    }
+  }
+  return { summary: null, timedOut: false }
+}
+
+async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<string | null> {
+  const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
+
+  for (const [index, url] of OLLAMA_URLS.entries()) {
+    throwIfAborted(signal)
+    const request = requestController(OLLAMA_TIMEOUT_MS, signal)
+    try {
+      const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'name-expert',
+            prompt,
+            stream: false,
+            options: { temperature: 0.7 },
+          }),
+          signal: request.controller.signal,
+      })
+      if (!response.ok) continue
+      const data = await response.json() as { response?: string }
+      const summary = data.response?.trim()
+      if (summary) return summary
+    } catch {
+      throwIfAborted(signal)
+    } finally {
+      request.cleanup()
+    }
+    if (index + 1 < OLLAMA_URLS.length) await delay(RETRY_DELAY_MS, signal)
+  }
+  return null
+}
+
 export async function checkNativeModel() {
-  if (!(window as any).__TAURI_INTERNALS__) return true;
+  if (!isTauri()) return true;
   return await invoke<boolean>('check_model_exists');
 }
 
 export async function checkSystemMemory() {
-  if (!(window as any).__TAURI_INTERNALS__) return 16; // Web 模式默认返回足够
+  if (!isTauri()) return 16; // Web 模式默认返回足够
   return await invoke<number>('check_memory');
 }
 
 export async function startModelDownload(onProgress: (p: { progress: number; total_size: number; downloaded: number }) => void) {
-  const unlisten = await listen<{ progress: number; total_size: number; downloaded: number }>('download-progress', (event: any) => {
+  const unlisten = await listen<{ progress: number; total_size: number; downloaded: number }>('download-progress', (event) => {
     onProgress(event.payload);
   });
   try {
@@ -264,15 +477,24 @@ export async function startModelDownload(onProgress: (p: { progress: number; tot
   }
 }
 
-export async function runLocalAiAnalysis(result: AnalyzedName): Promise<AiAnalysisResult> {
+export async function runLocalAiAnalysis(result: AnalyzedName, options: InferenceOptions = {}): Promise<AiAnalysisResult> {
+  const { signal } = options
+  throwIfAborted(signal)
   let labels: string[] = [];
   let source: 'model' | 'fallback' = 'fallback';
   try {
-    const modelLabels = await inferViaWorker(result)
+    const modelLabels = await inferViaWorker(result, signal)
     if (modelLabels?.length && modelLabels[0] !== 'pong') { labels = modelLabels; source = 'model'; }
   } catch {}
+  throwIfAborted(signal)
   if (labels.length === 0) { labels = pickFallbackLabels(buildFeatureText(result)); source = 'fallback'; }
-  const ollamaSummary = await fetchOllamaSummary(labels, result);
+  const native = await fetchNativeSummary(result, signal).catch((error): NativeSummaryResult => {
+    throwIfAborted(signal)
+    console.error('[Inference] Tauri native LLM failed:', error)
+    return { summary: null, timedOut: false }
+  })
+  const ollamaSummary = native.summary ?? (native.timedOut ? null : await fetchOllamaSummary(labels, result, signal))
+  throwIfAborted(signal)
   return {
     labels,
     summary: ollamaSummary || buildSummary(labels, result, source),

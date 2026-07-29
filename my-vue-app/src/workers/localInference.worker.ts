@@ -1,13 +1,13 @@
-import type { AnalyzedName } from '../types'
 import * as ort from 'onnxruntime-web'
 import { FEATURE_CONTRACT, buildFeatureVector } from '../model/nameFeatures'
+import type { FeatureInput } from '../model/nameFeatures'
 
 type OrtRuntime = typeof ort
 
 type WorkerRequest = {
   id: number
   type: 'infer'
-  payload: { result: AnalyzedName }
+  payload: { result: FeatureInput }
 }
 
 type WorkerResponse = {
@@ -18,12 +18,7 @@ type WorkerResponse = {
 
 const MODEL_VERSION = 'onnx-v1'
 const DEFAULT_MODEL_PATH = '/models/classifier.onnx'
-// 扩展更具差异化的标签体系
-const DEFAULT_LABELS = [
-  '书卷', '宏伟', '豪迈', '恬静',
-  '典雅', '新颖', '灵动', '坚毅',
-  '自然', '深邃'
-]
+const DEFAULT_LABELS = FEATURE_CONTRACT.labels
 
 type ClassifierManifest = {
   version?: string
@@ -31,21 +26,12 @@ type ClassifierManifest = {
   inputName?: string
   outputName?: string
   featureSize?: number
+  outputSize?: number
   featureContractVersion?: string
   labels?: string[]
 }
 
-type OrtTensor = {
-  data: Float32Array
-  type: string
-  dims: number[]
-}
-
-type SessionLike = {
-  inputNames: string[]
-  outputNames: string[]
-  run: (feeds: Record<string, OrtTensor>) => Promise<Record<string, { data: ArrayLike<number> }>>
-}
+type SessionLike = ort.InferenceSession
 
 let manifestPromise: Promise<ClassifierManifest | null> | null = null
 let cachedManifest: ClassifierManifest | null = null
@@ -72,7 +58,7 @@ function baseUrl() {
 }
 
 async function loadOrtRuntime(): Promise<OrtRuntime | null> {
-  return ort as any
+  return ort
 }
 
 function normaliseLabels(labels: unknown): string[] {
@@ -127,6 +113,7 @@ async function loadManifest(): Promise<ClassifierManifest | null> {
           inputName: typeof manifest.inputName === 'string' && manifest.inputName.trim() ? manifest.inputName : 'input',
           outputName: typeof manifest.outputName === 'string' && manifest.outputName.trim() ? manifest.outputName : 'logits',
           featureSize: Number.isFinite(manifest.featureSize) && (manifest.featureSize ?? 0) > 0 ? Math.floor(manifest.featureSize ?? 0) : 16,
+          outputSize: Number.isFinite(manifest.outputSize) && (manifest.outputSize ?? 0) > 0 ? Math.floor(manifest.outputSize ?? 0) : undefined,
           featureContractVersion: typeof manifest.featureContractVersion === 'string' ? manifest.featureContractVersion : undefined,
           labels: normaliseLabels(manifest.labels),
         }
@@ -171,8 +158,8 @@ async function loadSession(): Promise<SessionLike | null> {
 
       // Disable dynamic loading of modules to avoid the .mjs fetch error in some environments
       // and force the use of local WASM files
-      if (typeof (ortInstance.env as any).wasm !== 'undefined') {
-        (ortInstance.env as any).wasm.numThreads = 1; // Simplify for debugging
+      if (typeof ortInstance.env.wasm !== 'undefined') {
+        ortInstance.env.wasm.numThreads = 1; // Simplify for debugging
       }
 
       try {
@@ -223,7 +210,7 @@ async function loadSession(): Promise<SessionLike | null> {
   return cachedSession
 }
 
-function getOutputTensor(outputs: Record<string, { data: ArrayLike<number> }>, outputName?: string) {
+function getOutputTensor(outputs: ort.InferenceSession.OnnxValueMapType, outputName?: string) {
   if (outputName && outputs[outputName]) return outputs[outputName]!
   const first = Object.values(outputs)[0]
   return first ?? null
@@ -237,19 +224,22 @@ function pickModelLabels(scores: ArrayLike<number>, labels: string[]) {
     .map(item => item.label)
 }
 
-async function runClassifier(result: AnalyzedName) {
+async function runClassifier(result: FeatureInput) {
   const manifest = await loadManifest()
   const session = await loadSession()
   const ortInstance = await loadOrtRuntime()
   if (!manifest || !session || !ortInstance) return null
 
   if (manifest.featureSize !== FEATURE_CONTRACT.size
-    || manifest.featureContractVersion !== FEATURE_CONTRACT.version) {
+    || manifest.featureContractVersion !== FEATURE_CONTRACT.version
+    || manifest.outputSize !== FEATURE_CONTRACT.labels.length) {
     console.error('[Worker] Model feature contract mismatch', {
       expectedVersion: FEATURE_CONTRACT.version,
       actualVersion: manifest.featureContractVersion,
       expectedSize: FEATURE_CONTRACT.size,
       actualSize: manifest.featureSize,
+      expectedOutputSize: FEATURE_CONTRACT.labels.length,
+      actualOutputSize: manifest.outputSize,
     })
     return null
   }
@@ -261,10 +251,19 @@ async function runClassifier(result: AnalyzedName) {
 
   const outputs = await session.run({ [inputName]: new ortInstance.Tensor('float32', features, [1, featureSize]) })
   const outputTensor = getOutputTensor(outputs, outputName)
-  if (!outputTensor) return null
+  if (!outputTensor || !('data' in outputTensor)) return null
 
   const scores = outputTensor.data as ArrayLike<number>
-  return pickModelLabels(scores, manifest.labels ?? DEFAULT_LABELS)
+  const labels = manifest.labels ?? DEFAULT_LABELS
+  if (scores.length !== FEATURE_CONTRACT.labels.length || labels.length !== FEATURE_CONTRACT.labels.length) {
+    console.error('[Worker] Model output contract mismatch', {
+      expectedLabels: FEATURE_CONTRACT.labels.length,
+      actualScores: scores.length,
+      actualLabels: labels.length,
+    })
+    return null
+  }
+  return pickModelLabels(scores, labels)
 }
 
 self.addEventListener('message', async (event: MessageEvent<WorkerRequest | { type: 'ping', id: number }>) => {

@@ -6,16 +6,12 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 
-from feature_extractor import FEATURE_CONTRACT, FEATURE_SIZE, build_feature_vector as extract_feature_vector
+from feature_extractor import FEATURE_CONTRACT, FEATURE_LABELS, FEATURE_SIZE, build_feature_vector as extract_feature_vector
 
 RANDOM_SEED = 20260728
 
 # 扩展后的 10 个差异化标签
-LABELS = [
-    '书卷', '宏伟', '豪迈', '恬静',
-    '典雅', '新颖', '灵动', '坚毅',
-    '自然', '深邃'
-]
+LABELS = FEATURE_LABELS
 
 # 资源路径
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

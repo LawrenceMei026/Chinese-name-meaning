@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
 import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
@@ -25,11 +25,13 @@ const downloadProgress = ref(0)
 const downloadMeta = ref({ downloaded: '0MB', total: '0MB' })
 const isDownloading = ref(false)
 const lowMemoryWarning = ref(false)
+let aiController: AbortController | null = null
 
 const inputId = 'name-input'
 const helpId = 'name-input-help'
 const errorId = 'name-input-error'
 const isBusy = computed(() => loading.value || aiLoading.value)
+const isTauri = '__TAURI_INTERNALS__' in window
 
 function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
   if (!value || typeof value !== 'object') return false
@@ -78,6 +80,7 @@ function persistHistoryEntry(entry: AnalysisHistoryEntry) {
 }
 
 function restoreHistoryEntry(entry: AnalysisHistoryEntry) {
+  aiController?.abort()
   input.value = entry.input
   result.value = entry.result
   aiResult.value = entry.aiResult ?? null
@@ -103,6 +106,7 @@ function clearHistory() {
 }
 
 async function handleSubmit() {
+  aiController?.abort()
   const name = input.value.trim()
   if (!name) return
 
@@ -143,20 +147,33 @@ async function handleSubmit() {
 async function handleAiAnalysis() {
   if (!result.value) return
 
+  if (aiLoading.value) {
+    aiController?.abort()
+    return
+  }
+
+  aiController?.abort()
+  const controller = new AbortController()
+  aiController = controller
   aiLoading.value = true
   aiError.value = null
 
   try {
-    aiResult.value = await runLocalAiAnalysis(result.value)
+    aiResult.value = await runLocalAiAnalysis(result.value, { signal: controller.signal })
     updateActiveHistoryEntry(aiResult.value)
-  } catch {
+  } catch (caught) {
+    if (caught instanceof DOMException && caught.name === 'AbortError') return
     aiError.value = 'AI 深度分析暂时不可用，请稍后重试。'
   } finally {
-    aiLoading.value = false
+    if (aiController === controller) {
+      aiController = null
+      aiLoading.value = false
+    }
   }
 }
 
 function reset() {
+  aiController?.abort()
   input.value = ''
   result.value = null
   aiResult.value = null
@@ -173,8 +190,8 @@ function handleFeedback() {
   const envInfo = {
     userAgent: navigator.userAgent,
     language: navigator.language,
-    platform: (navigator as any).userAgentData?.platform || 'Unknown',
-    isTauri: !!(window as any).__TAURI_INTERNALS__
+    platform: (navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform || 'Unknown',
+    isTauri,
   }
 
   const body = encodeURIComponent(
@@ -195,13 +212,13 @@ async function handleActionDownload() {
     await startModelDownload((p) => {
       downloadProgress.value = Math.round(p.progress)
       downloadMeta.value = {
-        downloaded: (p.downloaded / 1024 / 1024).toFixed(1) + 'MB',
-        total: (p.total_size / 1024 / 1024).toFixed(1) + 'MB'
+        downloaded: (p.downloaded / 1024 / 1024).toFixed(1) + 'MiB',
+        total: (p.total_size / 1024 / 1024).toFixed(1) + 'MiB'
       }
     })
     modelReady.value = true
     downloadWindowOpen.value = false
-  } catch (e) {
+  } catch {
     alert('下载失败，请检查网络设置。')
   } finally {
     isDownloading.value = false
@@ -213,7 +230,7 @@ onMounted(async () => {
   preloadDictionary().catch(() => {})
 
   // Tauri 环境下的模型与内存检查
-  if ((window as any).__TAURI_INTERNALS__) {
+  if (isTauri) {
     const mem = await checkSystemMemory()
     if (mem < 6) {
       lowMemoryWarning.value = true
@@ -224,6 +241,11 @@ onMounted(async () => {
       downloadWindowOpen.value = true
     }
   }
+})
+
+onUnmounted(() => {
+  aiController?.abort()
+  aiController = null
 })
 </script>
 
@@ -238,7 +260,7 @@ onMounted(async () => {
     <div v-if="downloadWindowOpen" class="model-overlay">
       <div class="model-modal">
         <h2 class="modal-title">初始化智能引擎</h2>
-        <p class="modal-desc">为了提供更精准的姓名意境分析，我们需要下载一个轻量级的本地 AI 模型（约 300MB）。</p>
+        <p class="modal-desc">为了提供更精准的姓名意境分析，我们需要下载一个本地 AI 模型（约 491MB）。</p>
 
         <div v-if="isDownloading" class="progress-container">
           <div class="progress-bar">
@@ -321,8 +343,8 @@ onMounted(async () => {
             <p class="result-meta">共 {{ result.chars.length }} 个字</p>
           </div>
           <div class="result-actions">
-            <button class="ai-btn" type="button" @click="handleAiAnalysis" :disabled="aiLoading">
-              <span v-if="aiLoading">AI 分析中…</span>
+            <button class="ai-btn" type="button" @click="handleAiAnalysis">
+              <span v-if="aiLoading">取消分析</span>
               <span v-else>AI 深度分析</span>
             </button>
             <button class="reset-btn" type="button" @click="reset" aria-label="清除并重新开始">✕ 清除</button>

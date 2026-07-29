@@ -5,13 +5,16 @@ import packageJson from '../../package.json'
 import type { AnalyzedName, AiAnalysisResult } from '../types'
 
 vi.mock('../services/nameAnalyzer', () => ({
-  analyzeName: vi.fn(),
-  preloadDictionary: vi.fn().mockResolvedValue(undefined),
+  analyzeName: vi.fn<(input: string) => Promise<AnalyzedName>>(),
+  preloadDictionary: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
 }))
 
 vi.mock('../services/localInference', () => ({
-  runLocalAiAnalysis: vi.fn().mockResolvedValue({
-    labels: ['文雅'],
+  runLocalAiAnalysis: vi.fn<(
+    result: AnalyzedName,
+    options?: { signal?: AbortSignal },
+  ) => Promise<AiAnalysisResult>>().mockResolvedValue({
+    labels: ['书卷'],
     summary: '本地回退结果。',
     loadedFromCache: false,
     source: 'fallback',
@@ -28,7 +31,7 @@ const sampleResult: AnalyzedName = {
 }
 
 const sampleAiResult: AiAnalysisResult = {
-  labels: ['文雅'],
+  labels: ['书卷'],
   summary: '本地回退结果。',
   loadedFromCache: false,
   source: 'fallback',
@@ -136,6 +139,55 @@ describe('App', () => {
     const saved = JSON.parse(localStorage.getItem('analysis-history-v1') ?? '[]')
     expect(saved[0].aiResult.summary).toBe('本地回退结果。')
     expect(wrapper.find('.ai-panel').exists()).toBe(true)
+  })
+
+  it('cancels an in-flight AI analysis from the same button', async () => {
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    vi.mocked(runLocalAiAnalysis).mockImplementation((_result, options) => new Promise((_resolve, reject) => {
+      options?.signal?.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true })
+    }))
+    localStorage.setItem('analysis-history-v1', JSON.stringify([{
+      id: 'history-1',
+      input: '李明华',
+      createdAt: 1710000000000,
+      result: sampleResult,
+    }]))
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.history-button').trigger('click')
+
+    await wrapper.find('button.ai-btn').trigger('click')
+    expect(wrapper.find('button.ai-btn').text()).toContain('取消分析')
+    await wrapper.find('button.ai-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('button.ai-btn').text()).toContain('AI 深度分析')
+    expect(wrapper.find('.ai-error').exists()).toBe(false)
+  })
+
+  it('cancels an in-flight AI analysis when unmounted', async () => {
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    let capturedSignal: AbortSignal | undefined
+    vi.mocked(runLocalAiAnalysis).mockImplementation((_result, options) => {
+      capturedSignal = options?.signal
+      return new Promise((_resolve, reject) => {
+        options?.signal?.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true })
+      })
+    })
+    localStorage.setItem('analysis-history-v1', JSON.stringify([{
+      id: 'history-1',
+      input: '李明华',
+      createdAt: 1710000000000,
+      result: sampleResult,
+    }]))
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.history-button').trigger('click')
+    await wrapper.find('button.ai-btn').trigger('click')
+
+    wrapper.unmount()
+
+    expect(capturedSignal?.aborted).toBe(true)
   })
 
   it('ignores malformed history data', async () => {

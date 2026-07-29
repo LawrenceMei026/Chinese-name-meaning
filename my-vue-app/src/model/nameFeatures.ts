@@ -1,7 +1,68 @@
 import contract from './feature-contract.v1.json'
-import type { AnalyzedChar } from '../types'
+import type { AnalyzedChar, AnalyzedName } from '../types'
 
 export const FEATURE_CONTRACT = contract
+
+export type FeatureInput = {
+  original: string
+  chars: Array<{
+    char: string
+    role: 'surname' | 'given'
+    entry: {
+      pinyin: string
+      tones: string
+      definition_cn: string
+      radical?: string
+    } | null
+    cultural: {
+      element?: string
+      genderBias?: 'masculine' | 'feminine' | 'neutral'
+      literaryRef?: string
+      localGloss?: string
+    } | null
+  }>
+}
+
+export function toFeatureInput(result: AnalyzedName): FeatureInput {
+  return {
+    original: result.original,
+    chars: result.chars.map(char => ({
+      char: char.char,
+      role: char.role,
+      entry: char.entry
+        ? {
+            pinyin: char.entry.pinyin,
+            tones: char.entry.tones,
+            definition_cn: char.entry.definition_cn,
+            radical: char.entry.radical,
+          }
+        : null,
+      cultural: char.cultural
+        ? {
+            element: char.cultural.element,
+            genderBias: char.cultural.genderBias,
+            literaryRef: char.cultural.literaryRef,
+            localGloss: char.cultural.localGloss,
+          }
+        : null,
+    })),
+  }
+}
+
+export function pickFallbackLabels(text: string): string[] {
+  const labels: string[] = []
+  if (/[明华文雅诗书兰慕翰墨博思哲韵谦修德贤]/.test(text)) labels.push('书卷')
+  if (/[宇宙瀚海天乾坤鹏宏霄浩广阔疆泰]/.test(text)) labels.push('宏伟')
+  if (/[龙虎啸骁猛锐傲凌风云腾飞剑昂壮]/.test(text)) labels.push('豪迈')
+  if (/[婉柔静悦梦茹薇洁恬琳曼芊淑安宁悠]/.test(text)) labels.push('恬静')
+  if (/[子墨轩逸若望归词赋朝礼仪正纯质真]/.test(text)) labels.push('典雅')
+  if (/[希语涵奕凡诺星熙芮沐可乐予其于也]/.test(text)) labels.push('新颖')
+  if (/[舒悠然悦灵颖芸羽翔逸流光影旋舞翩]/.test(text)) labels.push('灵动')
+  if (/[刚强勇健毅峰军武力锋威定松柏岩钧]/.test(text)) labels.push('坚毅')
+  if (/[山川岳林森沐汐阳月雪云雨溪木禾竹]/.test(text)) labels.push('自然')
+  if (/[远幽潜深玄微妙默思冥理道索究渊鉴]/.test(text)) labels.push('深邃')
+  return labels.length ? [...new Set(labels)].slice(0, 3) : ['书卷']
+}
 
 function containsAny(value: string, candidates: string[]) {
   return candidates.some(candidate => value.includes(candidate))
@@ -12,7 +73,7 @@ function firstTone(value: string | undefined) {
   return first ? Number(first) : 0
 }
 
-export function buildFeatureVector(chars: AnalyzedChar[]): Float32Array {
+export function buildFeatureVector(chars: FeatureInput['chars'] | AnalyzedChar[]): Float32Array {
   if (contract.size !== contract.features.length) {
     throw new Error(`Feature contract size ${contract.size} does not match ${contract.features.length} features.`)
   }

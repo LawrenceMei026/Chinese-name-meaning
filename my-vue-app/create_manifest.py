@@ -2,11 +2,10 @@
 import json
 from pathlib import Path
 
-from feature_extractor import FEATURE_CONTRACT, FEATURE_SIZE
+from feature_extractor import FEATURE_CONTRACT, FEATURE_LABELS, FEATURE_SIZE
 
 MODEL_DIR = Path(__file__).resolve().parent / 'public/models'
 MANIFEST_PATH = MODEL_DIR / 'manifest.json'
-LABELS = ['书卷', '宏伟', '豪迈', '恬静', '典雅', '新颖', '灵动', '坚毅', '自然', '深邃']
 
 def create_manifest():
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -16,8 +15,9 @@ def create_manifest():
         "inputName": "input",
         "outputName": "logits",
         "featureSize": FEATURE_SIZE,
+        "outputSize": len(FEATURE_LABELS),
         "featureContractVersion": FEATURE_CONTRACT["version"],
-        "labels": LABELS
+        "labels": FEATURE_LABELS
     }
     with MANIFEST_PATH.open('w', encoding='utf-8') as f:
         json.dump(manifest, f, ensure_ascii=False, indent=2)

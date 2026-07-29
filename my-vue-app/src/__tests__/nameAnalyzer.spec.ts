@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('../data/cultural', () => ({
-  getCulturalData: vi.fn(() => null),
+  getCulturalData: vi.fn<(char: string) => null>(() => null),
 }))
 
 const charsJson = {

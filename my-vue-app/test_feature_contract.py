@@ -3,7 +3,7 @@ import math
 import unittest
 from pathlib import Path
 
-from feature_extractor import FEATURE_CONTRACT, FEATURE_SIZE, build_feature_vector
+from feature_extractor import FEATURE_CONTRACT, FEATURE_LABELS, FEATURE_SIZE, build_feature_vector
 
 
 FIXTURES_PATH = Path(__file__).resolve().parent / "src/model/feature-fixtures.v1.json"
@@ -12,12 +12,23 @@ MODEL_PATH = Path(__file__).resolve().parent / "public/models/classifier.onnx"
 
 
 class FeatureContractTest(unittest.TestCase):
+    def test_contract_defines_ten_unique_labels(self):
+        self.assertEqual(len(FEATURE_LABELS), 10)
+        self.assertEqual(len(set(FEATURE_LABELS)), 10)
+
+    def test_contract_includes_radical_and_excludes_frequency(self):
+        self.assertIn("radical", FEATURE_CONTRACT["input"]["entryFields"])
+        self.assertNotIn("freq", FEATURE_CONTRACT["input"]["entryFields"])
+        self.assertIn("freq", FEATURE_CONTRACT["input"]["excludedEntryFields"])
+
     def test_deployed_model_manifest(self):
         with MANIFEST_PATH.open("r", encoding="utf-8") as manifest_file:
             manifest = json.load(manifest_file)
 
         self.assertEqual(manifest["featureSize"], FEATURE_SIZE)
+        self.assertEqual(manifest["outputSize"], len(FEATURE_LABELS))
         self.assertEqual(manifest["featureContractVersion"], FEATURE_CONTRACT["version"])
+        self.assertEqual(manifest["labels"], FEATURE_LABELS)
         self.assertIn(FEATURE_CONTRACT["version"].encode(), MODEL_PATH.read_bytes())
 
     def test_shared_feature_fixtures(self):

@@ -34,7 +34,7 @@ jobs:
       - name: install build dependencies (Windows)
         if: matrix.platform == 'windows-latest'
         run: |
-          choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System'
+          choco install cmake llvm --installargs 'ADD_CMAKE_TO_PATH=System'
           refreshenv
 
       - name: install dependencies (ubuntu only)
@@ -56,6 +56,31 @@ jobs:
       - name: verify feature contract
         working-directory: my-vue-app
         run: npm run test:features
+
+      - name: run unit tests
+        working-directory: my-vue-app
+        run: npm run test:unit -- --run
+
+      - name: run type check
+        working-directory: my-vue-app
+        run: npm run type-check
+
+      - name: run read-only lint
+        working-directory: my-vue-app
+        run: npm run lint:check
+
+      - name: smoke test ONNX model
+        working-directory: my-vue-app
+        run: npm run test:onnx
+
+      - name: verify native Rust
+        working-directory: my-vue-app/src-tauri
+        env:
+          LIBCLANG_PATH: C:\Program Files\LLVM\bin
+        run: |
+          cargo fmt --check
+          cargo check --locked
+          cargo test --locked
 
       - uses: tauri-apps/tauri-action@v0
         env:
