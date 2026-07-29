@@ -35,7 +35,7 @@
 - Saved the current repo state so the next implementation step starts from the expanded cultural baseline.
 - Verified the app again with `npm run type-check` and `npm run test:unit` in `my-vue-app` before switching tasks.
 
-## Current checkpoint
+## Checkpoint after Commit 7
 - Task progress: cultural coverage target completed; ONNX classifier task is next.
 - The cultural map now has a much larger local-database-backed base.
 - Remaining work is now focused on `src/services/localInference.ts` and the model-loading path.
@@ -182,3 +182,25 @@
 - Synchronized `CLAUDE.md` with the full Native LLM and CMake-based CI architecture.
 - Summarized the transition to zero-dependency Rust inference and the "EXE as Downloader" distribution model.
 - Prepared the repo for stable release verification.
+
+## Commit 39 — Enforce shared release contracts
+- Unified the Python and TypeScript feature contract, deployed a self-contained ten-label ONNX model, and made release version checks reproducible.
+- Added locked feature validation and kept model input/output metadata synchronized with the runtime manifest.
+
+## Commit 40 — Gate Windows releases before packaging
+- Added feature tests, the complete unit suite, TypeScript checking, read-only scoped lint, real ONNX WASM inference, Rust formatting, and locked Rust checks before Tauri packaging.
+- Added `scripts/smoke-onnx.mjs`, committed `src-tauri/Cargo.lock`, and validated official ONNX Runtime types without a local `any` declaration.
+
+## Commit 41 — Remove obsolete project scaffolding
+- Removed the unused Router and Pinia starter examples and their dependencies, tracked virtual environments, Ollama logs, obsolete six-label training/export files, stale training data, generated archives, and unused ONNX Runtime JavaScript entry bundles.
+- Retained the active classifier, manifest, required `ort-wasm-*` support assets, current ten-label training tools, dictionary sources, and native release files.
+
+## Commit 42 — Patch npm dependency vulnerabilities
+- Updated `postcss`, `protobufjs`, `brace-expansion`, `shell-quote`, and `undici` to patched versions.
+- Pinned compatible `minimatch@10.2.5` and `brace-expansion@5.0.8` overrides, validated brace matching through minimatch, glob, and editorconfig, and reduced both production and full `npm audit` results to zero vulnerabilities.
+
+## Current checkpoint
+- The Windows release workflow now blocks packaging until frontend tests, feature contracts, types, read-only lint, real ONNX inference, and locked Rust checks pass.
+- The active runtime paths are the bundled ten-label ONNX classifier, downloaded native GGUF generation, sequential local Ollama fallback, and deterministic fallback text.
+- Obsolete Router/Pinia examples, tracked virtual environments, runtime logs, old six-label model tooling, and redundant ONNX Runtime JavaScript bundles have been removed.
+- The committed npm dependency graph reports zero vulnerabilities. Preserve the `minimatch` and `brace-expansion` compatibility overrides until upstream dependency ranges no longer require them.

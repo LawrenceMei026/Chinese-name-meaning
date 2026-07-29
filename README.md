@@ -12,20 +12,23 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 
 ### Features
 
-- **Hanzi-Specialized Analysis**: Optimized for 2-4 character Chinese names with automatic surname/given-name segmentation.
+- **Hanzi-Specialized Analysis**: Optimized for 2-4 character Chinese names in the current `U+4E00-U+9FA5` validator range, with automatic surname/given-name segmentation.
 - **Deep Dictionary Integration**: Powered by authoritative sources like Xinhua Dictionary, providing precise Simplified Chinese definitions.
 - **Cultural Context**: Includes Five Elements, literary references, gender bias, and naming connotations.
 - **Local AI Model (ONNX)**: Uses a custom-trained 10-label classifier (Scholarly, Heroic, Serene, etc.) with WebGPU hardware acceleration.
-- **Dynamic Narrative Engine**: AI synthesizes character meanings with predicted "vibes" to generate human-like summaries.
+- **Layered Local Inference**: ONNX predicts the 10 tone labels. Tauri first tries a downloaded native Qwen2.5 GGUF; native unavailability or non-timeout failure permits Ollama, while a native timeout goes directly to deterministic text.
+- **Controlled Inference Lifecycle**: Worker, Ollama, and native requests have bounded timeouts, cancellation, cleanup, and at most two attempts.
 - **Privacy & History**: 100% local processing; history is stored in browser localStorage.
 - **Open Feedback Loop**: Integrated GitHub feedback system with automated environment diagnostics.
 
 ### Tech Stack & Architecture
 
 - **Frontend**: Vue 3 (Composition API)
-- **Engine**: `localInference.ts` orchestrates an ONNX Runtime Web worker.
+- **Engine**: `localInference.ts` orchestrates an ONNX Runtime Web worker, native Tauri commands, local Ollama, and deterministic fallback.
 - **Acceleration**: Prioritizes **WebGPU** with a stable WebAssembly fallback.
 - **Desktop**: Packaged as a native Windows `.exe` via Tauri.
+- **Native LLM**: Rust `llama-cpp-2` loads a Qwen2.5 0.5B Q4_K_M GGUF downloaded on demand to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
+- **Model Integrity**: The 491,400,032-byte download is pinned to a Hugging Face revision and verified by HTTP status, size, and SHA-256 before atomic installation.
 
 ---
 
@@ -37,20 +40,23 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 
 ### 功能特性
 
-- **汉字特化解析**：专门针对 2-4 位中文姓名进行优化，自动识别姓氏与名字。
+- **汉字特化解析**：专门针对当前校验范围 `U+4E00-U+9FA5` 内的 2-4 位中文姓名进行优化，自动识别姓氏与名字。
 - **深度字义解析**：整理自新华字典等权威来源，提供纯中文的精准释义。
 - **文化背景关联**：集成五行属性、典故出处、性别倾向及命名寓意。
 - **本地 AI 模型 (ONNX)**：使用本地训练的 10 标签分类器（如书卷、豪迈、灵动等），通过 WebGPU 硬件加速进行“意境”实时分析。
-- **动态叙事引擎**：AI 结合字义与风格预测，生成人性化的中文姓名总结。
+- **分层本地推理**：ONNX 负责 10 类意境标签；Tauri 桌面端优先使用按需下载的 Qwen2.5 GGUF。原生不可用或非超时失败时尝试 Ollama；原生超时则直接回退到确定性文本。
+- **可控推理生命周期**：Worker、Ollama 和原生推理均具备有界超时、取消、资源清理和最多两次尝试。
 - **隐私与历史**：所有数据本地加载，历史记录存储于浏览器 localStorage，不上传任何隐私。
 - **反馈闭环**：内置 GitHub 反馈入口，自动收集基础诊断信息。
 
 ### 技术架构
 
 - **前端框架**：Vue 3 (Composition API)
-- **推理引擎**：`localInference.ts` 调度 Web Worker 运行 `classifier.onnx`。
+- **推理引擎**：`localInference.ts` 统一调度 ONNX Worker、Tauri 原生命令、本地 Ollama 和确定性回退。
 - **硬件加速**：优先尝试 **WebGPU**，稳健回退至 WebAssembly。
 - **桌面支持**：通过 Tauri 提供 Windows `.exe` 原生包支持。
+- **原生大模型**：Rust `llama-cpp-2` 加载 Qwen2.5 0.5B Q4_K_M GGUF，模型按需下载到 `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`。
+- **模型完整性**：491,400,032 字节的下载固定到 Hugging Face revision，并在原子安装前校验 HTTP 状态、大小和 SHA-256。
 
 ---
 
@@ -72,15 +78,18 @@ my-vue-app/
       nameAnalyzer.ts         # Dict & Segmentation engine
     workers/
       localInference.worker.ts # ONNX Inference worker
+  src-tauri/
+    src/main.rs                # Secure model download and Tauri commands
+    src/native_llm.rs          # llama.cpp-backed GGUF generation
 ```
 
 ## ML Context | 本地训练与模型
 
-If you wish to retrain the model, use `train_model.py` in the root (requires torch/onnx):
+If you wish to retrain the model, use `my-vue-app/train_model.py` (requires torch/onnx):
 - **Labels**: Scholarly, Grand, Heroic, Serene, Classical, Unique, Dynamic, Persistent, Nature, Deep.
 - **Feature Engineering**: 16-dimensional hybrid vector including 4 semantic category scores.
 
-如需重新训练模型，根目录下包含 `train_model.py`：
+如需重新训练模型，请使用 `my-vue-app/train_model.py`：
 - **标签体系**：书卷、宏伟、豪迈、恬静、典雅、新颖、灵动、坚毅、自然、深邃。
 - **特征工程**：16 维混合向量，注入了 4 类语义词谱得分。
 
@@ -88,25 +97,40 @@ If you wish to retrain the model, use `train_model.py` in the root (requires tor
 
 ```bash
 cd my-vue-app
-npm install
+npm ci
 npm run dev
 ```
 
 ## Windows Packaging | 打包发布
 
-1. Install deps in `my-vue-app`: `npm install`.
-2. Ensure Rust & MSVC toolchains are installed on Windows.
+1. Install locked dependencies in `my-vue-app`: `npm ci`.
+2. Ensure Rust stable, MSVC, Visual Studio C++ build tools, CMake, and LLVM/libclang are installed on Windows.
 3. Run `npm run tauri:build`.
 4. Output: `my-vue-app/src-tauri/target/release/bundle/`.
+
+The installer contains the downloader, not the GGUF weights. On first desktop launch, users may download approximately 491 MB. When the model is missing, the download dialog warns systems reporting less than 6GB RAM; it does not block download or later native inference.
 
 ## Verification | 验证步骤
 
 ```bash
 cd my-vue-app
-npm run test:unit
+npm audit --omit=dev
+npm audit
+npm run test:features
+npm run test:unit -- --run
 npm run type-check
+npm run lint:check
+npm run test:onnx
 npm run build
+cd src-tauri
+cargo fmt --check
+cargo check --locked
+cargo test --locked
 ```
+
+`test:onnx` creates an ONNX Runtime Web WASM session, executes `public/models/classifier.onnx` with a real tensor, and validates the output contract and finite values. `lint:check` is read-only and scans only project-owned source, scripts, and configuration; generated ONNX Runtime files under `public/` are excluded.
+
+The tag-triggered Windows workflow runs version validation, feature tests, unit tests, TypeScript checking, read-only lint, the real ONNX smoke test, and locked Rust checks before `tauri-apps/tauri-action@v0` can package a release. The committed npm dependency graph currently reports zero vulnerabilities through both `npm audit --omit=dev` and `npm audit`.
 
 ## Data Sources & License | 数据来源与证书
 

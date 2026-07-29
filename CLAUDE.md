@@ -25,32 +25,35 @@ A webpage that analyzes Chinese names and explains their meanings with cultural 
 
 - **Local ONNX**: Performs fast 10-class "vibe" prediction (Scholarly, Grand, etc.) in a Web Worker.
 - **Internal LLM (Native)**: 
-  - **Engine**: Powered by Rust `llm` crate (GGUF format) with ChatML templates.
-  - **Distribution**: EXE includes only the downloader. Model is pulled on first run to `%AppData%\Chinese Name Meaning Explorer\models`.
-  - **Inference**: High-performance, zero-dependency local generation for poetic Chinese analysis.
-  - **Fallback**: Automatic switch to deterministic rule engine if RAM < 6GB or loading fails.
-  - **Architecture**: Bridged via Tauri Commands (`download_model`, `generate_internal_summary`).
-- **Legacy Ollama**: Previous integration via `Racing Mode` (localhost/127.0.0.1) remains documented as a developer-mode fallback.
+  - **Engine**: Powered by Rust `llama-cpp-2` (GGUF format) with a ChatML prompt.
+  - **Distribution**: The installer does not bundle the 491,400,032-byte Qwen2.5 model. The desktop app downloads it on demand to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
+  - **Integrity**: The Hugging Face URL is pinned to a full revision. Downloads require a successful HTTP status and exact content length, stream through SHA-256 verification, use a cross-process lock and `.part` file, and install by same-directory atomic rename.
+  - **Inference**: Native generation is single-flight. It has a 60s frontend timeout, backend cancellation, a 5s stop grace period, and at most two attempts.
+  - **Memory Check**: When the model is missing, the download dialog warns systems reporting less than 6GB RAM. It does not block download or later native inference.
+  - **Architecture**: Bridged via Tauri commands (`check_model_exists`, `download_model`, `check_memory`, `generate_internal_summary`, `cancel_internal_summary`).
+- **Legacy Ollama**: If native inference is unavailable without timing out, the app tries `name-expert` sequentially at `localhost:11434` and then `127.0.0.1:11434`, with a 45s timeout per address. The equivalent addresses are never invoked in parallel, avoiding duplicate generation. It then uses the deterministic summary fallback.
 
 ## Architecture Notes
 
 The core data flow:
-1. User inputs a Chinese name (2-4 Chinese characters only, no Pinyin)
-2. App validates the input as pure Chinese characters, then segments the name into surname + given name characters
+1. User inputs a Chinese name containing 2-4 characters in the current `U+4E00-U+9FA5` validator range (no Pinyin)
+2. App validates the input, then segments the name into surname + given name characters
 3. Each character is looked up for definition, pinyin, and tone (from `chars.json`). Dictionary entries use a Chinese-first schema: `{ pinyin, tones, definition_cn, freq, radical }`.
 4. Cultural context layer adds connotations, literary references, and naming trends (from `cultural.json` via `cultural.ts`). Redundant historical fields are excluded.
 5. Results are rendered in a structured, readable layout
 
 Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()`. The dictionary includes content merged from multiple Chinese sources (like Xinhua Dictionary) and is periodically cleaned via Python scripts to remove academic jargon. Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts` for display only; the app does not support pinyin as input.
 
-The local AI layer is managed by `src/services/localInference.ts`. It includes a health-check mechanism (Ping/Pong) with a 10s timeout to verify Worker availability.
+The local AI layer is managed by `src/services/localInference.ts`. User cancellation is propagated through `AbortSignal`, and `App.vue` cancels active analysis on button press, new analysis, history restore, reset, and component unmount.
+- **Worker Lifecycle**: The ONNX Worker uses a 10s Ping/Pong health check and a 10s inference timeout. Attempts are serialized, and Workers are terminated and recreated after timeout, abort, construction/postMessage failure, or a Worker-level error. A normal inference error response returns `null` without forcing replacement. Inference is attempted at most twice.
 - **Model Loading**: The Web Worker (`localInference.worker.ts`) uses a static import of `onnxruntime-web` for stability. It attempts to use `webgpu` for acceleration with `wasm` as fallback. In Tauri production, `ort.env.wasm.wasmPaths` must be explicitly set to the origin base URL.
 - **Asset Integrity**: The ONNX model MUST have all weights inlined (no `.data` external files). If files like `classifier.onnx.data` are generated, they must be removed and the model re-saved with `save_as_external_data=False`.
-- **Production Pathing**: In Tauri EXE environments, model loading defaults to the app's installation resource path (`tauri://*` or `https://tauri.localhost`). Fallback to `C:\Users\<user>\AppData\Local\Chinese Name Meaning Explorer` is reserved for user-specific cache data if needed.
+- **Production Pathing**: Bundled ONNX assets are fetched from the current Tauri/web application origin relative to Vite `BASE_URL`. `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models` is used only for the downloaded native GGUF model.
 - **Inference Summary**: Output summaries are dynamically synthesized using a hybrid approach:
     1. **Local ONNX**: Fast 10-class vibe prediction.
-    2. **Ollama (Local LLM)**: Specialized `name-expert` model (based on Qwen2.5) for literate, elegant summaries. Requires `OLLAMA_HOST=0.0.0.0` and `OLLAMA_ORIGINS="*"` for cross-interface access.
-    3. **Deterministic Fallback**: Rule-based narrative engine if Ollama is unavailable.
+    2. **Native GGUF (Tauri)**: Preferred desktop summary generator when the validated model is installed.
+    3. **Ollama (Local LLM)**: Secondary summary generator when native inference is unavailable and did not time out. Cross-interface development may require `OLLAMA_HOST=0.0.0.0` and `OLLAMA_ORIGINS="*"`.
+    4. **Deterministic Fallback**: Rule-based narrative engine when no LLM summary succeeds.
 - **Custom Model**: `NameExpert.modelfile` defines the AI persona. Create it via `ollama create name-expert -f NameExpert.modelfile`.
 - **Feature Engineering**: Inference combines acoustic features (prosody/initials), radical analysis, and semantic dictionary scanning (beauty/strength/virtue/nature).
 - **Diagnostics**: Health checks and inference lifecycle are logged via `[Worker]` and `[InferenceService]` console prefixes.
@@ -58,9 +61,12 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 
 ## CI/CD 
 
-- **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`. Requires Node.js 24 and CMake for Windows LLM builds.
+- **GitHub Actions**: Automated release workflow is configured in `.github/workflows/release.yml`. Windows native builds require Node.js 24, Rust stable, CMake, LLVM/libclang, and the MSVC toolchain.
+- **Pre-package Gates**: Before `tauri-apps/tauri-action@v0`, the workflow validates the release version, shared feature contract, complete Vitest suite, TypeScript types, read-only scoped lint, real ONNX WASM inference, Rust formatting, and `cargo check/test --locked`.
+- **Read-only Lint**: Release lint runs Oxlint and ESLint only over `src`, `scripts`, `vite.config.ts`, and `eslint.config.ts`; do not add `--fix`, cache writes, or `public/` generated ONNX Runtime assets to this gate.
+- **Dependency Security**: Keep both `npm audit --omit=dev` and `npm audit` at zero. The lockfile currently patches `postcss`, `protobufjs`, `shell-quote`, and `undici`; `minimatch@10.2.5` and `brace-expansion@5.0.8` are pinned through npm overrides until upstream chains update.
 - **GitHub Connection**: Repository is connected to GitHub (`LawrenceMei026/Chinese-name-meaning`). Pushes to `main` and tags are handled via authenticated Git flow.
-- **Current Version**: `v0.1.1` (Current release tag triggering the active build).
+- **Package Version**: `0.1.1`; release tags must match the package and Tauri config version.
 - **Trigger**: Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push origin v1.0.0`).
 - **Target**: Build and package for `windows-latest` (producing `.msi` and `.exe`).
 
@@ -69,7 +75,7 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 - Keep `COMMIT_PROGRESS.md` updated with a short entry for each commit.
 - Treat that file as the running log of repository milestones and progress.
 - When expanding cultural coverage, prefer the local `xls` workbook in the bundled Kangxi database folder and keep each batch source-aligned.
-- Cultural coverage now has a large local-database-backed base; the next active implementation target is the ONNX classifier in `src/services/localInference.ts`.
+- Cultural coverage has a large local-database-backed base. Current maintenance priorities are release reproducibility, inference lifecycle correctness, model-contract integrity, and keeping dependency audits clean.
 - Keep following the active task plan without pausing between task-sized batches.
 - Refresh this file with any new durable workflow preferences learned during the task.
 - Keep the current checkpoint summaries aligned with the active task list so future sessions can resume cleanly.
@@ -81,11 +87,14 @@ The local AI layer is managed by `src/services/localInference.ts`. It includes a
 
 ```bash
 cd my-vue-app
-npm install       # first time
+npm ci            # install exactly from package-lock.json
 npm run dev       # dev server at http://localhost:5173
 npm run build     # production build
 npm run type-check  # TypeScript check only
-npm run test:unit  # Vitest unit tests
+npm run test:features  # Python + Vitest feature contract
+npm run test:unit -- --run  # complete Vitest suite once
+npm run lint:check  # read-only scoped Oxlint + ESLint
+npm run test:onnx  # real ONNX WASM inference smoke
 npm run tauri:dev  # desktop wrapper during development
 npm run tauri:build  # desktop bundle, including Windows .exe output on Windows
 ```
@@ -110,5 +119,8 @@ my-vue-app/
     workers/localInference.worker.ts  # ONNX session and inference on a worker thread
     components/CharacterCard.vue  # all labels/strings in Mandarin
     App.vue                     # single-page input + results — all UI text in Mandarin; preloads dict on mount
-    src-tauri/                  # minimal Tauri wrapper for desktop packaging
+  src-tauri/
+    Cargo.lock                 # locked Rust graph required by release checks
+    src/main.rs                # secure GGUF download and Tauri command lifecycle
+    src/native_llm.rs          # llama.cpp-backed native generation
 ```
