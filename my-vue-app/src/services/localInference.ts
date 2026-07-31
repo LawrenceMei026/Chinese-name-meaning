@@ -165,7 +165,7 @@ function compactFact(value: string | undefined, fallback: string, maxLength = 12
 export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedName): string {
   const facts = result.chars.map(char => {
     const role = char.role === 'surname' ? '姓氏' : '名字'
-    const definition = compactFact(char.entry?.definition_cn, char.role === 'surname' ? '姓氏用字' : '未提供')
+    const definition = compactFact(namingMeaning(char), char.role === 'surname' ? '姓氏用字' : '未提供')
     const culturalFacts = [
       char.cultural?.element ? `五行=${char.cultural.element}` : '',
       char.cultural?.connotation ? `命名寓意=${compactFact(char.cultural.connotation, '')}` : '',
@@ -209,44 +209,57 @@ export function isGroundedSummary(summary: string, result?: AnalyzedName): boole
 
 function cleanDefinition(text: string): string {
   if (!text) return ''
-  let cleaned = text.replace(/.*(?:俗字|义同|见“|亦作).*[。？?！!\s]?/g, '')
-  cleaned = cleaned.replace(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s\d]+/, '')
-  const match = cleaned.match(/^[^。；;！？!]+/)
-  return match ? match[0].trim() : cleaned.slice(0, 15).trim()
+  const unusable = /(?:会意|形声|象形|指事|转注|假借|甲骨文|金文|小篆|俗字|异体|本义|从[\u3400-\u9fff]|见“|亦作|义同)/u
+  const segments = text
+    .replace(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s\d]+/, '')
+    .split(/[。；;！？!，,]/)
+    .map(segment => segment.replace(/^[()（）\s]+|[()（）\s]+$/g, '').trim())
+    .filter(segment => segment.length > 1 && !unusable.test(segment))
+  return segments[0]?.slice(0, 24) ?? ''
 }
 
-function buildSummary(labels: string[], result: AnalyzedName, source: 'model' | 'fallback') {
+function namingMeaning(char: AnalyzedName['chars'][number]): string {
+  const gloss = char.cultural?.localGloss?.trim()
+  if (gloss) return gloss
+  const connotation = char.cultural?.connotation?.split(/[；。]/)[0]?.trim()
+  return connotation || cleanDefinition(char.entry?.definition_cn || '')
+}
+
+export function buildLocalSummary(labels: string[], result: AnalyzedName, source: 'model' | 'fallback') {
   if (labels.length === 0) return '名字整体音韵和谐，展现出一种平衡而中正的气质。'
   const givenChars = result.chars.filter(c => c.role === 'given')
-  const meaningfulChar = givenChars.find(c => {
-    const def = c.entry?.definition_cn || ''
-    return def && !def.includes('俗字') && !def.includes('姓')
-  }) || givenChars[0]
-  const coreMeaning = cleanDefinition(meaningfulChar?.entry?.definition_cn || '')
-  const openings = [`“${result.original}”这个名字`, `在“${result.original}”中`, `纵观“${result.original}”的选字` ]
-  const opening = openings[Math.floor(result.original.length % openings.length)]
-  let culturalLogic = ''
-  const element = givenChars.find(c => c.cultural?.element)?.cultural?.element
-  const litRef = givenChars.find(c => c.cultural?.literaryRef)?.cultural?.literaryRef
-  if (litRef) { culturalLogic = `通过典故的化用，为名字注入了深厚的古典底蕴` }
-  else if (element) { culturalLogic = `借助“${element}”行的意象，构建了平衡的五行能量` }
-  else { culturalLogic = `通过精准的选字组合` }
+  const meanings = givenChars
+    .map(char => ({ char: char.char, meaning: namingMeaning(char) }))
+    .filter(item => item.meaning)
+    .slice(0, 2)
+  const meaningText = meanings.length > 1
+    ? `“${meanings[0]!.char}”有${meanings[0]!.meaning}之意，“${meanings[1]!.char}”则带有${meanings[1]!.meaning}的意味。`
+    : meanings.length === 1
+      ? `“${meanings[0]!.char}”有${meanings[0]!.meaning}之意。`
+      : ''
   const descriptors: Record<(typeof FEATURE_CONTRACT.labels)[number], string> = {
-    '书卷': '书卷润墨的雅致',
-    '宏伟': '开阔宏大的格局',
-    '豪迈': '昂扬洒脱的气魄',
-    '恬静': '温婉沉静的质感',
-    '典雅': '古朴隽永的余韵',
-    '新颖': '清新别致的时代感',
-    '灵动': '轻盈鲜活的灵气',
-    '坚毅': '坚定刚劲的力量',
-    '自然': '山水相生的清润',
-    '深邃': '含蓄悠远的意境',
+    '书卷': '清朗而有书卷气',
+    '宏伟': '开阔而有格局',
+    '豪迈': '昂扬而不失洒脱',
+    '恬静': '温和沉静',
+    '典雅': '端正雅致',
+    '新颖': '清新而有辨识度',
+    '灵动': '轻盈鲜活',
+    '坚毅': '坚定有力量',
+    '自然': '自然清润',
+    '深邃': '含蓄而有余味',
   }
-  const primaryLabel = labels[0] || '书卷'
-  const vibe = descriptors[primaryLabel] || '独特'
-  let summary = `${opening}${culturalLogic}，${labels.length > 1 ? '在此基础上进一步' : ''}生发出${vibe}。`
-  if (coreMeaning && coreMeaning.length > 1) { summary += ` 尤其是“${meaningfulChar?.char}”字所代表的“${coreMeaning}”之意，起到了点睛之笔的作用。` }
+  const vibes = labels.slice(0, 2).map(label => descriptors[label]).filter(Boolean)
+  const vibeText = vibes.length > 1
+    ? `两字相连，语意彼此映照，整体${vibes[0]}，也保留了${vibes[1]}的分寸。`
+    : `名字整体${vibes[0] || '平和自然'}，读来舒展而协调。`
+  const literaryRef = givenChars
+    .map(char => char.cultural?.literaryRef?.trim())
+    .find(reference => reference && /《[^》]+》/.test(reference))
+  const referenceText = literaryRef
+    ? `文化联想上，${literaryRef.replace(/^可联想到/u, '可联系').replace(/[。；;]+$/u, '')}，使名字的意涵更有层次。`
+    : ''
+  const summary = `“${result.original}”中，${meaningText}${vibeText}${referenceText}`
   return source === 'fallback' ? `${summary} (本地解析)` : summary
 }
 
@@ -568,7 +581,7 @@ export async function runLocalAiAnalysis(result: AnalyzedName, options: Inferenc
   throwIfAborted(signal)
   return {
     labels,
-    summary: ollamaSummary || buildSummary(labels, result, source),
+    summary: ollamaSummary || buildLocalSummary(labels, result, source),
     loadedFromCache: source === 'model',
     source: source,
   }

@@ -25,6 +25,38 @@ const result: AnalyzedName = {
   ],
 }
 
+const liMinghua: AnalyzedName = {
+  original: '李明华',
+  chars: [
+    { char: '李', role: 'surname', entry: null, cultural: null },
+    {
+      char: '明',
+      role: 'given',
+      entry: { pinyin: 'ming2', tones: '2', definition_cn: '会意。甲骨文以日、月发光表示明亮。' },
+      cultural: {
+        element: '火',
+        elementEmoji: '🔥',
+        connotation: '光明、明晰与开朗；常用来表示聪慧、澄澈的心性。',
+        genderBias: 'neutral',
+        literaryRef: '可联想到《大学》中的“明德”。',
+        localGloss: '明亮、清楚、开朗',
+      },
+    },
+    {
+      char: '华',
+      role: 'given',
+      entry: { pinyin: 'hua2', tones: '2', definition_cn: '光彩美丽' },
+      cultural: {
+        element: '木',
+        elementEmoji: '🌿',
+        connotation: '华美、繁盛与文化气息；也可指中华之“华”。',
+        genderBias: 'neutral',
+        localGloss: '华美、光彩、繁盛',
+      },
+    },
+  ],
+}
+
 describe('grounded name summary prompts', () => {
   it('supplies parsed facts and prohibits unsupported biography', async () => {
     const { buildGroundedSummaryPrompt } = await import('../services/localInference')
@@ -49,6 +81,32 @@ describe('grounded name summary prompts', () => {
     expect(isGroundedSummary('李明字文彬，在书法方面有深厚造诣，他的作品典雅而富有诗意，深受读者喜爱。', result)).toBe(false)
     expect(isGroundedSummary('李明（明）字孔明，号卧龙，人称卧龙先生，以智慧和才华著称，被誉为一代名士。', result)).toBe(false)
     expect(isGroundedSummary('“明”字清澈开朗，与温润宜人的气质相映；名字整体简洁舒展，既有内心明净的含蓄表达，也寄托待人坦荡、思路通达、步履从容的美好愿景，在平和之中保有坚定而清醒的力量。', result)).toBe(true)
+  })
+})
+
+describe('deterministic name summaries', () => {
+  it('uses naming meanings instead of dictionary etymology boilerplate', async () => {
+    const { buildGroundedSummaryPrompt, buildLocalSummary } = await import('../services/localInference')
+    const summary = buildLocalSummary(['书卷', '典雅'], liMinghua, 'model')
+    const prompt = buildGroundedSummaryPrompt(['书卷', '典雅'], liMinghua)
+
+    expect(summary).toContain('“明”有明亮、清楚、开朗之意')
+    expect(summary).toContain('“华”则带有华美、光彩、繁盛的意味')
+    expect(summary).not.toContain('会意')
+    expect(summary).not.toContain('通过典故的化用')
+    expect(summary).not.toContain('在此基础上进一步生发')
+    expect(summary).not.toContain('点睛之笔')
+    expect(prompt).toContain('明：角色=名字；字义=明亮、清楚、开朗')
+    expect(prompt).not.toContain('会意')
+    expect(prompt).not.toContain('甲骨文')
+  })
+
+  it('mentions a literary source concretely rather than claiming generic allusion', async () => {
+    const { buildLocalSummary } = await import('../services/localInference')
+    const summary = buildLocalSummary(['书卷'], liMinghua, 'fallback')
+
+    expect(summary).toContain('《大学》中的“明德”')
+    expect(summary).toContain('(本地解析)')
   })
 })
 
