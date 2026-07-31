@@ -57,6 +57,25 @@ const liMinghua: AnalyzedName = {
   ],
 }
 
+const yueYi: AnalyzedName = {
+  original: '乐毅',
+  chars: [
+    { char: '乐', role: 'surname', entry: null, cultural: null },
+    {
+      char: '毅',
+      role: 'given',
+      entry: { pinyin: 'yi4', tones: '4', definition_cn: '形声。从殳，殳指兵器。' },
+      cultural: {
+        element: '木',
+        elementEmoji: '🌿',
+        connotation: '坚定、果决与持守；常用来表达意志坚韧、行事有担当。',
+        genderBias: 'masculine',
+        localGloss: '意志坚定、果决刚健',
+      },
+    },
+  ],
+}
+
 describe('grounded name summary prompts', () => {
   it('supplies parsed facts and prohibits unsupported biography', async () => {
     const { buildGroundedSummaryPrompt } = await import('../services/localInference')
@@ -78,6 +97,7 @@ describe('grounded name summary prompts', () => {
     expect(isGroundedSummary('读音：ming2。名字光明开阔，象征国家繁荣与民族昌盛，寄托美好愿景。', result)).toBe(false)
     expect(isGroundedSummary('李明字文彬，在书法方面有深厚造诣，他的作品典雅而富有诗意，深受读者喜爱。', result)).toBe(false)
     expect(isGroundedSummary('李明（明）字孔明，号卧龙，人称卧龙先生，以智慧和才华著称，被誉为一代名士。', result)).toBe(false)
+    expect(isGroundedSummary('李明，明字，明亮、清楚而开朗，名字整体清朗舒展，也保留了温润雅致的分寸。', result)).toBe(false)
     expect(isGroundedSummary('“明”字清澈开朗，与温润宜人的气质相映；名字整体简洁舒展，既有内心明净的含蓄表达，也寄托待人坦荡、思路通达、步履从容的美好愿景，在平和之中保有坚定而清醒的力量。', result)).toBe(true)
   })
 })
@@ -105,6 +125,17 @@ describe('deterministic name summaries', () => {
 
     expect(summary).toContain('《大学》中的“明德”')
     expect(summary).toContain('(本地解析)')
+  })
+
+  it('gives single-character given names enough grounded material to rewrite', async () => {
+    const { buildGroundedSummaryPrompt, buildLocalSummary } = await import('../services/localInference')
+    const summary = buildLocalSummary(['坚毅'], yueYi, 'model')
+    const prompt = buildGroundedSummaryPrompt(['坚毅'], yueYi)
+
+    expect(summary).toContain('“毅”有意志坚定、果决刚健之意')
+    expect(summary).not.toContain('殳')
+    expect([...summary].length).toBeGreaterThanOrEqual(80)
+    expect(prompt).toContain('不得在姓名后重复名字用字或添加“字”“号”')
   })
 })
 

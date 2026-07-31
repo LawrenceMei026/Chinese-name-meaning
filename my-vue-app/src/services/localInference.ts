@@ -164,6 +164,7 @@ export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedNam
     `基础文稿：${factualDraft}`,
     '必须完整保留文稿中的姓名字义和已注明出处的文化联想。',
     '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途或命运推断。',
+    '不得在姓名后重复名字用字或添加“字”“号”等身份句式。',
     '不得输出拼音、英文、标题、列表或解释过程。',
     '输出80至130个汉字，只输出润色后的正文。',
   ].join('\n')
@@ -179,11 +180,16 @@ export function isGroundedSummary(summary: string, result?: AnalyzedName): boole
   ) return false
   const claimsBiography = /(?:^|[，。；\s])(?:字|号)(?:为|曰|叫作|名为)?[\u3400-\u9fff]{1,4}(?=[，。；\s]|$)|(?:著名|杰出|历史上).{0,12}(?:人物|名将|将军|政治家|军事家|诗人|文人|官员)/u.test(text)
   if (claimsBiography) return false
-  if (result && (
-    text.startsWith(`${result.original}字`)
-    || text.startsWith(`${result.original}号`)
-    || (text.startsWith(`${result.original}（`) && /）[，,\s]*(?:字|号)/u.test(text))
-  )) return false
+  if (result) {
+    const givenName = result.chars.filter(char => char.role === 'given').map(char => char.char).join('')
+    if (
+      text.startsWith(`${result.original}字`)
+      || text.startsWith(`${result.original}号`)
+      || text.startsWith(`${result.original}，${givenName}字`)
+      || text.startsWith(`${result.original},${givenName}字`)
+      || (text.startsWith(`${result.original}（`) && /）[，,\s]*(?:字|号)/u.test(text))
+    ) return false
+  }
   if (
     /(?:生于|出生于|祖籍|籍贯)|(?:北京|上海|天津|重庆|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|海南|四川|贵州|云南|陕西|甘肃|青海|河北|山西|辽宁|吉林|黑龙江|内蒙古|广西|西藏|宁夏|新疆|香港|澳门|台湾)[\u3400-\u9fff]{0,6}人|(?:书法|文学|政治|军事).{0,10}(?:造诣|成就)|(?:他的|她的)(?:作品|诗歌|生平|事迹)|(?:被誉为|被尊为|人称|号称)/u.test(text)
   ) return false
@@ -220,6 +226,9 @@ export function buildLocalSummary(labels: string[], result: AnalyzedName, source
     : meanings.length === 1
       ? `“${meanings[0]!.char}”有${meanings[0]!.meaning}之意。`
       : ''
+  const singleCharacterText = meanings.length === 1
+    ? `单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达${meanings[0]!.meaning}，也让名字保有不张扬的分寸。`
+    : ''
   const descriptors: Record<(typeof FEATURE_CONTRACT.labels)[number], string> = {
     '书卷': '清朗而有书卷气',
     '宏伟': '开阔而有格局',
@@ -242,7 +251,7 @@ export function buildLocalSummary(labels: string[], result: AnalyzedName, source
   const referenceText = literaryRef
     ? `文化联想上，${literaryRef.replace(/^可联想到/u, '可联系').replace(/[。；;]+$/u, '')}，使名字的意涵更有层次。`
     : ''
-  const summary = `“${result.original}”中，${meaningText}${vibeText}${referenceText}`
+  const summary = `“${result.original}”中，${meaningText}${singleCharacterText}${vibeText}${referenceText}`
   return source === 'fallback' ? `${summary} (本地解析)` : summary
 }
 

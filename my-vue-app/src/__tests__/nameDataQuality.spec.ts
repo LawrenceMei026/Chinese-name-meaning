@@ -60,5 +60,6 @@ describe('production name data quality', () => {
     expect(cultural['蘅'].literaryRef).toContain('并非同字')
     expect(cultural['瑾'].literaryRef).toContain('《楚辞·九章·怀沙》')
     expect(cultural['瑜'].literaryRef).toContain('《礼记·聘义》')
+    expect(cultural['毅'].localGloss).toBe('意志坚定、果决刚健')
   })
 })
