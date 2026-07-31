@@ -45,8 +45,10 @@ my-vue-app/
 ## Key features
 
 - Chinese-name parsing with surname detection, including common compound surnames.
-- Pinyin tone-mark formatting that keeps whitespace normalized and handles `v` as `ü`.
-- Production-data regression checks for polyphonic surnames, contextual compound readings, `u:` notation, and unusable source definitions.
+- Context-aware surname readings from `public/data/surnames.json`, plus explicit readings for polyphonic compound surnames in `src/data/compoundSurnamePinyin.json`.
+- Pinyin tone-mark formatting that keeps whitespace normalized and handles both `v` and `u:` as `ü`.
+- Runtime cleanup that replaces punctuation-only surname definitions with useful surname context and hides equivalent given-name fragments.
+- Production-data regression checks cover polyphonic surnames, contextual compound readings, `u:` notation, and unusable source definitions.
 - Curated cultural annotations for common naming characters.
 - Local AI fallback that still works when the model files are missing.
 - Persistent history stored in `localStorage`.
@@ -59,6 +61,7 @@ my-vue-app/
 - Blank, placeholder, and punctuation-only dictionary definitions are suppressed at runtime rather than presented as name meanings.
 - Cultural annotations are stored in `src/data/cultural.json` and read through `src/data/cultural.ts`.
 - The UI and normalized dictionary definitions are primarily Simplified Chinese.
+- `src/__tests__/nameDataQuality.spec.ts` loads the production JSON files and guards real polyphonic surname and dirty-definition cases.
 
 ## Local AI
 

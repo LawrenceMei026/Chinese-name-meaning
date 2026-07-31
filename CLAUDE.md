@@ -37,12 +37,12 @@ A webpage that analyzes Chinese names and explains their meanings with cultural 
 
 The core data flow:
 1. User inputs a Chinese name containing 2-4 characters in the current `U+4E00-U+9FA5` validator range (no Pinyin)
-2. App validates the input, then segments the name into surname + given name characters
-3. Each character is looked up for definition, pinyin, and tone (from `chars.json`). Dictionary entries use a Chinese-first schema: `{ pinyin, tones, definition_cn, freq, radical }`.
+2. App validates the input, then segments the name into a single surname or common compound surname plus given-name characters.
+3. Each character is looked up for definition, general pinyin, and tone from `chars.json`. Single-character surname context can override the reading from `surnames.json`; polyphonic compound surnames use the narrow `src/data/compoundSurnamePinyin.json` override table. Dictionary entries use a Chinese-first schema: `{ pinyin, tones, definition_cn, freq, radical }`.
 4. Cultural context layer adds connotations, literary references, and naming trends (from `cultural.json` via `cultural.ts`). Redundant historical fields are excluded.
 5. Results are rendered in a structured, readable layout
 
-Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()`. The dictionary includes content merged from multiple Chinese sources (like Xinhua Dictionary) and is periodically cleaned via Python scripts to remove academic jargon. Pinyin tone marks are formatted in `src/services/nameAnalyzer.ts` for display only; the app does not support pinyin as input.
+Dictionary data (`chars.json`, `surnames.json`) is preloaded on `onMounted` via `preloadDictionary()`. Keep general character readings in `chars.json` and surname-context readings in the surname data; do not overwrite the general reading to fix a surname. `nameAnalyzer.ts` filters empty or punctuation-only definition fragments at runtime, applies surname readings only after segmentation, and formats both numbered `v` and `u:` Pinyin as `ü` for display. The app does not support Pinyin as input. Production-data regressions belong in `src/__tests__/nameDataQuality.spec.ts`, not only mocked analyzer tests.
 
 The local AI layer is managed by `src/services/localInference.ts`. User cancellation is propagated through `AbortSignal`, and `App.vue` cancels active analysis on button press, new analysis, history restore, reset, and component unmount.
 - **Worker Lifecycle**: The ONNX Worker uses a 10s Ping/Pong health check and a 10s inference timeout. Attempts are serialized, and Workers are terminated and recreated after timeout, abort, construction/postMessage failure, or a Worker-level error. A normal inference error response returns `null` without forcing replacement. Inference is attempted at most twice.

@@ -160,7 +160,8 @@ export function formatPinyin(raw: string): string {
   if (!syllables.length) return ''
 
   return syllables
-    .map(syl => {
+    .map(rawSyllable => {
+      const syl = rawSyllable.replace(/u:/gi, matched => matched[0] === 'U' ? 'V' : 'v')
       const tone = toneFromPinyin(syl)
       if (!tone) return syl
       const base = syl.replace(/\d$/, '')

@@ -5,7 +5,7 @@ vi.mock('../data/cultural', () => ({
 }))
 
 const charsJson = {
-  李: { pinyin: 'li3', tones: '3', definition_cn: 'the surname Li' },
+  李: { pinyin: 'li3', tones: '3', definition_cn: ')' },
   明: { pinyin: 'ming2', tones: '2', definition_cn: 'bright' },
   华: { pinyin: 'hua2', tones: '2', definition_cn: 'magnificent' },
   欧: { pinyin: 'ou1', tones: '1', definition_cn: 'Europe' },
@@ -26,6 +26,7 @@ const surnamesJson = {
   阳: 'yang2',
   乐: 'yue4',
   吕: 'lu:3',
+  单: 'shan4',
 }
 
 vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
@@ -50,6 +51,26 @@ describe('analyzeName', () => {
 
     expect(result.original).toBe('李明华')
     expect(result.chars.map(char => char.role)).toEqual(['surname', 'given', 'given'])
+    expect(result.chars[0]?.entry?.definition_cn).toBe('姓氏用字')
+  })
+
+  it('uses the surname-specific pronunciation for a polyphonic surname', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+    const result = await analyzeName('乐明')
+
+    expect(result.chars[0]?.role).toBe('surname')
+    expect(result.chars[0]?.entry?.pinyin).toBe('yue4')
+    expect(result.chars[0]?.entry?.tones).toBe('4')
+    expect(result.chars[1]?.entry?.pinyin).toBe('ming2')
+  })
+
+  it('uses an explicit reading for a polyphonic compound surname', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+    const result = await analyzeName('单于明')
+
+    expect(result.chars.map(char => char.role)).toEqual(['surname', 'surname', 'given'])
+    expect(result.chars[0]?.entry?.pinyin).toBe('chan2')
+    expect(result.chars[1]?.entry?.pinyin).toBe('yu2')
   })
 
   it('trims the original input before returning it', async () => {
@@ -114,6 +135,7 @@ describe('formatPinyin', () => {
     const { formatPinyin } = await import('../services/nameAnalyzer')
 
     expect(formatPinyin('nv3 er2 ma')).toBe('nǚ ér ma')
+    expect(formatPinyin('lu:3')).toBe('lǚ')
     expect(formatPinyin('NV3 ER2 MA')).toBe('NǙ ÉR MA')
     expect(formatPinyin('lu:3 nu:e4')).toBe('lǚ nüè')
     expect(formatPinyin('LU:3')).toBe('LǙ')

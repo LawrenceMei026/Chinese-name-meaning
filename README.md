@@ -44,9 +44,9 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 
 ### 功能特性
 
-- **汉字特化解析**：专门针对当前校验范围 `U+4E00-U+9FA5` 内的 2-4 位中文姓名进行优化，自动识别姓氏与名字。
-- **深度字义解析**：整理自新华字典等权威来源，提供纯中文的精准释义。
-- **姓氏语境读音**：完成姓氏切分后才应用单姓和复姓专用读音，正确处理乐、翟、华、覃等多音姓。
+- **汉字特化解析**：专门针对当前校验范围 `U+4E00-U+9FA5` 内的 2-4 位中文姓名进行优化，自动识别单姓、常见复姓与名字。
+- **姓名上下文读音**：通用字典保留普通字音，单字姓数据库与特殊复姓读音表在姓氏位置覆盖多音字读音，例如 `乐 yuè`、`翟 zhái`、`单于 chányú`。
+- **深度字义解析**：整理自新华字典等来源，提供中文释义；运行时会过滤空白或纯标点残片，避免把无意义字典内容显示给用户。
 - **文化背景关联**：集成五行属性、典故出处、性别倾向及命名寓意。
 - **本地 AI 模型 (ONNX)**：使用本地训练的 10 标签分类器（如书卷、豪迈、灵动等），通过 WebGPU 硬件加速进行“意境”实时分析。
 - **分层本地推理**：ONNX 负责 10 类意境标签；Tauri 桌面端优先使用按需下载的 Qwen2.5 GGUF。原生不可用或非超时失败时尝试 Ollama；原生超时则直接回退到确定性文本。
@@ -139,6 +139,8 @@ cargo test --locked
 ```
 
 `test:onnx` creates an ONNX Runtime Web WASM session, executes `public/models/classifier.onnx` with a real tensor, and validates the output contract and finite values. `lint:check` is read-only and scans only project-owned source, scripts, and configuration; generated ONNX Runtime files under `public/` are excluded.
+
+The unit suite also loads the production `chars.json` and `surnames.json` files to verify polyphonic single surnames, explicit compound-surname readings, Pinyin normalization, and punctuation-only definition cleanup. Keep surname-specific readings out of the general character dictionary: they are applied only after segmentation identifies surname context.
 
 The tag-triggered Windows workflow runs version validation, feature tests, unit tests, TypeScript checking, read-only lint, the real ONNX smoke test, and locked Rust checks before `tauri-apps/tauri-action@v0` can package a release. The committed npm dependency graph currently reports zero vulnerabilities through both `npm audit --omit=dev` and `npm audit`.
 
