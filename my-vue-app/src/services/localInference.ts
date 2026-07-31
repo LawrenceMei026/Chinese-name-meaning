@@ -477,6 +477,17 @@ export async function startModelDownload(onProgress: (p: { progress: number; tot
   }
 }
 
+export function formatModelDownloadError(error: unknown): string {
+  const detail = typeof error === 'string'
+    ? error
+    : error instanceof Error
+      ? error.message
+      : ''
+  return detail
+    ? `模型下载失败：${detail}`
+    : '模型下载失败，请检查网络设置后重试。'
+}
+
 export async function runLocalAiAnalysis(result: AnalyzedName, options: InferenceOptions = {}): Promise<AiAnalysisResult> {
   const { signal } = options
   throwIfAborted(signal)

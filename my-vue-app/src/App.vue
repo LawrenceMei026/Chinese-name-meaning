@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
-import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory } from './services/localInference'
+import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory, formatModelDownloadError } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
 
@@ -218,8 +218,8 @@ async function handleActionDownload() {
     })
     modelReady.value = true
     downloadWindowOpen.value = false
-  } catch {
-    alert('下载失败，请检查网络设置。')
+  } catch (downloadError) {
+    alert(formatModelDownloadError(downloadError))
   } finally {
     isDownloading.value = false
   }

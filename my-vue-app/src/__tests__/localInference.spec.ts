@@ -25,6 +25,16 @@ const result: AnalyzedName = {
   ],
 }
 
+describe('model download errors', () => {
+  it('preserves the native download failure reason', async () => {
+    const { formatModelDownloadError } = await import('../services/localInference')
+
+    expect(formatModelDownloadError('connection timed out')).toBe('模型下载失败：connection timed out')
+    expect(formatModelDownloadError(new Error('disk full'))).toBe('模型下载失败：disk full')
+    expect(formatModelDownloadError(null)).toBe('模型下载失败，请检查网络设置后重试。')
+  })
+})
+
 class FakeWorker {
   static instances: FakeWorker[] = []
 

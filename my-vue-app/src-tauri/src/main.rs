@@ -13,6 +13,7 @@ use std::sync::{
     atomic::{AtomicBool, Ordering},
     Arc, Mutex,
 };
+use std::time::Duration;
 use sysinfo::System;
 use tauri::{AppHandle, Emitter, Manager, State};
 
@@ -30,6 +31,7 @@ const MODEL_REVISION: &str = "9217f5db79a29953eb74d5343926648285ec7e67";
 const MODEL_FILENAME: &str = "qwen2.5-0.5b-instruct-q4_k_m.gguf";
 const MODEL_SIZE: u64 = 491_400_032;
 const MODEL_SHA256: &str = "74a4da8c9fdbcd15bd1f6d01d621410d31c6fc00986f5eb687824e7b93d7a9db";
+const MODEL_BASE_URLS: [&str; 2] = ["https://huggingface.co", "https://hf-mirror.com"];
 
 #[derive(Serialize, Deserialize, Clone)]
 struct DownloadPayload {
@@ -94,6 +96,35 @@ fn acquire_download_lock(path: &PathBuf) -> Result<fs::File, String> {
     Ok(lock)
 }
 
+async fn request_model(client: &reqwest::Client) -> Result<reqwest::Response, String> {
+    let mut failures = Vec::new();
+    for base_url in MODEL_BASE_URLS {
+        let url = format!(
+            "{base_url}/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/{MODEL_REVISION}/{MODEL_FILENAME}"
+        );
+        let response = match client.get(&url).send().await {
+            Ok(response) => match response.error_for_status() {
+                Ok(response) => response,
+                Err(error) => {
+                    failures.push(format!("{base_url}: {error}"));
+                    continue;
+                }
+            },
+            Err(error) => {
+                failures.push(format!("{base_url}: {error}"));
+                continue;
+            }
+        };
+        match response.content_length() {
+            Some(MODEL_SIZE) => return Ok(response),
+            received => failures.push(format!(
+                "{base_url}: unexpected model size (expected {MODEL_SIZE}, received {received:?})"
+            )),
+        }
+    }
+    Err(format!("所有模型下载源均不可用：{}", failures.join("; ")))
+}
+
 #[tauri::command]
 async fn check_model_exists() -> bool {
     tauri::async_runtime::spawn_blocking(|| model_is_valid(&get_model_path()))
@@ -116,23 +147,12 @@ async fn download_model(handle: AppHandle) -> Result<String, String> {
         fs::remove_file(&path)
             .map_err(|error| format!("Failed to remove invalid model before download: {error}"))?;
     }
-    let url = format!(
-        "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/{MODEL_REVISION}/{MODEL_FILENAME}"
-    );
-    let client = reqwest::Client::new();
-    let res = client
-        .get(url)
-        .send()
-        .await
-        .and_then(reqwest::Response::error_for_status)
-        .map_err(|e| e.to_string())?;
-
-    let total_size = res.content_length().ok_or("Failed to get content length")?;
-    if total_size != MODEL_SIZE {
-        return Err(format!(
-            "Unexpected model size: expected {MODEL_SIZE}, received {total_size}"
-        ));
-    }
+    let client = reqwest::Client::builder()
+        .connect_timeout(Duration::from_secs(10))
+        .build()
+        .map_err(|error| format!("Failed to create model download client: {error}"))?;
+    let res = request_model(&client).await?;
+    let total_size = MODEL_SIZE;
     let temp_path = path.with_extension("gguf.part");
     let mut temporary = TemporaryDownload {
         path: temp_path.clone(),
