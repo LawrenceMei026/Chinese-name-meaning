@@ -13,12 +13,19 @@ const charsJson = {
   刘: { pinyin: 'liu2', tones: '2', definition_cn: 'surname Liu' },
   归: { pinyin: 'gui1', tones: '1', definition_cn: 'return' },
   走: { pinyin: 'zou3', tones: '3', definition_cn: 'walk' },
+  乐: { pinyin: 'le4', tones: '4', definition_cn: ')' },
+  吕: { pinyin: 'lu:3', tones: '3', definition_cn: 'surname Lü' },
+  毅: { pinyin: 'yi4', tones: '4', definition_cn: 'resolute' },
+  单: { pinyin: 'dan1', tones: '1', definition_cn: 'single' },
+  于: { pinyin: 'yu2', tones: '2', definition_cn: 'at' },
 }
 
 const surnamesJson = {
-  李: '',
-  欧: '',
-  阳: '',
+  李: 'li3',
+  欧: 'ou1',
+  阳: 'yang2',
+  乐: 'yue4',
+  吕: 'lu:3',
 }
 
 vi.stubGlobal('fetch', vi.fn(async (input: RequestInfo | URL) => {
@@ -65,6 +72,25 @@ describe('analyzeName', () => {
 
     expect(result.chars.map(char => char.role)).toEqual(['given', 'given', 'given'])
   })
+
+  it('uses a surname-specific reading only in surname context', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+
+    const surname = await analyzeName('乐毅')
+    const given = await analyzeName('李明乐')
+
+    expect(surname.chars[0]?.entry).toMatchObject({ pinyin: 'yue4', tones: '4', definition_cn: '姓氏用字' })
+    expect(given.chars[2]?.entry?.pinyin).toBe('le4')
+  })
+
+  it('uses contextual readings for special compound surnames', async () => {
+    const { analyzeName } = await import('../services/nameAnalyzer')
+
+    const result = await analyzeName('单于明')
+
+    expect(result.chars.map(char => char.role)).toEqual(['surname', 'surname', 'given'])
+    expect(result.chars.slice(0, 2).map(char => char.entry?.pinyin)).toEqual(['chan2', 'yu2'])
+  })
 })
 
 describe('formatPinyin', () => {
@@ -89,6 +115,8 @@ describe('formatPinyin', () => {
 
     expect(formatPinyin('nv3 er2 ma')).toBe('nǚ ér ma')
     expect(formatPinyin('NV3 ER2 MA')).toBe('NǙ ÉR MA')
+    expect(formatPinyin('lu:3 nu:e4')).toBe('lǚ nüè')
+    expect(formatPinyin('LU:3')).toBe('LǙ')
   })
 
   it('places tones on the correct vowel clusters', async () => {

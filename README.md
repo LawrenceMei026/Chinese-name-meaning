@@ -14,6 +14,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 
 - **Hanzi-Specialized Analysis**: Optimized for 2-4 character Chinese names in the current `U+4E00-U+9FA5` validator range, with automatic surname/given-name segmentation.
 - **Deep Dictionary Integration**: Powered by authoritative sources like Xinhua Dictionary, providing precise Simplified Chinese definitions.
+- **Context-Aware Readings**: Applies single and compound surname pronunciations only after surname segmentation, including polyphonic surnames such as 乐, 翟, 华, and 覃.
 - **Cultural Context**: Includes Five Elements, literary references, gender bias, and naming connotations.
 - **Local AI Model (ONNX)**: Uses a custom-trained 10-label classifier (Scholarly, Heroic, Serene, etc.) with WebGPU hardware acceleration.
 - **Layered Local Inference**: ONNX predicts the 10 tone labels. Tauri first tries a downloaded native Qwen2.5 GGUF; native unavailability or non-timeout failure permits Ollama, while a native timeout goes directly to deterministic text.
@@ -29,6 +30,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **Desktop**: Packaged as a native Windows `.exe` via Tauri.
 - **Native LLM**: Rust `llama-cpp-2` loads a Qwen2.5 0.5B Q4_K_M GGUF downloaded on demand to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
 - **Model Integrity**: The 491,400,032-byte download is pinned to a Hugging Face revision and verified by HTTP status, size, and SHA-256 before atomic installation.
+- **Resilient Download**: The desktop downloader falls back to a mirror when the primary Hugging Face endpoint is unavailable without relaxing size or SHA-256 verification.
 
 ---
 
@@ -42,6 +44,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 
 - **汉字特化解析**：专门针对当前校验范围 `U+4E00-U+9FA5` 内的 2-4 位中文姓名进行优化，自动识别姓氏与名字。
 - **深度字义解析**：整理自新华字典等权威来源，提供纯中文的精准释义。
+- **姓氏语境读音**：完成姓氏切分后才应用单姓和复姓专用读音，正确处理乐、翟、华、覃等多音姓。
 - **文化背景关联**：集成五行属性、典故出处、性别倾向及命名寓意。
 - **本地 AI 模型 (ONNX)**：使用本地训练的 10 标签分类器（如书卷、豪迈、灵动等），通过 WebGPU 硬件加速进行“意境”实时分析。
 - **分层本地推理**：ONNX 负责 10 类意境标签；Tauri 桌面端优先使用按需下载的 Qwen2.5 GGUF。原生不可用或非超时失败时尝试 Ollama；原生超时则直接回退到确定性文本。
@@ -57,6 +60,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **桌面支持**：通过 Tauri 提供 Windows `.exe` 原生包支持。
 - **原生大模型**：Rust `llama-cpp-2` 加载 Qwen2.5 0.5B Q4_K_M GGUF，模型按需下载到 `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`。
 - **模型完整性**：491,400,032 字节的下载固定到 Hugging Face revision，并在原子安装前校验 HTTP 状态、大小和 SHA-256。
+- **下载容错**：官方 Hugging Face 端点不可用时自动切换镜像，同时保持大小和 SHA-256 完整性校验不变。
 
 ---
 
@@ -67,7 +71,7 @@ my-vue-app/
   public/
     data/
       chars.json      # Chinese-first dictionary (Xinhua core data)
-      surnames.json   # Surname database
+      surnames.json   # Single-character surname-specific readings
     models/
       classifier.onnx # Custom-trained 16-dim feature -> 10-class classifier
       manifest.json   # Model version and label mapping
@@ -76,6 +80,8 @@ my-vue-app/
     services/
       localInference.ts       # AI Orchestration
       nameAnalyzer.ts         # Dict & Segmentation engine
+    data/
+      compoundSurnamePinyin.json # Contextual readings that cannot be inferred safely
     workers/
       localInference.worker.ts # ONNX Inference worker
   src-tauri/

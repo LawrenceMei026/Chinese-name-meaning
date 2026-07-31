@@ -1,11 +1,12 @@
 import type { AnalyzedChar, AnalyzedName, CharEntry } from '../types'
 import { getCulturalData } from '../data/cultural'
+import compoundSurnamePinyin from '../data/compoundSurnamePinyin.json'
 
 type RawDict = Record<string, CharEntry>
 type SurnameDict = Record<string, string>
 
 let charDict: RawDict | null = null
-let surnameSet: Set<string> | null = null
+let surnameDict: SurnameDict | null = null
 let loadPromise: Promise<void> | null = null
 
 const COMMON_COMPOUND_SURNAMES = new Set([
@@ -13,7 +14,9 @@ const COMMON_COMPOUND_SURNAMES = new Set([
   '尉迟', '长孙', '公孙', '东郭', '南宫', '闾丘', '子车', '百里', '梁丘', '东门',
   '西门', '呼延', '公羊', '轩辕', '濮阳', '单于', '申屠', '仲孙', '钟离', '东里',
   '谷梁', '拓跋', '夹谷', '段干', '漆雕', '乐正', '壤驷', '公良', '漆周', '东野',
-  '宰父', '端木', '巫马', '公西', '颛孙', '壤丘', '微生', '羊舌', '宓', '伯',
+  '宰父', '端木', '巫马', '公西', '颛孙', '壤丘', '微生', '羊舌', '万俟', '闻人',
+  '东方', '赫连', '澹台', '公冶', '宗政', '淳于', '太叔', '鲜于', '司空', '司寇',
+  '亓官', '左丘', '南门', '归海', '第五',
 ])
 
 function baseUrl() {
@@ -26,7 +29,7 @@ function dataUrl(path: string) {
 }
 
 async function loadData() {
-  if (charDict && surnameSet) return
+  if (charDict && surnameDict) return
   if (!loadPromise) {
     loadPromise = Promise.all([
       fetch(dataUrl('data/chars.json')),
@@ -38,8 +41,7 @@ async function loadData() {
         }
 
         charDict = await charsRes.json() as RawDict
-        const surnames = await surnamesRes.json() as SurnameDict
-        surnameSet = new Set(Object.keys(surnames))
+        surnameDict = await surnamesRes.json() as SurnameDict
       })
       .finally(() => {
         loadPromise = null
@@ -52,6 +54,33 @@ async function loadData() {
 function lookupChar(char: string): CharEntry | null {
   if (!charDict) return null
   return charDict[char] ?? null
+}
+
+function toneString(pinyin: string): string {
+  const tone = toneFromPinyin(pinyin)
+  return tone ? String(tone) : '0'
+}
+
+function withPinyin(entry: CharEntry | null, pinyin: string | undefined): CharEntry | null {
+  if (!entry || !pinyin) return entry
+  return { ...entry, pinyin, tones: toneString(pinyin) }
+}
+
+export function hasMeaningfulDefinition(definition: string | undefined): boolean {
+  const trimmed = definition?.trim()
+  return Boolean(
+    trimmed
+    && !/^[()（）,，。;；?？\s]+$/.test(trimmed)
+    && !/^(?:暂无中文释义|义未详)$/u.test(trimmed),
+  )
+}
+
+function sanitizeEntry(entry: CharEntry | null, role: 'surname' | 'given'): CharEntry | null {
+  if (!entry || hasMeaningfulDefinition(entry.definition_cn)) return entry
+  return {
+    ...entry,
+    definition_cn: role === 'surname' ? '姓氏用字' : '',
+  }
 }
 
 function toneFromPinyin(syllable: string): number {
@@ -127,7 +156,7 @@ function replaceToneVowel(base: string, tone: number): string {
 }
 
 export function formatPinyin(raw: string): string {
-  const syllables = raw.trim().split(/\s+/).filter(Boolean)
+  const syllables = raw.trim().replace(/u:/gi, match => match[0] === 'U' ? 'Ü' : 'ü').split(/\s+/).filter(Boolean)
   if (!syllables.length) return ''
 
   return syllables
@@ -146,13 +175,13 @@ function surnameLength(chars: string[]): number {
   const joinedTwo = chars.length >= 2 ? chars[0]! + chars[1]! : ''
   if (COMMON_COMPOUND_SURNAMES.has(joinedTwo)) return 2
 
-  if (surnameSet?.has(joinedTwo)) return 2
-  if (surnameSet?.has(chars[0]!)) return 1
+  if (surnameDict?.[joinedTwo]) return 2
+  if (surnameDict?.[chars[0]!]) return 1
   return 0
 }
 
 function segment(chars: string[]): ('surname' | 'given')[] {
-  if (!surnameSet) return chars.map(() => 'given')
+  if (!surnameDict) return chars.map(() => 'given')
 
   const roles: ('surname' | 'given')[] = []
   const surnameCount = surnameLength(chars)
@@ -176,13 +205,24 @@ export async function analyzeName(input: string): Promise<AnalyzedName> {
   const trimmedInput = input.trim()
   const chars = [...trimmedInput]
   const roles = segment(chars)
+  const surnameCount = roles.findIndex(role => role === 'given')
+  const actualSurnameCount = surnameCount === -1 ? roles.length : surnameCount
+  const compoundReading = actualSurnameCount === 2
+    ? compoundSurnamePinyin[chars.slice(0, 2).join('') as keyof typeof compoundSurnamePinyin]?.split(/\s+/)
+    : undefined
 
-  const analyzed: AnalyzedChar[] = chars.map((char, i) => ({
-    char,
-    role: roles[i] ?? 'given',
-    entry: lookupChar(char),
-    cultural: getCulturalData(char),
-  }))
+  const analyzed: AnalyzedChar[] = chars.map((char, i) => {
+    const role = roles[i] ?? 'given'
+    const contextualPinyin = role === 'surname'
+      ? compoundReading?.[i] ?? (actualSurnameCount === 1 ? surnameDict?.[char] : undefined)
+      : undefined
+    return {
+      char,
+      role,
+      entry: sanitizeEntry(withPinyin(lookupChar(char), contextualPinyin), role),
+      cultural: getCulturalData(char),
+    }
+  })
 
   return { original: trimmedInput, chars: analyzed }
 }

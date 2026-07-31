@@ -6,7 +6,7 @@ This Vue 3 app analyzes Chinese names character by character and explains the me
 
 - Accepts names containing 2-4 characters in the current `U+4E00-U+9FA5` validator range; pinyin input is not supported.
 - Splits the name into surname and given-name characters.
-- Looks up pronunciation and dictionary definitions from CC-CEDICT data.
+- Looks up dictionary definitions and applies surname-specific pronunciation after segmentation.
 - Adds curated cultural notes such as Five Elements, literary references, and naming connotations.
 - Uses the bundled ONNX model for 10-class tone labels and a layered local summary path: native GGUF, Ollama, then deterministic fallback.
 - Saves recent analyses in the browser so you can revisit them after a refresh.
@@ -46,6 +46,7 @@ my-vue-app/
 
 - Chinese-name parsing with surname detection, including common compound surnames.
 - Pinyin tone-mark formatting that keeps whitespace normalized and handles `v` as `ü`.
+- Production-data regression checks for polyphonic surnames, contextual compound readings, `u:` notation, and unusable source definitions.
 - Curated cultural annotations for common naming characters.
 - Local AI fallback that still works when the model files are missing.
 - Persistent history stored in `localStorage`.
@@ -54,6 +55,8 @@ my-vue-app/
 ## Data sources
 
 - Dictionary data comes from CC-CEDICT and is loaded at runtime from `public/data/`, resolved relative to the Vite base path so subpath deployments keep working.
+- `public/data/surnames.json` stores single-character surname readings. `src/data/compoundSurnamePinyin.json` stores only compound readings that cannot be inferred safely from ordinary character readings.
+- Blank, placeholder, and punctuation-only dictionary definitions are suppressed at runtime rather than presented as name meanings.
 - Cultural annotations are stored in `src/data/cultural.json` and read through `src/data/cultural.ts`.
 - The UI and normalized dictionary definitions are primarily Simplified Chinese.
 
@@ -72,7 +75,7 @@ The optional AI layer is orchestrated by `src/services/localInference.ts`.
 ### Desktop GGUF download
 
 - The installer does not bundle GGUF weights. The app downloads a 491,400,032-byte Qwen2.5 0.5B Q4_K_M model to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
-- The Hugging Face URL is pinned to a full revision. The downloader checks HTTP status and content length, streams SHA-256 validation into a `.part` file, uses a cross-process lock, and atomically renames only a verified model.
+- The Hugging Face URL is pinned to a full revision, with an integrity-equivalent mirror fallback. The downloader checks HTTP status and content length, streams SHA-256 validation into a `.part` file, uses a cross-process lock, and atomically renames only a verified model.
 - When the model is missing, the download dialog warns systems reporting less than 6GB RAM. The warning does not block download or later native inference.
 
 ## Getting started
