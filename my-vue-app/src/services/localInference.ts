@@ -162,6 +162,7 @@ export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedNam
   return [
     '任务：只润色基础文稿，不介绍人物，不增加事实。',
     `基础文稿：${factualDraft}`,
+    `开头必须保留为：在“${result.original}”中，`,
     '必须完整保留文稿中的姓名字义和已注明出处的文化联想。',
     '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途或命运推断。',
     '不得在姓名后重复名字用字或添加“字”“号”等身份句式。',
@@ -242,16 +243,16 @@ export function buildLocalSummary(labels: string[], result: AnalyzedName, source
     '深邃': '含蓄而有余味',
   }
   const vibes = labels.slice(0, 2).map(label => descriptors[label]).filter(Boolean)
-  const vibeText = vibes.length > 1
-    ? `两字相连，语意彼此映照，整体${vibes[0]}，也保留了${vibes[1]}的分寸。`
-    : `名字整体${vibes[0] || '平和自然'}，读来舒展而协调。`
+  const vibeText = meanings.length > 1 && vibes.length > 1
+    ? `名字中的两个用字彼此映照，整体${vibes[0]}，也保留了${vibes[1]}的分寸。`
+    : `名字整体${vibes[0] || '平和自然'}${vibes[1] ? `，也保留了${vibes[1]}的分寸` : ''}，读来舒展而协调。`
   const literaryRef = givenChars
     .map(char => char.cultural?.literaryRef?.trim())
     .find(reference => reference && /《[^》]+》/.test(reference))
   const referenceText = literaryRef
     ? `文化联想上，${literaryRef.replace(/^可联想到/u, '可联系').replace(/[。；;]+$/u, '')}，使名字的意涵更有层次。`
     : ''
-  const summary = `“${result.original}”中，${meaningText}${singleCharacterText}${vibeText}${referenceText}`
+  const summary = `在“${result.original}”中，${meaningText}${singleCharacterText}${vibeText}${referenceText}`
   return source === 'fallback' ? `${summary} (本地解析)` : summary
 }
 

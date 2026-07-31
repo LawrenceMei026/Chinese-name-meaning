@@ -403,7 +403,7 @@ async fn generate_internal_summary(
     handle: AppHandle,
     state: State<'_, AppState>,
     request_id: String,
-    name: String,
+    _name: String,
     context: String,
 ) -> Result<String, String> {
     let cancelled = Arc::new(AtomicBool::new(false));
@@ -454,9 +454,9 @@ fn generate_summary(
 
     let prompt = format!(
         "<|im_start|>system\n你是姓名文字分析助手。只能依据用户提供的事实进行分析，不得调用或补充人物传记知识。<|im_end|>\n\
-        <|im_start|>user\n姓名是“{}”。\n{}<|im_end|>\n\
+        <|im_start|>user\n{}<|im_end|>\n\
         <|im_start|>assistant\n",
-        name, context
+        context
     );
 
     let path = get_model_path()?;

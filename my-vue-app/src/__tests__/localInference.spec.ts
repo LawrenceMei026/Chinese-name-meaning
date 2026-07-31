@@ -82,7 +82,7 @@ describe('grounded name summary prompts', () => {
     const prompt = buildGroundedSummaryPrompt(['书卷', '典雅'], result)
 
     expect(prompt).toContain('任务：只润色基础文稿，不介绍人物，不增加事实')
-    expect(prompt).toContain('基础文稿：“李明”中，“明”有明亮之意')
+    expect(prompt).toContain('基础文稿：在“李明”中，“明”有明亮之意')
     expect(prompt).not.toContain('读音=míng')
     expect(prompt).toContain('禁止出现字号、人称、出生、籍贯、人物身份、生平')
   })
@@ -363,7 +363,7 @@ describe('local inference worker recovery', () => {
     expect(fetchMock.mock.calls[0]?.[0]).toBe('http://localhost:11434/api/generate')
     const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as { prompt: string }
     expect(request.prompt).toContain('任务：只润色基础文稿，不介绍人物，不增加事实')
-    expect(request.prompt).toContain('基础文稿：“李明”中，“明”有明亮之意')
+    expect(request.prompt).toContain('基础文稿：在“李明”中，“明”有明亮之意')
 
     resolveFirst({ ok: false } as Response)
     await vi.advanceTimersByTimeAsync(250)
