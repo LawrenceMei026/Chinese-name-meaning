@@ -25,6 +25,33 @@ const result: AnalyzedName = {
   ],
 }
 
+describe('grounded name summary prompts', () => {
+  it('supplies parsed facts and prohibits unsupported biography', async () => {
+    const { buildGroundedSummaryPrompt } = await import('../services/localInference')
+    const prompt = buildGroundedSummaryPrompt(['书卷', '典雅'], result)
+
+    expect(prompt).toContain('李：角色=姓氏')
+    expect(prompt).toContain('明：角色=名字；字义=明亮')
+    expect(prompt).not.toContain('读音=míng')
+    expect(prompt).toContain('不得把姓名识别为真实人物')
+    expect(prompt).toContain('不得补充字号、朝代、官职、职业、生平')
+    expect(prompt).toContain('只允许使用下列已提供事实')
+  })
+
+  it('rejects unsupported biographical claims from generated text', async () => {
+    const { isGroundedSummary } = await import('../services/localInference')
+
+    expect(isGroundedSummary('“明”字取光明通达之意，与清朗意境相映，使名字呈现澄澈开阔的气质；明亮并非浮于表面的耀眼，而是内心清醒、待人坦荡的温润表达，寄托行事坚定、思路通达且前路明朗的美好愿景。', result)).toBe(true)
+    expect(isGroundedSummary('乐毅，字子渊，是春秋时期著名军事家。', result)).toBe(false)
+    expect(isGroundedSummary('单于明，汉唐以来多有所指，意为光耀先贤，象征国家兴盛。', result)).toBe(false)
+    expect(isGroundedSummary('结合具体字义生成一段100字左右的文雅姓名意境分析。', result)).toBe(false)
+    expect(isGroundedSummary('读音：ming2。名字光明开阔，象征国家繁荣与民族昌盛，寄托美好愿景。', result)).toBe(false)
+    expect(isGroundedSummary('李明字文彬，在书法方面有深厚造诣，他的作品典雅而富有诗意，深受读者喜爱。', result)).toBe(false)
+    expect(isGroundedSummary('李明（明）字孔明，号卧龙，人称卧龙先生，以智慧和才华著称，被誉为一代名士。', result)).toBe(false)
+    expect(isGroundedSummary('“明”字清澈开朗，与温润宜人的气质相映；名字整体简洁舒展，既有内心明净的含蓄表达，也寄托待人坦荡、思路通达、步履从容的美好愿景，在平和之中保有坚定而清醒的力量。', result)).toBe(true)
+  })
+})
+
 describe('model download errors', () => {
   it('preserves the native download failure reason', async () => {
     const { formatModelDownloadError } = await import('../services/localInference')
@@ -32,6 +59,19 @@ describe('model download errors', () => {
     expect(formatModelDownloadError('connection timed out')).toBe('模型下载失败：connection timed out')
     expect(formatModelDownloadError(new Error('disk full'))).toBe('模型下载失败：disk full')
     expect(formatModelDownloadError(null)).toBe('模型下载失败，请检查网络设置后重试。')
+  })
+
+  it('reads and configures the native model directory', async () => {
+    invokeMock.mockImplementation((command: string) => {
+      if (command === 'get_model_directory') return Promise.resolve('D:\\ChineseNameModels')
+      if (command === 'set_model_directory') return Promise.resolve('D:\\ChineseNameModels')
+      return Promise.reject(new Error(`Unexpected command: ${command}`))
+    })
+    const { getModelDirectory, setModelDirectory } = await import('../services/localInference')
+
+    await expect(getModelDirectory()).resolves.toBe('D:\\ChineseNameModels')
+    await expect(setModelDirectory('D:\\ChineseNameModels')).resolves.toBe('D:\\ChineseNameModels')
+    expect(invokeMock).toHaveBeenLastCalledWith('set_model_directory', { directory: 'D:\\ChineseNameModels' })
   })
 })
 
@@ -218,7 +258,7 @@ describe('local inference worker recovery', () => {
     fetchMock.mockImplementationOnce(() => new Promise<Response>(resolve => { resolveFirst = resolve }))
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ response: 'Ollama summary' }),
+      json: async () => ({ response: '“明”字取光明通达之意，与清朗意境相映，使名字呈现澄澈开阔的气质；明亮并非浮于表面的耀眼，而是内心清醒、待人坦荡的温润表达，寄托行事坚定、思路通达且前路明朗的美好愿景。' }),
     } as Response)
     vi.stubGlobal('fetch', fetchMock)
     vi.stubGlobal('Worker', class extends FakeWorker {
@@ -233,6 +273,9 @@ describe('local inference worker recovery', () => {
     await vi.advanceTimersByTimeAsync(0)
     expect(fetchMock).toHaveBeenCalledTimes(1)
     expect(fetchMock.mock.calls[0]?.[0]).toBe('http://localhost:11434/api/generate')
+    const request = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body)) as { prompt: string }
+    expect(request.prompt).toContain('明：角色=名字；字义=明亮')
+    expect(request.prompt).toContain('不得补充字号、朝代、官职、职业、生平')
 
     resolveFirst({ ok: false } as Response)
     await vi.advanceTimersByTimeAsync(250)
@@ -240,7 +283,7 @@ describe('local inference worker recovery', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls[1]?.[0]).toBe('http://127.0.0.1:11434/api/generate')
-    expect(analysis.summary).toBe('Ollama summary')
+    expect(analysis.summary).toContain('“明”字取光明通达之意')
   })
 
   it('cancels the complete inference chain through AbortSignal', async () => {

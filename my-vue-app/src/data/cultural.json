@@ -542,7 +542,7 @@
     "elementEmoji": "🔥",
     "connotation": "美玉、珍贵与温润；常用来写品德与光华。",
     "genderBias": "feminine",
-    "literaryRef": "可联想到“怀瑾握瑜”的美德意象。",
+    "literaryRef": "《楚辞·九章·怀沙》有“怀瑾握瑜兮”，以美玉比喻美德。",
     "localGloss": "美玉、珍贵、温润"
   },
   "琪": {
@@ -802,7 +802,7 @@
     "elementEmoji": "✨",
     "connotation": "香气远播、德行芬芳；常用来写美名与美德。",
     "genderBias": "feminine",
-    "literaryRef": "“黍稷非馨，明德维馨。”——《尚书·酒诰》",
+    "literaryRef": "《尚书·君陈》有“黍稷非馨，明德惟馨”，以馨香比喻德行。",
     "localGloss": "芬芳、远播、美德"
   },
   "香": {
@@ -1390,7 +1390,7 @@
     "elementEmoji": "🌿",
     "connotation": "杜衡香草；常与芳芷并举，带香草、清雅和古典气息。",
     "genderBias": "feminine",
-    "literaryRef": "可联想到《离骚》“杂杜蘅与芳芷”。",
+    "literaryRef": "《离骚》有“杂杜衡与芳芷”，此处“衡”为香草名，可与蘅的香草意象关联，但并非同字。",
     "localGloss": "香草、清雅、芬芳"
   },
   "荟": {
@@ -1475,7 +1475,7 @@
     "elementEmoji": "🔥",
     "connotation": "美玉与美德并举；常写无瑕、出众与温润光采。",
     "genderBias": "neutral",
-    "literaryRef": "可联想到“瑕不掩瑜”的赞美表达。",
+    "literaryRef": "《礼记·聘义》有“瑕不掩瑜，瑜不掩瑕”，以美玉比喻德质。",
     "localGloss": "美玉、无瑕、光采"
   },
   "琛": {

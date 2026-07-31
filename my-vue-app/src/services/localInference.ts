@@ -156,6 +156,57 @@ function buildFeatureText(result: AnalyzedName) {
   ].join('\n')
 }
 
+function compactFact(value: string | undefined, fallback: string, maxLength = 120): string {
+  const compacted = value?.replace(/\s+/g, ' ').trim()
+  if (!compacted) return fallback
+  return compacted.length > maxLength ? `${compacted.slice(0, maxLength)}…` : compacted
+}
+
+export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedName): string {
+  const facts = result.chars.map(char => {
+    const role = char.role === 'surname' ? '姓氏' : '名字'
+    const definition = compactFact(char.entry?.definition_cn, char.role === 'surname' ? '姓氏用字' : '未提供')
+    const culturalFacts = [
+      char.cultural?.element ? `五行=${char.cultural.element}` : '',
+      char.cultural?.connotation ? `命名寓意=${compactFact(char.cultural.connotation, '')}` : '',
+      char.cultural?.literaryRef ? `典故=${compactFact(char.cultural.literaryRef, '')}` : '',
+    ].filter(Boolean)
+    return `${char.char}：角色=${role}；字义=${definition}${culturalFacts.length ? `；${culturalFacts.join('；')}` : ''}`
+  }).join('\n')
+
+  return [
+    `分析姓名：“${result.original}”`,
+    `意境基调：${labels.join('、') || '中正'}`,
+    '只允许使用下列已提供事实：',
+    facts,
+    '事实边界：不得把姓名识别为真实人物，不得补充字号、朝代、官职、职业、生平、亲属、事迹或未提供的典故。',
+    '不得从姓名引申国家、民族、政治、军事、事业成就或命运结论。姓氏只作为姓氏，不解释其普通字义。',
+    '若名字字义未提供，只分析字形组合和给定基调，不得猜测。',
+    '输出要求：直接输出80至130字中文正文；围绕名字用字及意境表达；不得输出拼音、英文、标题、列表，不得复述指令或事实清单。',
+  ].join('\n')
+}
+
+export function isGroundedSummary(summary: string, result?: AnalyzedName): boolean {
+  const text = summary.trim()
+  if (
+    [...text].length < 80
+    || /[A-Za-z]/.test(text)
+    || /(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)
+    || /(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)
+  ) return false
+  const claimsBiography = /(?:^|[，。；\s])(?:字|号)(?:为|曰|叫作|名为)?[\u3400-\u9fff]{1,4}(?=[，。；\s]|$)|(?:著名|杰出|历史上).{0,12}(?:人物|名将|将军|政治家|军事家|诗人|文人|官员)/u.test(text)
+  if (claimsBiography) return false
+  if (result && (
+    text.startsWith(`${result.original}字`)
+    || text.startsWith(`${result.original}号`)
+    || (text.startsWith(`${result.original}（`) && /）[，,\s]*(?:字|号)/u.test(text))
+  )) return false
+  if (
+    /(?:生于|出生于|祖籍|籍贯)|(?:北京|上海|天津|重庆|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|海南|四川|贵州|云南|陕西|甘肃|青海|河北|山西|辽宁|吉林|黑龙江|内蒙古|广西|西藏|宁夏|新疆|香港|澳门|台湾)[\u3400-\u9fff]{0,6}人|(?:书法|文学|政治|军事).{0,10}(?:造诣|成就)|(?:他的|她的)(?:作品|诗歌|生平|事迹)|(?:被誉为|被尊为|人称|号称)/u.test(text)
+  ) return false
+  return !/(?:春秋|战国|秦汉|汉唐|秦朝|汉朝|汉代|唐朝|唐代|宋朝|宋代|明朝|明代|清朝|清代|古代|先贤|史载|相传)/u.test(text)
+}
+
 function cleanDefinition(text: string): string {
   if (!text) return ''
   let cleaned = text.replace(/.*(?:俗字|义同|见“|亦作).*[。？?！!\s]?/g, '')
@@ -376,12 +427,12 @@ async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ ava
   }
 }
 
-async function fetchNativeSummary(result: AnalyzedName, signal?: AbortSignal): Promise<NativeSummaryResult> {
+async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<NativeSummaryResult> {
   if (!isTauri()) return { summary: null, timedOut: false }
   const model = await checkNativeModelForInference(signal)
   if (!model.available) return { summary: null, timedOut: model.timedOut }
 
-  const context = buildFeatureText(result)
+  const context = buildGroundedSummaryPrompt(labels, result)
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
     throwIfAborted(signal)
     const requestId = crypto.randomUUID()
@@ -395,7 +446,8 @@ async function fetchNativeSummary(result: AnalyzedName, signal?: AbortSignal): P
       request.controller.signal.addEventListener('abort', () => reject(request.controller.signal.reason ?? abortError()), { once: true })
     })
     try {
-      return { summary: await Promise.race([generation, aborted]), timedOut: false }
+      const summary = await Promise.race([generation, aborted])
+      return { summary: isGroundedSummary(summary, result) ? summary : null, timedOut: false }
     } catch {
       if (request.controller.signal.aborted) {
         if (signal?.aborted) {
@@ -425,7 +477,7 @@ async function fetchNativeSummary(result: AnalyzedName, signal?: AbortSignal): P
 }
 
 async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<string | null> {
-  const prompt = `你是一个精通中国传统文化、文学和取名艺术的专家。名字是“${result.original}”。基调为${labels.join('、')}。结合具体字义生成一段100字左右的文雅姓名意境分析。只输出分析内容。`;
+  const prompt = buildGroundedSummaryPrompt(labels, result)
 
   for (const [index, url] of OLLAMA_URLS.entries()) {
     throwIfAborted(signal)
@@ -445,7 +497,7 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal
       if (!response.ok) continue
       const data = await response.json() as { response?: string }
       const summary = data.response?.trim()
-      if (summary) return summary
+      if (summary && isGroundedSummary(summary, result)) return summary
     } catch {
       throwIfAborted(signal)
     } finally {
@@ -464,6 +516,14 @@ export async function checkNativeModel() {
 export async function checkSystemMemory() {
   if (!isTauri()) return 16; // Web 模式默认返回足够
   return await invoke<number>('check_memory');
+}
+
+export async function getModelDirectory(): Promise<string> {
+  return await invoke<string>('get_model_directory')
+}
+
+export async function setModelDirectory(directory: string): Promise<string> {
+  return await invoke<string>('set_model_directory', { directory })
 }
 
 export async function startModelDownload(onProgress: (p: { progress: number; total_size: number; downloaded: number }) => void) {
@@ -499,7 +559,7 @@ export async function runLocalAiAnalysis(result: AnalyzedName, options: Inferenc
   } catch {}
   throwIfAborted(signal)
   if (labels.length === 0) { labels = pickFallbackLabels(buildFeatureText(result)); source = 'fallback'; }
-  const native = await fetchNativeSummary(result, signal).catch((error): NativeSummaryResult => {
+  const native = await fetchNativeSummary(labels, result, signal).catch((error): NativeSummaryResult => {
     throwIfAborted(signal)
     console.error('[Inference] Tauri native LLM failed:', error)
     return { summary: null, timedOut: false }

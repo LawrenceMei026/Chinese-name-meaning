@@ -18,6 +18,8 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **Cultural Context**: Includes Five Elements, literary references, gender bias, and naming connotations.
 - **Local AI Model (ONNX)**: Uses a custom-trained 10-label classifier (Scholarly, Heroic, Serene, etc.) with WebGPU hardware acceleration.
 - **Layered Local Inference**: ONNX predicts the 10 tone labels. Tauri first tries a downloaded native Qwen2.5 GGUF; native unavailability or non-timeout failure permits Ollama, while a native timeout goes directly to deterministic text.
+- **Grounded AI Narratives**: Qwen receives only parsed character facts and explicit fact boundaries. Unsupported biography, history, pinyin leakage, prompt repetition, or undersized output is rejected in favor of deterministic local text.
+- **Curated Literary Context**: Source-specific character allusions may enrich the analysis, while famous-person matching is deliberately excluded from automatic name interpretation.
 - **Controlled Inference Lifecycle**: Worker, Ollama, and native requests have bounded timeouts, cancellation, cleanup, and at most two attempts.
 - **Privacy & History**: 100% local processing; history is stored in browser localStorage.
 - **Open Feedback Loop**: Integrated GitHub feedback system with automated environment diagnostics.
@@ -28,7 +30,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **Engine**: `localInference.ts` orchestrates an ONNX Runtime Web worker, native Tauri commands, local Ollama, and deterministic fallback.
 - **Acceleration**: Prioritizes **WebGPU** with a stable WebAssembly fallback.
 - **Desktop**: Packaged as a native Windows `.exe` via Tauri.
-- **Native LLM**: Rust `llama-cpp-2` loads a Qwen2.5 0.5B Q4_K_M GGUF downloaded on demand to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
+- **Native LLM**: Rust `llama-cpp-2` loads a Qwen2.5 0.5B Q4_K_M GGUF. The download dialog pre-fills `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models` and accepts a persistent custom absolute directory such as a D drive folder.
 - **Model Integrity**: The 491,400,032-byte download is pinned to a Hugging Face revision and verified by HTTP status, size, and SHA-256 before atomic installation.
 - **Resilient Download**: The desktop downloader falls back to a mirror when the primary Hugging Face endpoint is unavailable without relaxing size or SHA-256 verification.
 
@@ -48,6 +50,8 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **文化背景关联**：集成五行属性、典故出处、性别倾向及命名寓意。
 - **本地 AI 模型 (ONNX)**：使用本地训练的 10 标签分类器（如书卷、豪迈、灵动等），通过 WebGPU 硬件加速进行“意境”实时分析。
 - **分层本地推理**：ONNX 负责 10 类意境标签；Tauri 桌面端优先使用按需下载的 Qwen2.5 GGUF。原生不可用或非超时失败时尝试 Ollama；原生超时则直接回退到确定性文本。
+- **事实约束叙述**：Qwen 仅接收解析后的汉字事实和明确事实边界；包含无来源人物传记、历史引申、拼音泄漏、提示复述或长度不足的输出会被拒绝并回退到确定性本地文本。
+- **可核验典故**：经过核验的汉字典故可用于丰富意境分析；历史人物同名匹配不会自动进入姓名解释，避免把用户误识别为名人。
 - **可控推理生命周期**：Worker、Ollama 和原生推理均具备有界超时、取消、资源清理和最多两次尝试。
 - **隐私与历史**：所有数据本地加载，历史记录存储于浏览器 localStorage，不上传任何隐私。
 - **反馈闭环**：内置 GitHub 反馈入口，自动收集基础诊断信息。
@@ -58,7 +62,7 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 - **推理引擎**：`localInference.ts` 统一调度 ONNX Worker、Tauri 原生命令、本地 Ollama 和确定性回退。
 - **硬件加速**：优先尝试 **WebGPU**，稳健回退至 WebAssembly。
 - **桌面支持**：通过 Tauri 提供 Windows `.exe` 原生包支持。
-- **原生大模型**：Rust `llama-cpp-2` 加载 Qwen2.5 0.5B Q4_K_M GGUF，模型按需下载到 `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`。
+- **原生大模型**：Rust `llama-cpp-2` 加载 Qwen2.5 0.5B Q4_K_M GGUF。下载弹窗默认预填 `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`，也可持久化使用 D 盘等自定义绝对目录。
 - **模型完整性**：491,400,032 字节的下载固定到 Hugging Face revision，并在原子安装前校验 HTTP 状态、大小和 SHA-256。
 - **下载容错**：官方 Hugging Face 端点不可用时自动切换镜像，同时保持大小和 SHA-256 完整性校验不变。
 
@@ -114,7 +118,7 @@ npm run dev
 3. Run `npm run tauri:build`.
 4. Output: `my-vue-app/src-tauri/target/release/bundle/`.
 
-The installer contains the downloader, not the GGUF weights. On first desktop launch, users may download approximately 491 MB. When the model is missing, the download dialog warns systems reporting less than 6GB RAM; it does not block download or later native inference.
+The installer contains the downloader, not the GGUF weights. On first desktop launch, users may download approximately 491 MB to the pre-filled default directory or a custom absolute directory. When the model is missing, the download dialog warns systems reporting less than 6GB RAM; it does not block download or later native inference.
 
 ## Verification | 验证步骤
 

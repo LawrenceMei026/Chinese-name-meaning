@@ -66,6 +66,9 @@ The optional AI layer is orchestrated by `src/services/localInference.ts`.
 
 - The bundled ONNX model runs in a serialized Web Worker and produces 10 tone labels. Worker health checks and inference use a 10-second timeout, with at most two attempts. Workers are replaced after timeout, abort, construction/postMessage failure, or a Worker-level error; a normal inference error response returns `null` without forcing replacement.
 - In Tauri, a validated native Qwen2.5 GGUF is preferred for the narrative. Native generation is single-flight, uses a 60-second timeout, sends backend cancellation, waits up to 5 seconds before a timeout retry, and attempts at most twice.
+- Native and Ollama prompts share the same grounded fact packet: surname/given-name roles, sanitized dictionary meanings, reviewed cultural fields, and ONNX tone labels. The prompt treats these as a closed fact set and prohibits inferred biography or historical identity.
+- Generated narratives are accepted only when they meet the Chinese length and format contract and contain no unsupported biographical, historical, political, national, pinyin, or prompt-repetition signals. Rejected output falls back to deterministic local text.
+- Literary references are character-level, reviewed facts. Historical-person identity is intentionally not inferred from a matching full name; any future historical lookup must remain a separate opt-in feature with claim-level sources.
 - When native inference is unavailable without timing out, Ollama is tried sequentially at `localhost:11434` and then `127.0.0.1:11434`, with a 45-second timeout per address. The equivalent addresses are not called in parallel, preventing duplicate generation.
 - If no model path succeeds, the app falls back to deterministic labels and narrative text.
 - The same AI button cancels active analysis. New analysis, history restore, reset, and component unmount also propagate cancellation.
@@ -74,7 +77,7 @@ The optional AI layer is orchestrated by `src/services/localInference.ts`.
 
 ### Desktop GGUF download
 
-- The installer does not bundle GGUF weights. The app downloads a 491,400,032-byte Qwen2.5 0.5B Q4_K_M model to `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`.
+- The installer does not bundle GGUF weights. The app downloads a 491,400,032-byte Qwen2.5 0.5B Q4_K_M model. The dialog pre-fills `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`, accepts another absolute directory such as `D:\ChineseNameModels`, and persists the selection in the app data settings.
 - The Hugging Face URL is pinned to a full revision, with an integrity-equivalent mirror fallback. The downloader checks HTTP status and content length, streams SHA-256 validation into a `.part` file, uses a cross-process lock, and atomically renames only a verified model.
 - When the model is missing, the download dialog warns systems reporting less than 6GB RAM. The warning does not block download or later native inference.
 

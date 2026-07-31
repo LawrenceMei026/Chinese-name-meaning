@@ -19,6 +19,12 @@ vi.mock('../services/localInference', () => ({
     loadedFromCache: false,
     source: 'fallback',
   }),
+  checkNativeModel: vi.fn<() => Promise<boolean>>().mockResolvedValue(true),
+  checkSystemMemory: vi.fn<() => Promise<number>>().mockResolvedValue(16),
+  getModelDirectory: vi.fn<() => Promise<string>>().mockResolvedValue('D:\\ChineseNameModels'),
+  setModelDirectory: vi.fn<(directory: string) => Promise<string>>().mockImplementation(async directory => directory),
+  startModelDownload: vi.fn<() => Promise<string>>().mockResolvedValue('D:\\ChineseNameModels\\qwen2.5-0.5b-instruct.gguf'),
+  formatModelDownloadError: vi.fn<(error: unknown) => string>(() => '模型下载失败'),
 }))
 
 const sampleResult: AnalyzedName = {

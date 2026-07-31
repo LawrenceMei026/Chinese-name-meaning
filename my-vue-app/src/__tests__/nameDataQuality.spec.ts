@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import chars from '../../public/data/chars.json'
 import surnames from '../../public/data/surnames.json'
 import compoundSurnamePinyin from '../data/compoundSurnamePinyin.json'
+import cultural from '../data/cultural.json'
 import { formatPinyin, hasMeaningfulDefinition } from '../services/nameAnalyzer'
 import type { CharEntry } from '../types'
 
@@ -51,5 +52,13 @@ describe('production name data quality', () => {
 
     expect(colonReadings.length).toBeGreaterThanOrEqual(38)
     for (const entry of colonReadings) expect(formatPinyin(entry.pinyin)).not.toContain(':')
+  })
+
+  it('keeps corrected literary references source-specific and textually honest', () => {
+    expect(cultural['馨'].literaryRef).toContain('《尚书·君陈》')
+    expect(cultural['馨'].literaryRef).not.toContain('《尚书·酒诰》')
+    expect(cultural['蘅'].literaryRef).toContain('并非同字')
+    expect(cultural['瑾'].literaryRef).toContain('《楚辞·九章·怀沙》')
+    expect(cultural['瑜'].literaryRef).toContain('《礼记·聘义》')
   })
 })

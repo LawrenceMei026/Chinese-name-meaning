@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
-import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory, formatModelDownloadError } from './services/localInference'
+import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory, formatModelDownloadError, getModelDirectory, setModelDirectory } from './services/localInference'
 import CharacterCard from './components/CharacterCard.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
 
@@ -25,6 +25,7 @@ const downloadProgress = ref(0)
 const downloadMeta = ref({ downloaded: '0MB', total: '0MB' })
 const isDownloading = ref(false)
 const lowMemoryWarning = ref(false)
+const modelDirectory = ref('')
 let aiController: AbortController | null = null
 
 const inputId = 'name-input'
@@ -207,8 +208,14 @@ function handleFeedback() {
 }
 
 async function handleActionDownload() {
+  const directory = modelDirectory.value.trim()
+  if (!directory) {
+    alert('请选择模型下载目录。')
+    return
+  }
   isDownloading.value = true
   try {
+    modelDirectory.value = await setModelDirectory(directory)
     await startModelDownload((p) => {
       downloadProgress.value = Math.round(p.progress)
       downloadMeta.value = {
@@ -231,11 +238,22 @@ onMounted(async () => {
 
   // Tauri 环境下的模型与内存检查
   if (isTauri) {
-    const mem = await checkSystemMemory()
-    if (mem < 6) {
-      lowMemoryWarning.value = true
+    try {
+      modelDirectory.value = await getModelDirectory()
+    } catch {
+      modelDirectory.value = ''
     }
-    const hasModel = await checkNativeModel()
+    try {
+      lowMemoryWarning.value = await checkSystemMemory() < 6
+    } catch {
+      lowMemoryWarning.value = false
+    }
+    let hasModel = false
+    try {
+      hasModel = await checkNativeModel()
+    } catch {
+      hasModel = false
+    }
     if (!hasModel) {
       modelReady.value = false
       downloadWindowOpen.value = true
@@ -254,6 +272,9 @@ onUnmounted(() => {
     <header class="app-header">
       <h1 class="title">汉字姓名解析</h1>
       <p class="subtitle">输入一个中文姓名，探索每个汉字背后的含义、文化内涵与历史渊源。</p>
+      <button v-if="isTauri" class="model-settings-btn" type="button" @click="downloadWindowOpen = true">
+        模型设置
+      </button>
     </header>
 
     <!-- 模型下载引导层 -->
@@ -261,6 +282,19 @@ onUnmounted(() => {
       <div class="model-modal">
         <h2 class="modal-title">初始化智能引擎</h2>
         <p class="modal-desc">为了提供更精准的姓名意境分析，我们需要下载一个本地 AI 模型（约 491MB）。</p>
+
+        <label class="model-path-label" for="model-directory">模型下载目录</label>
+        <input
+          id="model-directory"
+          v-model="modelDirectory"
+          class="model-path-input"
+          type="text"
+          :disabled="isDownloading"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="例如：D:\Chinese Name Meaning Explorer\models"
+        />
+        <p class="model-path-help">将自动保存选择，并在目录中使用固定且经过校验的模型文件名。</p>
 
         <div v-if="isDownloading" class="progress-container">
           <div class="progress-bar">
@@ -454,6 +488,8 @@ body {
   padding: 2.5rem;
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
   text-align: center;
+  max-height: calc(100vh - 3rem);
+  overflow-y: auto;
 }
 
 .modal-title {
@@ -465,7 +501,40 @@ body {
 .modal-desc {
   color: #666;
   line-height: 1.6;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.model-path-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+.model-path-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d8d0c8;
+  border-radius: 10px;
+  padding: 0.75rem;
+  color: #292421;
+  background: #fffdf9;
+  font: inherit;
+}
+
+.model-path-input:focus {
+  border-color: #8b2c2c;
+  outline: 2px solid rgba(139, 44, 44, 0.15);
+}
+
+.model-path-help {
+  margin: 0.5rem 0 1.5rem;
+  color: #777;
+  font-size: 0.8rem;
+  line-height: 1.5;
+  text-align: left;
 }
 
 .progress-container {
@@ -531,6 +600,16 @@ body {
 
 .skip-btn:hover {
   color: #555;
+}
+
+.model-settings-btn {
+  margin-top: 0.75rem;
+  border: 1px solid rgba(139, 44, 44, 0.35);
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  color: #762626;
+  background: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
 }
 
 .title {
