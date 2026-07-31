@@ -82,6 +82,7 @@ The optional AI layer is orchestrated by `src/services/localInference.ts`.
 
 - The installer does not bundle GGUF weights. The app downloads a 491,400,032-byte Qwen2.5 0.5B Q4_K_M model. The dialog pre-fills `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`, accepts another absolute directory such as `D:\ChineseNameModels`, and persists the selection in the app data settings.
 - The Hugging Face URL is pinned to a full revision, with an integrity-equivalent mirror fallback. The downloader checks HTTP status and content length, streams SHA-256 validation into a `.part` file, uses a cross-process lock, and atomically renames only a verified model.
+- `src-tauri/capabilities/default.json` grants the main window only the event listen/unlisten permissions needed for download progress. `npm run check:tauri-acl` guards this requirement in local and release builds.
 - When the model is missing, the download dialog warns systems reporting less than 6GB RAM. The warning does not block download or later native inference.
 
 ## Getting started

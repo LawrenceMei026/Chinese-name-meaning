@@ -53,6 +53,10 @@ jobs:
           RELEASE_TAG: ${{ github.ref_name }}
         run: npm run check:version -- "$env:RELEASE_TAG"
 
+      - name: verify Tauri event permissions
+        working-directory: my-vue-app
+        run: npm run check:tauri-acl
+
       - name: verify feature contract
         working-directory: my-vue-app
         run: npm run test:features

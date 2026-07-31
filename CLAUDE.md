@@ -66,7 +66,7 @@ The local AI layer is managed by `src/services/localInference.ts`. User cancella
 - **Read-only Lint**: Release lint runs Oxlint and ESLint only over `src`, `scripts`, `vite.config.ts`, and `eslint.config.ts`; do not add `--fix`, cache writes, or `public/` generated ONNX Runtime assets to this gate.
 - **Dependency Security**: Keep both `npm audit --omit=dev` and `npm audit` at zero. The lockfile currently patches `postcss`, `protobufjs`, `shell-quote`, and `undici`; `minimatch@10.2.5` and `brace-expansion@5.0.8` are pinned through npm overrides until upstream chains update.
 - **GitHub Connection**: Repository is connected to GitHub (`LawrenceMei026/Chinese-name-meaning`). Pushes to `main` and tags are handled via authenticated Git flow.
-- **Package Version**: `0.1.3`; release tags must match the package and Tauri config version.
+- **Package Version**: `0.1.4`; release tags must match the package and Tauri config version.
 - **Trigger**: Push a tag starting with `v` (e.g., `git tag v1.0.0 && git push origin v1.0.0`).
 - **Target**: Build and package for `windows-latest` (producing `.msi` and `.exe`).
 
