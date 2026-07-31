@@ -156,33 +156,16 @@ function buildFeatureText(result: AnalyzedName) {
   ].join('\n')
 }
 
-function compactFact(value: string | undefined, fallback: string, maxLength = 120): string {
-  const compacted = value?.replace(/\s+/g, ' ').trim()
-  if (!compacted) return fallback
-  return compacted.length > maxLength ? `${compacted.slice(0, maxLength)}…` : compacted
-}
-
 export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedName): string {
-  const facts = result.chars.map(char => {
-    const role = char.role === 'surname' ? '姓氏' : '名字'
-    const definition = compactFact(namingMeaning(char), char.role === 'surname' ? '姓氏用字' : '未提供')
-    const culturalFacts = [
-      char.cultural?.element ? `五行=${char.cultural.element}` : '',
-      char.cultural?.connotation ? `命名寓意=${compactFact(char.cultural.connotation, '')}` : '',
-      char.cultural?.literaryRef ? `典故=${compactFact(char.cultural.literaryRef, '')}` : '',
-    ].filter(Boolean)
-    return `${char.char}：角色=${role}；字义=${definition}${culturalFacts.length ? `；${culturalFacts.join('；')}` : ''}`
-  }).join('\n')
+  const factualDraft = buildLocalSummary(labels, result, 'model')
 
   return [
-    `分析姓名：“${result.original}”`,
-    `意境基调：${labels.join('、') || '中正'}`,
-    '只允许使用下列已提供事实：',
-    facts,
-    '事实边界：不得把姓名识别为真实人物，不得补充字号、朝代、官职、职业、生平、亲属、事迹或未提供的典故。',
-    '不得从姓名引申国家、民族、政治、军事、事业成就或命运结论。姓氏只作为姓氏，不解释其普通字义。',
-    '若名字字义未提供，只分析字形组合和给定基调，不得猜测。',
-    '输出要求：直接输出80至130字中文正文；围绕名字用字及意境表达；不得输出拼音、英文、标题、列表，不得复述指令或事实清单。',
+    '任务：只润色基础文稿，不介绍人物，不增加事实。',
+    `基础文稿：${factualDraft}`,
+    '必须完整保留文稿中的姓名字义和已注明出处的文化联想。',
+    '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途或命运推断。',
+    '不得输出拼音、英文、标题、列表或解释过程。',
+    '输出80至130个汉字，只输出润色后的正文。',
   ].join('\n')
 }
 
@@ -577,12 +560,18 @@ export async function runLocalAiAnalysis(result: AnalyzedName, options: Inferenc
     console.error('[Inference] Tauri native LLM failed:', error)
     return { summary: null, timedOut: false }
   })
-  const ollamaSummary = native.summary ?? (native.timedOut ? null : await fetchOllamaSummary(labels, result, signal))
+  let generatedSummary = native.summary
+  let summarySource: 'native' | 'ollama' | 'fallback' = native.summary ? 'native' : 'fallback'
+  if (!generatedSummary && !native.timedOut) {
+    generatedSummary = await fetchOllamaSummary(labels, result, signal)
+    if (generatedSummary) summarySource = 'ollama'
+  }
   throwIfAborted(signal)
   return {
     labels,
-    summary: ollamaSummary || buildLocalSummary(labels, result, source),
+    summary: generatedSummary || buildLocalSummary(labels, result, source),
     loadedFromCache: source === 'model',
     source: source,
+    summarySource,
   }
 }

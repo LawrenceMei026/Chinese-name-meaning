@@ -32,6 +32,7 @@ export interface AiAnalysisResult {
   summary: string
   loadedFromCache: boolean
   source: 'model' | 'fallback'
+  summarySource?: 'native' | 'ollama' | 'fallback'
 }
 
 export interface AnalysisHistoryEntry {

@@ -398,7 +398,7 @@ onUnmounted(() => {
         <section v-if="aiResult" class="ai-panel" aria-label="AI 深度分析结果">
           <div class="ai-panel-header">
             <h3 class="ai-title">AI 深度分析</h3>
-            <span v-if="!aiResult.loadedFromCache" class="ai-badge">本地回退</span>
+            <span class="ai-badge">{{ aiResult.summarySource === 'native' ? '原生 Qwen' : aiResult.summarySource === 'ollama' ? 'Ollama' : '本地回退' }}</span>
           </div>
           <div class="ai-labels">
             <span v-for="label in aiResult.labels" :key="label" class="ai-label">{{ label }}</span>
