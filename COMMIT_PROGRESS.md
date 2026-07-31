@@ -199,8 +199,18 @@
 - Updated `postcss`, `protobufjs`, `brace-expansion`, `shell-quote`, and `undici` to patched versions.
 - Pinned compatible `minimatch@10.2.5` and `brace-expansion@5.0.8` overrides, validated brace matching through minimatch, glob, and editorconfig, and reduced both production and full `npm audit` results to zero vulnerabilities.
 
+## Commit 43 — Release and validate Windows v0.1.2
+- Synchronized npm and Cargo versions to `0.1.2`, passed every Windows release gate, and published MSI and NSIS assets from commit `41f985c`.
+- Installed the NSIS package on Windows and verified name analysis, history persistence, AI analysis, validation, resources, launch, and uninstall behavior.
+
+## Commit 44 — Apply surname-context readings and dictionary cleanup
+- Preserved the full single-character surname reading map instead of reducing it to a membership set, so polyphonic surnames such as `乐`, `翟`, `华`, `覃`, and `隗` use their surname pronunciations.
+- Added explicit readings for polyphonic compound surnames, normalized `u:` Pinyin, and filtered punctuation-only dictionary definitions at runtime.
+- Added production-data regression coverage that loads the shipped `chars.json` and `surnames.json` rather than relying only on mocks.
+
 ## Current checkpoint
 - The Windows release workflow now blocks packaging until frontend tests, feature contracts, types, read-only lint, real ONNX inference, and locked Rust checks pass.
 - The active runtime paths are the bundled ten-label ONNX classifier, downloaded native GGUF generation, sequential local Ollama fallback, and deterministic fallback text.
 - Obsolete Router/Pinia examples, tracked virtual environments, runtime logs, old six-label model tooling, and redundant ONNX Runtime JavaScript bundles have been removed.
 - The committed npm dependency graph reports zero vulnerabilities. Preserve the `minimatch` and `brace-expansion` compatibility overrides until upstream dependency ranges no longer require them.
+- Name analysis now keeps general character readings separate from surname-context readings and protects real polyphonic surname and dirty-definition cases with production JSON tests.

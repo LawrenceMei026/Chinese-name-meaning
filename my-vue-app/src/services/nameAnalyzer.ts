@@ -1,11 +1,14 @@
 import type { AnalyzedChar, AnalyzedName, CharEntry } from '../types'
 import { getCulturalData } from '../data/cultural'
+import compoundSurnamePinyin from '../data/compoundSurnamePinyin.json'
 
 type RawDict = Record<string, CharEntry>
 type SurnameDict = Record<string, string>
+type CompoundSurnamePinyin = Record<string, string[]>
 
 let charDict: RawDict | null = null
 let surnameSet: Set<string> | null = null
+let surnameDict: SurnameDict | null = null
 let loadPromise: Promise<void> | null = null
 
 const COMMON_COMPOUND_SURNAMES = new Set([
@@ -15,6 +18,7 @@ const COMMON_COMPOUND_SURNAMES = new Set([
   '谷梁', '拓跋', '夹谷', '段干', '漆雕', '乐正', '壤驷', '公良', '漆周', '东野',
   '宰父', '端木', '巫马', '公西', '颛孙', '壤丘', '微生', '羊舌', '宓', '伯',
 ])
+const compoundSurnameReadings = compoundSurnamePinyin as CompoundSurnamePinyin
 
 function baseUrl() {
   const locationHref = typeof window !== 'undefined' ? window.location.href : 'http://localhost/'
@@ -38,8 +42,8 @@ async function loadData() {
         }
 
         charDict = await charsRes.json() as RawDict
-        const surnames = await surnamesRes.json() as SurnameDict
-        surnameSet = new Set(Object.keys(surnames))
+        surnameDict = await surnamesRes.json() as SurnameDict
+        surnameSet = new Set(Object.keys(surnameDict))
       })
       .finally(() => {
         loadPromise = null
@@ -52,6 +56,28 @@ async function loadData() {
 function lookupChar(char: string): CharEntry | null {
   if (!charDict) return null
   return charDict[char] ?? null
+}
+
+function cleanDefinition(definition: string, role: 'surname' | 'given'): string {
+  const trimmed = definition.trim()
+  if (/^[()（）,，。;；、\s]*$/.test(trimmed)) return role === 'surname' ? '姓氏用字。' : ''
+  return trimmed
+}
+
+function contextualEntry(
+  char: string,
+  role: 'surname' | 'given',
+  contextualPinyin?: string,
+): CharEntry | null {
+  const entry = lookupChar(char)
+  if (!entry) return null
+
+  return {
+    ...entry,
+    pinyin: contextualPinyin || entry.pinyin,
+    tones: contextualPinyin ? String(toneFromPinyin(contextualPinyin)) : entry.tones,
+    definition_cn: cleanDefinition(entry.definition_cn, role),
+  }
 }
 
 function toneFromPinyin(syllable: string): number {
@@ -131,7 +157,8 @@ export function formatPinyin(raw: string): string {
   if (!syllables.length) return ''
 
   return syllables
-    .map(syl => {
+    .map(rawSyllable => {
+      const syl = rawSyllable.replace(/u:/gi, matched => matched[0] === 'U' ? 'V' : 'v')
       const tone = toneFromPinyin(syl)
       if (!tone) return syl
       const base = syl.replace(/\d$/, '')
@@ -176,11 +203,19 @@ export async function analyzeName(input: string): Promise<AnalyzedName> {
   const trimmedInput = input.trim()
   const chars = [...trimmedInput]
   const roles = segment(chars)
+  const surnameCount = roles.filter(role => role === 'surname').length
+  const compoundReadings = surnameCount === 2
+    ? compoundSurnameReadings[chars[0]! + chars[1]!]
+    : undefined
 
   const analyzed: AnalyzedChar[] = chars.map((char, i) => ({
     char,
     role: roles[i] ?? 'given',
-    entry: lookupChar(char),
+    entry: contextualEntry(
+      char,
+      roles[i] ?? 'given',
+      surnameCount === 1 && i === 0 ? surnameDict?.[char] : compoundReadings?.[i],
+    ),
     cultural: getCulturalData(char),
   }))
 
