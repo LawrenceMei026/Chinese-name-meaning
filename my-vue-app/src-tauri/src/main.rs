@@ -403,7 +403,7 @@ async fn generate_internal_summary(
     handle: AppHandle,
     state: State<'_, AppState>,
     request_id: String,
-    _name: String,
+    name: String,
     context: String,
 ) -> Result<String, String> {
     let cancelled = Arc::new(AtomicBool::new(false));
@@ -438,7 +438,7 @@ async fn generate_internal_summary(
 fn generate_summary(
     state: &AppState,
     cancelled: &Arc<AtomicBool>,
-    name: String,
+    _name: String,
     context: String,
 ) -> Result<String, String> {
     if cancelled.load(Ordering::Acquire) {
