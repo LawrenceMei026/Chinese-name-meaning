@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { spawn } from 'node:child_process'
 import { readFile, writeFile } from 'node:fs/promises'
-import { extractModernChineseDefinitions } from './lib/zhwiktionary-parser.mjs'
+import { extractModernChineseDefinitions } from './zhwiktionary-parser.mjs'
 
 const dumpPath = process.argv[2]
 if (!dumpPath) throw new Error('Usage: node scripts/generate-zhwiktionary-review-queue.mjs <pages-articles.xml.bz2>')

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { extractModernChineseDefinitions } from '../../scripts/lib/zhwiktionary-parser.mjs'
+import { extractModernChineseDefinitions } from '../../scripts/zhwiktionary-parser.mjs'
 
 describe('Chinese Wiktionary parser', () => {
   it('extracts only modern Chinese definitions from mixed-language pages', () => {
