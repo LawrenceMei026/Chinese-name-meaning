@@ -4,6 +4,7 @@ import surnames from '../../public/data/surnames.json'
 import compoundSurnamePinyin from '../data/compoundSurnamePinyin.json'
 import cultural from '../data/cultural.json'
 import dictionarySupplements from '../data/ccCedictDefinitionSupplements.json'
+import zhWiktionarySupplements from '../data/zhWiktionaryDefinitionSupplements.json'
 import { getCulturalData, isUsableCulturalData } from '../data/cultural'
 import { formatPinyin, hasMeaningfulDefinition } from '../services/nameAnalyzer'
 import type { CharEntry, CulturalData } from '../types'
@@ -64,12 +65,47 @@ describe('production name data quality', () => {
       sha256: '700ca1acb9729385bb1e86061e2b8478be7755b85d8854cd0e0a81cd11316381',
       license: 'CC BY-SA 4.0',
     })
+    expect(dictionarySupplements.corroborationSource).toMatchObject({
+      name: 'Unicode Unihan',
+      version: '17.0.0',
+      sha256: 'f7a48b2b545acfaa77b2d607ae28747404ce02baefee16396c5d2d7a8ef34b5e',
+      field: 'kDefinition',
+      license: 'Unicode License V3',
+    })
+
+    const unihanFailures = Object.entries(dictionarySupplements.entries)
+      .filter(([, supplement]) => 'unihanDefinition' in supplement && !supplement.unihanDefinition)
+    expect(unihanFailures).toEqual([])
 
     for (const [char, supplement] of Object.entries(dictionarySupplements.entries)) {
       expect(supplement.reviewed).toBe(true)
       expect(supplement.raw).toContain(` ${char} [`)
       expect(supplement.glosses.length).toBeGreaterThan(0)
       for (const gloss of supplement.glosses) expect(supplement.raw).toContain(gloss)
+      expect(charDict[char]?.definition_cn).toBe(supplement.definitionCn)
+    }
+  })
+
+  it('provides reviewed modern meanings for Zhang Suqin', () => {
+    expect(charDict['张']?.definition_cn).toBe('展开；伸展；扩大')
+    expect(charDict['素']?.definition_cn).toBe('朴素无饰；本色；白色')
+    expect(charDict['琴']?.definition_cn).toBe('古琴；弦乐器的泛称')
+  })
+
+  it('keeps reviewed Chinese Wiktionary definitions traceable to fixed revisions', () => {
+    expect(zhWiktionarySupplements.source).toMatchObject({
+      name: 'Chinese Wiktionary',
+      dumpDate: '2026-07-01',
+      sha1: '2c866dafae0a95da3850d8e269f0366d1338d418',
+      license: 'CC BY-SA 4.0',
+    })
+
+    for (const [char, supplement] of Object.entries(zhWiktionarySupplements.entries)) {
+      expect(supplement.reviewed).toBe(true)
+      expect(supplement.revisionId).toBeGreaterThan(0)
+      expect(supplement.timestamp).toMatch(/^20\d{2}-\d{2}-\d{2}T/u)
+      expect(supplement.sourceUrl).toContain(`oldid=${supplement.revisionId}`)
+      expect(supplement.selectedDefinitions.length).toBeGreaterThan(0)
       expect(charDict[char]?.definition_cn).toBe(supplement.definitionCn)
     }
   })

@@ -215,30 +215,25 @@ describe('deterministic name summaries', () => {
     expect(summary).not.toContain('十斗为一石')
   })
 
-  it('does not salvage fragments from formation-only definitions', async () => {
+  it('uses reviewed definitions instead of formation fragments for Zhang Suqin', async () => {
     const { buildGroundedSummaryPrompt, buildLocalSummary } = await import('../services/localInference')
     const zhangSuqin: AnalyzedName = {
       original: '张素琴',
       chars: [
-        { char: '张', role: 'surname', entry: { pinyin: 'zhang1', tones: '1', definition_cn: ')' }, cultural: null },
-        { char: '素', role: 'given', entry: { pinyin: 'su4', tones: '4', definition_cn: '会意。小篆字形。上是垂”,下是糸。糸,丝。织物光润则易于下垂。)' }, cultural: null },
-        { char: '琴', role: 'given', entry: { pinyin: 'qin2', tones: '2', definition_cn: '本作珡”。象形。小篆字形,象乐器形,上面玨”象弦和弦柱,下面象琴身。俗称古琴)' }, cultural: null },
+        { char: '张', role: 'surname', entry: { pinyin: 'zhang1', tones: '1', definition_cn: '展开；伸展；扩大' }, cultural: null },
+        { char: '素', role: 'given', entry: { pinyin: 'su4', tones: '4', definition_cn: '朴素无饰；本色；白色' }, cultural: null },
+        { char: '琴', role: 'given', entry: { pinyin: 'qin2', tones: '2', definition_cn: '古琴；弦乐器的泛称' }, cultural: null },
       ],
     }
 
     const summary = buildLocalSummary(['新颖', '灵动'], zhangSuqin, 'model')
     const prompt = buildGroundedSummaryPrompt(['新颖', '灵动'], zhangSuqin)
 
-    expect(summary).toContain('没有可直接采用的名字字义')
+    expect(summary).toContain('“素”有朴素无饰之意')
+    expect(summary).toContain('“琴”则带有古琴的意味')
     expect(summary).not.toMatch(/下是|象乐器形|糸|琴身/u)
     expect(prompt).not.toMatch(/下是|象乐器形|糸|琴身/u)
-    expect(prompt).toContain('“素”“琴”没有可核实的名字字义')
-
-    const { groundedSummaryRejection } = await import('../services/localInference')
-    expect(groundedSummaryRejection(
-      '在“张素琴”中，“素”有质朴纯洁之意，“琴”带有琴音雅致的意味。两个名字用字相互映照，使整体结构自然舒展，读来轻盈清朗，也寄托从容平和、温润坚定的美好愿景，含蓄之中保有鲜明而协调的节奏。',
-      zhangSuqin,
-    )).toBe('为缺少可靠释义的“素”补写了含义。')
+    expect(prompt).not.toContain('没有可核实的名字字义')
   })
 
   it('gives repeated-character names a grounded structure when no meaning is usable', async () => {

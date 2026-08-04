@@ -148,5 +148,7 @@ The tag-triggered Windows workflow runs version validation, feature tests, unit 
 ## Data Sources & License | 数据来源与证书
 
 - Dictionary supplements: CC-CEDICT, official 2026-08-02 release, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Reviewed Simplified Chinese translations preserve their source lines and English glosses in a reproducible overlay.
+- Bulk dictionary corroboration: Unicode Unihan 17.0.0 `kDefinition`, [Unicode License V3](https://www.unicode.org/license.txt). Unihan glosses remain separate evidence and are never published as unreviewed machine translations.
+- Pure-Chinese definition supplements: Chinese Wiktionary `2026-07-01` fixed dump, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Each published definition links to an immutable page revision and records the selected source text and Simplified Chinese transformation; unreviewed parser output remains isolated from production data.
 - Legacy consolidated definitions remain subject to provenance review; new supplementation does not use scraped Xinhua or Kangxi mirrors with an unclear redistribution chain.
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

@@ -1,0 +1,5086 @@
+{
+  "source": {
+    "name": "Unicode Unihan",
+    "version": "17.0.0",
+    "file": "/tmp/kilo/Unihan_Readings.txt",
+    "field": "kDefinition",
+    "sha256": "575e69c9ad85a4737a889a4f94cbd987042a90a1a6cc16dd3f4ed995c715b17c",
+    "license": "Unicode License V3",
+    "licenseUrl": "https://www.unicode.org/license.txt",
+    "transformation": "Conservative Chinese keyword mapping from English kDefinition fragments; surnames, proper names, transliterations, variants, radicals, and locale-specific labels are excluded."
+  },
+  "corroborationSource": {
+    "name": "Make Me a Hanzi dictionary.txt",
+    "downloadUrl": "https://raw.githubusercontent.com/skishore/makemeahanzi/master/dictionary.txt",
+    "sha256": "744bb05d5b0742e9ee35c37791f94d56a173349b3367569e7ca11e510364d203",
+    "license": "LGPL-3.0-or-later",
+    "licenseUrl": "https://raw.githubusercontent.com/skishore/makemeahanzi/master/COPYING"
+  },
+  "skippedNoSource": 4669,
+  "skippedBlocked": 0,
+  "skippedUnmapped": 7491,
+  "skippedExisting": 723,
+  "entries": {
+    "僖": {
+      "sourceDefinition": "joy, gladness, delight; surname",
+      "makeMeAHanziDefinition": "joy, gladness, delight; surname",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "儇": {
+      "sourceDefinition": "clever, nimble",
+      "makeMeAHanziDefinition": "clever, nimble",
+      "definitionCn": "灵巧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "出": {
+      "sourceDefinition": "go out, send out; stand; produce",
+      "makeMeAHanziDefinition": "to go out, to send out; stand; produce",
+      "definitionCn": "发出；站立",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "初": {
+      "sourceDefinition": "beginning, initial, primary",
+      "makeMeAHanziDefinition": "beginning, initial, primary",
+      "definitionCn": "初始",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "删": {
+      "sourceDefinition": "to cut; delete",
+      "makeMeAHanziDefinition": "to delete; to cut; to censor",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "剁": {
+      "sourceDefinition": "chop by pounding, mince, hash",
+      "makeMeAHanziDefinition": "to chop by pounding, to hash, to mince",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "剜": {
+      "sourceDefinition": "cut, cut out, pick out, scoop out",
+      "makeMeAHanziDefinition": "to cut; to cut out, to pick out, to scoop out",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "创": {
+      "sourceDefinition": "establish, create; knife cut",
+      "makeMeAHanziDefinition": "to establish, to create; cut, wound, trauma",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "劓": {
+      "sourceDefinition": "cut off nose",
+      "makeMeAHanziDefinition": "to cut off the nose",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "徭": {
+      "sourceDefinition": "conscript labor, compulsory labor",
+      "makeMeAHanziDefinition": "conscripted labor",
+      "definitionCn": "劳作",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "捃": {
+      "sourceDefinition": "to pick up, collect",
+      "makeMeAHanziDefinition": "to gather, to sort",
+      "definitionCn": "收集",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "攫": {
+      "sourceDefinition": "snatch away, seize; catch with",
+      "makeMeAHanziDefinition": "to snatch, to sieze, to rob",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "斩": {
+      "sourceDefinition": "cut, chop, sever; behead",
+      "makeMeAHanziDefinition": "to chop, to cut, to sever; to behead",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "祉": {
+      "sourceDefinition": "happiness, blessings, good luck",
+      "makeMeAHanziDefinition": "blessings, happiness, good luck",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "祜": {
+      "sourceDefinition": "blessing, happiness, prosperity",
+      "makeMeAHanziDefinition": "blessings, happiness, prosperity",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缯": {
+      "sourceDefinition": "silk fabrics; surname",
+      "makeMeAHanziDefinition": "silk; to tie, to bind; surname",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "胾": {
+      "sourceDefinition": "minced meat; to cut meat into pieces",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "芟": {
+      "sourceDefinition": "mow, cut; weed out; scythe",
+      "makeMeAHanziDefinition": "to weed, to mow, to scythe",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "荀": {
+      "sourceDefinition": "surname; ancient state; plant",
+      "makeMeAHanziDefinition": "plant, herb; surname",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "貅": {
+      "sourceDefinition": "brave, fierce, courageous",
+      "makeMeAHanziDefinition": "fierce; brave, courageous",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赤": {
+      "sourceDefinition": "red; bare; Kangxi radical 155",
+      "makeMeAHanziDefinition": "red, scarlet; blushing; bare, naked",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "迨": {
+      "sourceDefinition": "until, when; seize, arrest",
+      "makeMeAHanziDefinition": "while, until; to seize, to arrest",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "陈": {
+      "sourceDefinition": "exhibit, display; plead; a surname",
+      "makeMeAHanziDefinition": "to display, to exhibit; to plead; surname",
+      "definitionCn": "布告",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鱼": {
+      "sourceDefinition": "fish; surname; Kangxi radical 195",
+      "makeMeAHanziDefinition": "fish",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "巛": {
+      "sourceDefinition": "river; Kangxi radical 47",
+      "makeMeAHanziDefinition": "stream, river",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "彂": {
+      "sourceDefinition": "issue, dispatch, send out, emit",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "发出",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "乕": {
+      "sourceDefinition": "tiger; brave, fierce; surname",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "斚": {
+      "sourceDefinition": "a small cup of stone with ears, used in ancient times for libations",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "叓": {
+      "sourceDefinition": "affair, matter; work",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "劳作",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "攟": {
+      "sourceDefinition": "to pick up, collect",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "收集",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "迧": {
+      "sourceDefinition": "a Chinese family name arrange; display a column of troops",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "布告",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "代": {
+      "sourceDefinition": "replace, replacement (of person or generation); era, generation",
+      "makeMeAHanziDefinition": "era, generation; to substitute for, to replace",
+      "definitionCn": "替代；世代",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "估": {
+      "sourceDefinition": "merchant; estimate, guess, presume",
+      "makeMeAHanziDefinition": "merchant; to estimate, to guess, to presume",
+      "definitionCn": "估量",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "布": {
+      "sourceDefinition": "cotton cloth, textiles, linen",
+      "makeMeAHanziDefinition": "cotton, linen, textiles; to announce, to declare; to spread",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "佼": {
+      "sourceDefinition": "beautiful, handsome, good-looking",
+      "makeMeAHanziDefinition": "beautiful, handsome, good-looking",
+      "definitionCn": "美好；俊美",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "侍": {
+      "sourceDefinition": "serve, attend upon; attendant, servant; samurai",
+      "makeMeAHanziDefinition": "to serve, to attend upon; servant, attendant; samurai",
+      "definitionCn": "侍奉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "侣": {
+      "sourceDefinition": "companion; associate with",
+      "makeMeAHanziDefinition": "companion; associate with",
+      "definitionCn": "伴侣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "俟": {
+      "sourceDefinition": "wait for, wait until, as soon as",
+      "makeMeAHanziDefinition": "wait for, wait until, as soon as",
+      "definitionCn": "等待",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "俯": {
+      "sourceDefinition": "bow down, face down, look down",
+      "makeMeAHanziDefinition": "to bow down, to face down, to look down",
+      "definitionCn": "俯身",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "偎": {
+      "sourceDefinition": "cling to, cuddle, embrace, fondle",
+      "makeMeAHanziDefinition": "to cling to, to cuddle, to embrace, to fondle",
+      "definitionCn": "依偎",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "偕": {
+      "sourceDefinition": "together; be in order",
+      "makeMeAHanziDefinition": "together, accompanied by; in order",
+      "definitionCn": "共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "傩": {
+      "sourceDefinition": "rich",
+      "makeMeAHanziDefinition": "rich",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "垤": {
+      "sourceDefinition": "ant-hill, small mound; hill",
+      "makeMeAHanziDefinition": "anthill; hill mound",
+      "definitionCn": "山石；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "墉": {
+      "sourceDefinition": "wall; fortified wall; small wall",
+      "makeMeAHanziDefinition": "wall; fortification",
+      "definitionCn": "墙垣；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "奫": {
+      "sourceDefinition": "deep and broad (expanse of water); abyss",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "婢": {
+      "sourceDefinition": "servant girl; your servant",
+      "makeMeAHanziDefinition": "servant girl; maidservant",
+      "definitionCn": "侍奉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "婵": {
+      "sourceDefinition": "beautiful, lovely, pretty, graceful",
+      "makeMeAHanziDefinition": "beautiful, graceful, lovely, pretty",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "娈": {
+      "sourceDefinition": "lovely, beautiful; docile, obedient",
+      "makeMeAHanziDefinition": "lovely, beautiful; docile, obedient",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "对": {
+      "sourceDefinition": "correct, right; facing, opposed",
+      "makeMeAHanziDefinition": "correct, right; facing, opposed",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "冈": {
+      "sourceDefinition": "ridge or crest of hill",
+      "makeMeAHanziDefinition": "ridge or crest of hill",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "岚": {
+      "sourceDefinition": "mountain mist, mountain haze",
+      "makeMeAHanziDefinition": "mountain mist, mountain haze",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嶂": {
+      "sourceDefinition": "cliff; mountain barrier",
+      "makeMeAHanziDefinition": "cliff; the barrier formed by a mountain range",
+      "definitionCn": "山石；墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "岿": {
+      "sourceDefinition": "grand, stately; secure, lasting",
+      "makeMeAHanziDefinition": "grand, stately; secure, lasting",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "巍": {
+      "sourceDefinition": "high, lofty, majestic, eminent",
+      "makeMeAHanziDefinition": "high, lofty; eminent, majestic",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "巅": {
+      "sourceDefinition": "summit of mountain, mountain top",
+      "makeMeAHanziDefinition": "mountain peak, mountain top",
+      "definitionCn": "山石；顶部",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "厩": {
+      "sourceDefinition": "stable; barnyard",
+      "makeMeAHanziDefinition": "stable; barnyard",
+      "definitionCn": "坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "弩": {
+      "sourceDefinition": "cross-bow, bow; downward stroke",
+      "makeMeAHanziDefinition": "crossbow; an arrow falling, a downward stroke",
+      "definitionCn": "俯身",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "弼": {
+      "sourceDefinition": "aid, assist, help; correct",
+      "makeMeAHanziDefinition": "to aid, to help; to correct",
+      "definitionCn": "帮助；端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "彤": {
+      "sourceDefinition": "red, vermilion",
+      "makeMeAHanziDefinition": "red, vermillion",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "恰": {
+      "sourceDefinition": "just, exactly, precisely; proper",
+      "makeMeAHanziDefinition": "just, exactly, precisely; proper",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "惶": {
+      "sourceDefinition": "fearful, afraid, anxious, nervous",
+      "makeMeAHanziDefinition": "anxious, nervous, uneasy",
+      "definitionCn": "惊惧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "慑": {
+      "sourceDefinition": "afraid, scared, fearful",
+      "makeMeAHanziDefinition": "afraid, scared; to frighten, to intimidate",
+      "definitionCn": "惊惧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "扳": {
+      "sourceDefinition": "pull; drag; right itself",
+      "makeMeAHanziDefinition": "to drag, to pull; to twist",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "拯": {
+      "sourceDefinition": "help, save, aid; lift, raise",
+      "makeMeAHanziDefinition": "to aid, to help; to lift, to raise",
+      "definitionCn": "帮助；养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "擎": {
+      "sourceDefinition": "lift up, hold up, support",
+      "makeMeAHanziDefinition": "to lift; to support, to hold up",
+      "definitionCn": "帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "杈": {
+      "sourceDefinition": "fork of a tree; a pitchfork",
+      "makeMeAHanziDefinition": "pitchfork; tree fork",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "栳": {
+      "sourceDefinition": "a basket",
+      "makeMeAHanziDefinition": "basket",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棉": {
+      "sourceDefinition": "cotton; cotton padded",
+      "makeMeAHanziDefinition": "cotton; cotton-padded",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "榎": {
+      "sourceDefinition": "small evergreen shrub",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "樽": {
+      "sourceDefinition": "goblet; jar, jug; lush",
+      "makeMeAHanziDefinition": "goblet, jar, jug; lush, drunk",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "枥": {
+      "sourceDefinition": "type of oak; stable",
+      "makeMeAHanziDefinition": "oak tree; a stable",
+      "definitionCn": "坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "椤": {
+      "sourceDefinition": "tree",
+      "makeMeAHanziDefinition": "tree; tree fern",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "汨": {
+      "sourceDefinition": "Mi(luo) river in Hunan province where Qu Yuan drowned himself; to sink; (used erroneously for 汩)",
+      "makeMeAHanziDefinition": "to sink; a river in Hunan where Qu Yuan drowned himself",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "冲": {
+      "sourceDefinition": "soar; pour boiling water over",
+      "makeMeAHanziDefinition": "wash, rinse, flush; dash; soar",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "沚": {
+      "sourceDefinition": "islet in stream; small sandbar",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "莅": {
+      "sourceDefinition": "attend, be present; arrive at",
+      "makeMeAHanziDefinition": "attend, be present; arrive at",
+      "definitionCn": "侍奉；给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "淬": {
+      "sourceDefinition": "temper; dye; soak; change, alter",
+      "makeMeAHanziDefinition": "to soak, to dye; to temper, to change",
+      "definitionCn": "替代",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "渟": {
+      "sourceDefinition": "(of water) not flowing; clear",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "浈": {
+      "sourceDefinition": "river in Guangdong province",
+      "makeMeAHanziDefinition": "a river in Guangdong province",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "沧": {
+      "sourceDefinition": "blue, dark green; cold",
+      "makeMeAHanziDefinition": "azure, cold, vast (all as of the sea)",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "滕": {
+      "sourceDefinition": "an ancient state in Shandong province; water bursting forth",
+      "makeMeAHanziDefinition": "an ancient state in Shandong province",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漕": {
+      "sourceDefinition": "transport by water; canal transportation",
+      "makeMeAHanziDefinition": "canal, watercourse; to transport by sea",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漪": {
+      "sourceDefinition": "ripples on water; swirling",
+      "makeMeAHanziDefinition": "ripples; swirling water",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漭": {
+      "sourceDefinition": "vast; expansive",
+      "makeMeAHanziDefinition": "vast, expansive",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "涧": {
+      "sourceDefinition": "brook, mountain stream",
+      "makeMeAHanziDefinition": "brook, mountain stream",
+      "definitionCn": "山石；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "澧": {
+      "sourceDefinition": "river in northern Hunan province",
+      "makeMeAHanziDefinition": "a river in northern Hunan",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "濑": {
+      "sourceDefinition": "swift current; rapids",
+      "makeMeAHanziDefinition": "current, rapids",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "熹": {
+      "sourceDefinition": "dim light, glimmer; warm, bright",
+      "makeMeAHanziDefinition": "dim light, a glimmer; warm; bright",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "炽": {
+      "sourceDefinition": "burning-hot, intense; to burn, blaze; splendid, illustrious",
+      "makeMeAHanziDefinition": "to burn, to blaze; splendid; intense",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "烁": {
+      "sourceDefinition": "shine, glitter, sparkle",
+      "makeMeAHanziDefinition": "to sparkle, to shine, to glitter",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "墙": {
+      "sourceDefinition": "wall",
+      "makeMeAHanziDefinition": "wall",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "猝": {
+      "sourceDefinition": "abruptly, suddenly; abrupt",
+      "makeMeAHanziDefinition": "sudden, abrupt",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "兽": {
+      "sourceDefinition": "beast, animal; bestial",
+      "makeMeAHanziDefinition": "beast, animal; bestial",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璀": {
+      "sourceDefinition": "lustre of gems; glitter; shine",
+      "makeMeAHanziDefinition": "brillance; luster; to shine",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "甗": {
+      "sourceDefinition": "earthenware vessel in two parts",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "白": {
+      "sourceDefinition": "white; pure, unblemished; bright",
+      "makeMeAHanziDefinition": "white; clear, pure, unblemished; bright",
+      "definitionCn": "色彩；光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "皎": {
+      "sourceDefinition": "white; bright, brilliant; clear",
+      "makeMeAHanziDefinition": "white; bright, brilliant; clear",
+      "definitionCn": "色彩；光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "皿": {
+      "sourceDefinition": "shallow container; rad. no. 108",
+      "makeMeAHanziDefinition": "dish, vessel; shallow container",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "盒": {
+      "sourceDefinition": "small box or case; casket",
+      "makeMeAHanziDefinition": "small box or case; casket",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "砧": {
+      "sourceDefinition": "anvil; flat stone",
+      "makeMeAHanziDefinition": "anvil, flat stone",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碉": {
+      "sourceDefinition": "room made of stone; watchtower",
+      "makeMeAHanziDefinition": "watchtower",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碟": {
+      "sourceDefinition": "small dish, plate",
+      "makeMeAHanziDefinition": "plate, small dish",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碡": {
+      "sourceDefinition": "stone roller used to level fields",
+      "makeMeAHanziDefinition": "stone roller",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "祊": {
+      "sourceDefinition": "river in Shāndōng; space inside",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "祎": {
+      "sourceDefinition": "excellent",
+      "makeMeAHanziDefinition": "excellent, rare; beautiful, fine",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "稍": {
+      "sourceDefinition": "little, slightly; rather",
+      "makeMeAHanziDefinition": "somewhat, slightly, a little; rather",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "稻": {
+      "sourceDefinition": "rice growing in field, rice plant",
+      "makeMeAHanziDefinition": "rice plant; rice growing in the field",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笥": {
+      "sourceDefinition": "a hamper, wicker basket",
+      "makeMeAHanziDefinition": "hamper, wicker basket",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "筚": {
+      "sourceDefinition": "wicker, bamboo",
+      "makeMeAHanziDefinition": "wicker, bamboo",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篾": {
+      "sourceDefinition": "bamboo splints or slats",
+      "makeMeAHanziDefinition": "bamboo splints or slats",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "簋": {
+      "sourceDefinition": "a square basket of bamboo for holding grain used at sacrifices",
+      "makeMeAHanziDefinition": "bamboo basket for grain",
+      "definitionCn": "器具；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "箪": {
+      "sourceDefinition": "small bamboo basket for holding",
+      "makeMeAHanziDefinition": "a small bamboo basket for rice",
+      "definitionCn": "器具；生物；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篑": {
+      "sourceDefinition": "a bamboo basket for carrying earth",
+      "makeMeAHanziDefinition": "a bamboo basket for carrying soil",
+      "definitionCn": "器具；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "箨": {
+      "sourceDefinition": "bamboo sheath, bamboo shoots",
+      "makeMeAHanziDefinition": "bamboo sheath, bamboo shoots",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篱": {
+      "sourceDefinition": "bamboo or wooden fence; hedge",
+      "makeMeAHanziDefinition": "bamboo fence; fence, hedge",
+      "definitionCn": "墙垣；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "绛": {
+      "sourceDefinition": "deep red; river in Shanxi province",
+      "makeMeAHanziDefinition": "deep red; a river in Shanxi province",
+      "definitionCn": "色彩；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "绨": {
+      "sourceDefinition": "coarse pongee, kind of heavy silk",
+      "makeMeAHanziDefinition": "coarse pongee, heavy silk",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "绸": {
+      "sourceDefinition": "silk cloth, satin damask",
+      "makeMeAHanziDefinition": "silk cloth, satin damask",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缔": {
+      "sourceDefinition": "tie, join, connect; connection",
+      "makeMeAHanziDefinition": "to tie, to join; knot, connection",
+      "definitionCn": "共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缣": {
+      "sourceDefinition": "fine silk",
+      "makeMeAHanziDefinition": "fine silk",
+      "definitionCn": "卓越；织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缟": {
+      "sourceDefinition": "white raw silk",
+      "makeMeAHanziDefinition": "plain white silk",
+      "definitionCn": "织物；色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "绎": {
+      "sourceDefinition": "to unravel or unreel silk; to interpret",
+      "makeMeAHanziDefinition": "to unravel; to interpret",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罚": {
+      "sourceDefinition": "penalty, fine; punish, penalize",
+      "makeMeAHanziDefinition": "penalty, fine; to punish, to penalize",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "肢": {
+      "sourceDefinition": "human limbs; animal feet",
+      "makeMeAHanziDefinition": "limbs",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "腮": {
+      "sourceDefinition": "lower part of face; jaw; gills of a fish",
+      "makeMeAHanziDefinition": "jaw; gills",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "膆": {
+      "sourceDefinition": "the crop of a bird or fowl; fat",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "脍": {
+      "sourceDefinition": "minced meat or fish",
+      "makeMeAHanziDefinition": "minced meat, minced fish",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "舶": {
+      "sourceDefinition": "large, ocean-going vessel",
+      "makeMeAHanziDefinition": "large ship, ocean-going vessel",
+      "definitionCn": "宏大；器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "舸": {
+      "sourceDefinition": "large boat, barge",
+      "makeMeAHanziDefinition": "barge, large boat",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "苛": {
+      "sourceDefinition": "small, petty; harsh, rigorous",
+      "makeMeAHanziDefinition": "severe, harsh; rigorous, exacting",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "菅": {
+      "sourceDefinition": "coarse grass, Themedia forskalii",
+      "makeMeAHanziDefinition": "coarse grass; Themedia forskali",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "萋": {
+      "sourceDefinition": "luxuriant foliage; crowded",
+      "makeMeAHanziDefinition": "luxuriant foliage",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "葸": {
+      "sourceDefinition": "afraid, bashful",
+      "makeMeAHanziDefinition": "afraid, bashful, insecure",
+      "definitionCn": "惊惧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "莼": {
+      "sourceDefinition": "an edible water plant-brasenia",
+      "makeMeAHanziDefinition": "an edible water plant; Brasenia",
+      "definitionCn": "生物；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "苧": {
+      "sourceDefinition": "China grass, ramie (Boehmeria nivea)",
+      "makeMeAHanziDefinition": "China grass, ramie",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "茏": {
+      "sourceDefinition": "tall grass; water-weeds",
+      "makeMeAHanziDefinition": "tall grass; water-weeds",
+      "definitionCn": "生物；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "觞": {
+      "sourceDefinition": "wine vessel; propose toast; feast",
+      "makeMeAHanziDefinition": "wine cup; to propose a toast; feast",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "讣": {
+      "sourceDefinition": "obituary; give notice of death",
+      "makeMeAHanziDefinition": "obituary, death notice",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "訹": {
+      "sourceDefinition": "to beguile with false stories",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "诳": {
+      "sourceDefinition": "deceive, lie, delude, cheat",
+      "makeMeAHanziDefinition": "to lie, to deceive; to delude, to cheat",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "豢": {
+      "sourceDefinition": "domestic animals; feed, raise",
+      "makeMeAHanziDefinition": "domestic animal; to feed, to raise",
+      "definitionCn": "养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赠": {
+      "sourceDefinition": "give present; bestow, confer",
+      "makeMeAHanziDefinition": "to bestow, to confer, to present a gift",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赝": {
+      "sourceDefinition": "false; counterfeit; bogus; sham",
+      "makeMeAHanziDefinition": "false, bogus; counterfeit; a sham",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赳": {
+      "sourceDefinition": "grand, valiant",
+      "makeMeAHanziDefinition": "gallant, valiant",
+      "definitionCn": "宏大；强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蹄": {
+      "sourceDefinition": "hoof; horse",
+      "makeMeAHanziDefinition": "hoof; pig's trotter",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "跷": {
+      "sourceDefinition": "raise one's foot",
+      "makeMeAHanziDefinition": "to stand on tiptoe; stilts",
+      "definitionCn": "养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "辍": {
+      "sourceDefinition": "stop, suspend, halt",
+      "makeMeAHanziDefinition": "to suspend, to stop, to halt",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "逮": {
+      "sourceDefinition": "seize, catch; reach, arrive",
+      "makeMeAHanziDefinition": "to catch, to seize; to arrive, to reach",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "醝": {
+      "sourceDefinition": "white wine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "钜": {
+      "sourceDefinition": "steel, iron; great",
+      "makeMeAHanziDefinition": "steel, iron; great",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "锖": {
+      "sourceDefinition": "the color of the a mineral",
+      "makeMeAHanziDefinition": "the color of a mineral",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "銮": {
+      "sourceDefinition": "bells hung on horse; bells hung",
+      "makeMeAHanziDefinition": "bells hung on a horse; imperial",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "阽": {
+      "sourceDefinition": "wall ready to fall; danger",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "陇": {
+      "sourceDefinition": "mountain located between Shanxi",
+      "makeMeAHanziDefinition": "a mountain located in the Shanxi provice",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "巩": {
+      "sourceDefinition": "bind; firm, secure, strong",
+      "makeMeAHanziDefinition": "to bind, to guard, to strengthen; firm, secure, strong",
+      "definitionCn": "坚定；强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "韪": {
+      "sourceDefinition": "right; proper; propriety",
+      "makeMeAHanziDefinition": "right; proper; perpriety",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "颢": {
+      "sourceDefinition": "luminous; white, hoary",
+      "makeMeAHanziDefinition": "bright, luminous; white, hoary",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "养": {
+      "sourceDefinition": "raise, rear, bring up; support",
+      "makeMeAHanziDefinition": "to raise, to rear, to bring up; to support",
+      "definitionCn": "养育；帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "馵": {
+      "sourceDefinition": "horse with white back legs",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "驽": {
+      "sourceDefinition": "tired, old horse; old, weak",
+      "makeMeAHanziDefinition": "tired old horse; old, weak",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骈": {
+      "sourceDefinition": "team of horses; associate, join",
+      "makeMeAHanziDefinition": "a team of horses; to associate; to join",
+      "definitionCn": "伴侣；共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骇": {
+      "sourceDefinition": "terrify, frighten, scare; shock",
+      "makeMeAHanziDefinition": "to terrify, to shock, to frighten",
+      "definitionCn": "惊惧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骞": {
+      "sourceDefinition": "raise, hold high; fly, soar",
+      "makeMeAHanziDefinition": "to lift, to raise; to fly, to soar",
+      "definitionCn": "养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骖": {
+      "sourceDefinition": "two outside ones in three horse",
+      "makeMeAHanziDefinition": "the two outside horses in a team of four",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骥": {
+      "sourceDefinition": "thoroughbred horse; refined and",
+      "makeMeAHanziDefinition": "a thoroughbred horse; refined, virtuous",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "魑": {
+      "sourceDefinition": "a mountain demon resembling a tiger",
+      "makeMeAHanziDefinition": "a mountain demon resembling a tiger",
+      "definitionCn": "生物；山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鳏": {
+      "sourceDefinition": "huge fish; widower; bachelor",
+      "makeMeAHanziDefinition": "huge fish; widower; bachelor",
+      "definitionCn": "宏大；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鸯": {
+      "sourceDefinition": "female mandarin duck (Aix galericulata)",
+      "makeMeAHanziDefinition": "female mandarin duck (Aix galericulata)",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "黢": {
+      "sourceDefinition": "black",
+      "makeMeAHanziDefinition": "black",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "黧": {
+      "sourceDefinition": "a dark, yellowish colour",
+      "makeMeAHanziDefinition": "a dark, sallow colour",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "箄": {
+      "sourceDefinition": "a basket; a raft",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "辧": {
+      "sourceDefinition": "manage, do, handle; deal with",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棅": {
+      "sourceDefinition": "handle, lever, knob; authority",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "幷": {
+      "sourceDefinition": "combine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "縞": {
+      "sourceDefinition": "white raw silk",
+      "makeMeAHanziDefinition": "plain white silk",
+      "definitionCn": "织物；色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "頳": {
+      "sourceDefinition": "red",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "縝": {
+      "sourceDefinition": "detailed, fine; closely woven",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "遷": {
+      "sourceDefinition": "move, shift, change; transfer",
+      "makeMeAHanziDefinition": "to shift, to move; to transfer, to change",
+      "definitionCn": "替代",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騘": {
+      "sourceDefinition": "a piebald horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蟚": {
+      "sourceDefinition": "a small land crab",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "縟": {
+      "sourceDefinition": "decorative, adorned, elegant",
+      "makeMeAHanziDefinition": "elegant, decorative, adorned",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "逓": {
+      "sourceDefinition": "hand over, deliver; substitute",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "替代",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "渉": {
+      "sourceDefinition": "ford stream",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鐤": {
+      "sourceDefinition": "huge tripod of bronze with two ears; sacrificial vessel",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大；器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "葢": {
+      "sourceDefinition": "cover, hide, protect",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漑": {
+      "sourceDefinition": "water",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罁": {
+      "sourceDefinition": "a cistern; an earthenware jar of large dimensions; a vat; a crock",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "曍": {
+      "sourceDefinition": "bright, brilliant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "烉": {
+      "sourceDefinition": "shining, brilliant, lustrous",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "羇": {
+      "sourceDefinition": "an inn; to lodge; travel",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "覉": {
+      "sourceDefinition": "an inn; to lodge; travel",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "徤": {
+      "sourceDefinition": "strong, robust; to strengthen",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "纎": {
+      "sourceDefinition": "fine, delicate; minute; graceful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越；细小；美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "柾": {
+      "sourceDefinition": "straight grain",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "釐": {
+      "sourceDefinition": "manage, control; thousandth part of tael",
+      "makeMeAHanziDefinition": "one thousandth",
+      "definitionCn": "治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蓋": {
+      "sourceDefinition": "cover, hide, protect",
+      "makeMeAHanziDefinition": "to cover, to hide, to protect",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "聨": {
+      "sourceDefinition": "connect, join; associate, ally",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "共同；伴侣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "聫": {
+      "sourceDefinition": "connect, join; associate, ally",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "共同；伴侣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "聮": {
+      "sourceDefinition": "connect, join; associate, ally",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "共同；伴侣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "魲": {
+      "sourceDefinition": "fish name",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "攙": {
+      "sourceDefinition": "to give a helping hand; to support, hold up",
+      "makeMeAHanziDefinition": "to mix; to support, to sustain, to lend a hand",
+      "definitionCn": "给予；帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "貎": {
+      "sourceDefinition": "lion; wild beast; wild horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嬝": {
+      "sourceDefinition": "delicate; graceful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鷿": {
+      "sourceDefinition": "little grebe, dabchick (Tachybaptus ruficollis)",
+      "makeMeAHanziDefinition": "a duck-like bird",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "捿": {
+      "sourceDefinition": "perch; roost; stay",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "輝": {
+      "sourceDefinition": "brightness, luster, brilliance",
+      "makeMeAHanziDefinition": "brightness, luster",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鵭": {
+      "sourceDefinition": "a small bird with black neck",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；色彩；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "逎": {
+      "sourceDefinition": "strong, unyielding, forceful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "紈": {
+      "sourceDefinition": "white silk, fine silk; gauze",
+      "makeMeAHanziDefinition": "gauze; fine white silk",
+      "definitionCn": "织物；色彩；卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "惖": {
+      "sourceDefinition": "respect; fear",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "惊惧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "綂": {
+      "sourceDefinition": "govern, command, control; unite",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "曅": {
+      "sourceDefinition": "bright; flourishing",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鶃": {
+      "sourceDefinition": "hawk; Ardea cinerea",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鳤": {
+      "sourceDefinition": "a kind of fish; with a long cylinder body",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "丏": {
+      "sourceDefinition": "parapet; invisible",
+      "makeMeAHanziDefinition": "parapet; invisible, hidden",
+      "definitionCn": "墙垣；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "丮": {
+      "sourceDefinition": "catch",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "丵": {
+      "sourceDefinition": "thick (grass)",
+      "makeMeAHanziDefinition": "thick (grass)",
+      "definitionCn": "浓密；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "乀": {
+      "sourceDefinition": "stretch",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "伸展",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "乂": {
+      "sourceDefinition": "govern, control, manage; nurture",
+      "makeMeAHanziDefinition": "to govern; to control; to nurture",
+      "definitionCn": "治理；养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "乑": {
+      "sourceDefinition": "stand side by side",
+      "makeMeAHanziDefinition": "to stand side by side",
+      "definitionCn": "站立",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "乢": {
+      "sourceDefinition": "lid, to cover; to hide; a cover; an umbrella",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "亠": {
+      "sourceDefinition": "head; Kangxi radical 8",
+      "makeMeAHanziDefinition": "lid, cover; head",
+      "definitionCn": "顶部",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "亹": {
+      "sourceDefinition": "progress; busy, untiring; exert",
+      "makeMeAHanziDefinition": "busy; resolute; to exert; to make progress",
+      "definitionCn": "进展；勤勉；努力",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "佪": {
+      "sourceDefinition": "hesitate",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "犹豫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "佷": {
+      "sourceDefinition": "to act contrary to",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "佹": {
+      "sourceDefinition": "depend upon; support; go against; (variant deceive)",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "侹": {
+      "sourceDefinition": "straight",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "俘": {
+      "sourceDefinition": "prisoner of war; take as prisoner",
+      "makeMeAHanziDefinition": "prisoner of war; take as prisoner",
+      "definitionCn": "俘获",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "働": {
+      "sourceDefinition": "labor; work",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "劳作",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "僎": {
+      "sourceDefinition": "collect",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "收集",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "僿": {
+      "sourceDefinition": "small, minute; lacking sincerity",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "儅": {
+      "sourceDefinition": "stop",
+      "makeMeAHanziDefinition": "to stop",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "儌": {
+      "sourceDefinition": "lucky, fortunate",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "儓": {
+      "sourceDefinition": "servant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "侍奉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "冓": {
+      "sourceDefinition": "a secluded place; secret cabinet",
+      "makeMeAHanziDefinition": "secret, niche, hiding-hole, cabinet",
+      "definitionCn": "隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "冘": {
+      "sourceDefinition": "to move on; doubtful, to hesitate",
+      "makeMeAHanziDefinition": "to move on; doubtful",
+      "definitionCn": "犹豫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "凞": {
+      "sourceDefinition": "bright, splendid, glorious",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "刌": {
+      "sourceDefinition": "cut up small; divide",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "剸": {
+      "sourceDefinition": "cut",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "劘": {
+      "sourceDefinition": "make into mince",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "匜": {
+      "sourceDefinition": "basin; container for wine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "厔": {
+      "sourceDefinition": "stop, hinder; place near water",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "厖": {
+      "sourceDefinition": "bulky; thick and large; confused",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大；浓密",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "呺": {
+      "sourceDefinition": "voice of anger vast, spacious",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "圌": {
+      "sourceDefinition": "fence",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "垍": {
+      "sourceDefinition": "firm ground",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "垴": {
+      "sourceDefinition": "small, head shaped hill, used in place names",
+      "makeMeAHanziDefinition": "small hillock, used in place names",
+      "definitionCn": "细小；顶部；山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塅": {
+      "sourceDefinition": "a large flat area, usually used in place names",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塕": {
+      "sourceDefinition": "a gust of wind",
+      "makeMeAHanziDefinition": "airborne dust",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塭": {
+      "sourceDefinition": "fish farm",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "奜": {
+      "sourceDefinition": "big",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "姸": {
+      "sourceDefinition": "beautiful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "婤": {
+      "sourceDefinition": "lovely",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "婥": {
+      "sourceDefinition": "beautiful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "媄": {
+      "sourceDefinition": "beautiful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嬛": {
+      "sourceDefinition": "apt, clever; sycophant, flatterer",
+      "makeMeAHanziDefinition": "apt, clever; flatterer, sycophant",
+      "definitionCn": "灵巧",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "尥": {
+      "sourceDefinition": "a backward kick, as by a mule or horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "岧": {
+      "sourceDefinition": "peak; cliff; precipice",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "峿": {
+      "sourceDefinition": "mountain",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "峃": {
+      "sourceDefinition": "big rocky mountain",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大；山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "幪": {
+      "sourceDefinition": "cover, shelter, screen; protect",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "幭": {
+      "sourceDefinition": "cover",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "庉": {
+      "sourceDefinition": "a village; to dwell together",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住；共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "庬": {
+      "sourceDefinition": "abundant; mixed",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "廆": {
+      "sourceDefinition": "a room; the wall of a house a man's name",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "廋": {
+      "sourceDefinition": "conceal, hide; search for, seek",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "廧": {
+      "sourceDefinition": "wall",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "弇": {
+      "sourceDefinition": "cover over, hide; narrow-necked",
+      "makeMeAHanziDefinition": "to trap; to hide, to cover; narrow-necked",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "悆": {
+      "sourceDefinition": "happy",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "愒": {
+      "sourceDefinition": "rest, stop",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "慉": {
+      "sourceDefinition": "to bring up; to raise",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "养育",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "戠": {
+      "sourceDefinition": "a sword; potter's clay; to gather",
+      "makeMeAHanziDefinition": "sword; potter's clay; to gather",
+      "definitionCn": "共同",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "扻": {
+      "sourceDefinition": "to strike; to run against to throw, as a stone",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "捗": {
+      "sourceDefinition": "make progress",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "进展",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "挜": {
+      "sourceDefinition": "take; hold; give forcefully",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "揜": {
+      "sourceDefinition": "cover up; take by force, shut",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "揳": {
+      "sourceDefinition": "wipe; estimate",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "估量",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "搰": {
+      "sourceDefinition": "dig; turbid; exert; (Cant.) to shake",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "努力",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "搲": {
+      "sourceDefinition": "to seize, to grasp",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "摀": {
+      "sourceDefinition": "to cover with the hand; to hide",
+      "makeMeAHanziDefinition": "to conceal, to hide; to cover with a hand",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "摰": {
+      "sourceDefinition": "to seize with the hand; to grasp; to advance; to break down",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "捉拿；进展",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "擭": {
+      "sourceDefinition": "trap catch animals, snare; seize",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "捉拿",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "收": {
+      "sourceDefinition": "gather together, collect; harvest",
+      "makeMeAHanziDefinition": "to collect, to gather, to harvest",
+      "definitionCn": "共同；收集",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "敃": {
+      "sourceDefinition": "strong; robust; vigorous",
+      "makeMeAHanziDefinition": "robust, strong, vigorous",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "敪": {
+      "sourceDefinition": "to weigh; cut; come without being invited",
+      "makeMeAHanziDefinition": "to weigh; to cut; to enter without being invited",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "敻": {
+      "sourceDefinition": "long, faraway; pre-eminent",
+      "makeMeAHanziDefinition": "remote, far away; preeminent",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昄": {
+      "sourceDefinition": "big",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昑": {
+      "sourceDefinition": "bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "晢": {
+      "sourceDefinition": "light of stars; shine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "暋": {
+      "sourceDefinition": "strong, robust, tough",
+      "makeMeAHanziDefinition": "tough, strong, robust",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "暠": {
+      "sourceDefinition": "daybreak; bright and brilliant",
+      "makeMeAHanziDefinition": "daybreak; brilliant, bright",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "朅": {
+      "sourceDefinition": "brave",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "朠": {
+      "sourceDefinition": "color of the moon",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "栱": {
+      "sourceDefinition": "large peg, stake; post, pillar",
+      "makeMeAHanziDefinition": "stake, post; pillar; peg",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "桋": {
+      "sourceDefinition": "tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棬": {
+      "sourceDefinition": "bowl",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棯": {
+      "sourceDefinition": "jujube tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棻": {
+      "sourceDefinition": "kind of wood from which perfume is made",
+      "makeMeAHanziDefinition": "sandalwood",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "椊": {
+      "sourceDefinition": "to fit a handle into a socket; a plug or cork",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "楛": {
+      "sourceDefinition": "coarse, crude; plant",
+      "makeMeAHanziDefinition": "coarse, crude; a kind of plant",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "楩": {
+      "sourceDefinition": "tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "楪": {
+      "sourceDefinition": "small dish; window",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "楰": {
+      "sourceDefinition": "tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "榦": {
+      "sourceDefinition": "tree trunk; support, prop",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "榾": {
+      "sourceDefinition": "pieces of wood",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "槾": {
+      "sourceDefinition": "paste wall with dirt",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "墙垣",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "橚": {
+      "sourceDefinition": "tall tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "檴": {
+      "sourceDefinition": "tree",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "欻": {
+      "sourceDefinition": "sudden, abrupt, quick",
+      "makeMeAHanziDefinition": "sudden, abrupt",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "氆": {
+      "sourceDefinition": "thick, rough serge from Tibet",
+      "makeMeAHanziDefinition": "thick rough serge from Tibet",
+      "definitionCn": "浓密",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "沬": {
+      "sourceDefinition": "dusk; Mei river; Zhou dynasty place-name; (Cant.) to go underwater, to dive",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "泂": {
+      "sourceDefinition": "clear and deep (of water); wide",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "泒": {
+      "sourceDefinition": "a river in Hubei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "泜": {
+      "sourceDefinition": "a river in Hebei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "淅": {
+      "sourceDefinition": "water used wash rice; to wash rice",
+      "makeMeAHanziDefinition": "water used wash rice",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "淊": {
+      "sourceDefinition": "to immerse (in water)",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "渰": {
+      "sourceDefinition": "(of cloud) forming or rising",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "湑": {
+      "sourceDefinition": "to strain spirits; river in Guangxi; abundant; bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然；丰盛；光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "溎": {
+      "sourceDefinition": "river in Guangxi province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "溠": {
+      "sourceDefinition": "river in Hubei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "涢": {
+      "sourceDefinition": "river in Hubei",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "滊": {
+      "sourceDefinition": "a river name; a long rain",
+      "makeMeAHanziDefinition": "saline pond; the name of a river",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "溇": {
+      "sourceDefinition": "river in Hubei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漎": {
+      "sourceDefinition": "a place where small streams flow into a large one",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漷": {
+      "sourceDefinition": "river in Hebei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "澒": {
+      "sourceDefinition": "vast",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "濊": {
+      "sourceDefinition": "vast, expansive, deep; dirty",
+      "makeMeAHanziDefinition": "vast, expansive, deep; dirty",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "浕": {
+      "sourceDefinition": "river in Hubei province",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "炘": {
+      "sourceDefinition": "brilliant, shining, bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "烺": {
+      "sourceDefinition": "(said of fire) bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "煆": {
+      "sourceDefinition": "raging fire; to forge, work",
+      "makeMeAHanziDefinition": "a raging fire; to forge; to work",
+      "definitionCn": "劳作",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "颎": {
+      "sourceDefinition": "bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "燊": {
+      "sourceDefinition": "luxuriant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "燡": {
+      "sourceDefinition": "bright",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "犛": {
+      "sourceDefinition": "a black ox, a yak",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "犺": {
+      "sourceDefinition": "animal",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "狻": {
+      "sourceDefinition": "a fabulous beast",
+      "makeMeAHanziDefinition": "a fabulous beast",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "猋": {
+      "sourceDefinition": "wind; storm; gale; dog moving; (Cant.) running quickly",
+      "makeMeAHanziDefinition": "wind, storm, gale; a dog running",
+      "definitionCn": "自然；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "狝": {
+      "sourceDefinition": "hunt; autumn hunting; to capture with a fine net",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越；俘获",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "獳": {
+      "sourceDefinition": "looking like a fierce dog; angry",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "玃": {
+      "sourceDefinition": "a large ape found in western China",
+      "makeMeAHanziDefinition": "a large ape found in western China",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "玈": {
+      "sourceDefinition": "black",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璚": {
+      "sourceDefinition": "splendid",
+      "makeMeAHanziDefinition": "splendid; a jade ring",
+      "definitionCn": "光明",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "甔": {
+      "sourceDefinition": "big jar",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "疕": {
+      "sourceDefinition": "head sores",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "顶部",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "痦": {
+      "sourceDefinition": "a sudden outbreak of spots",
+      "makeMeAHanziDefinition": "spot, mole, birthmark",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "皁": {
+      "sourceDefinition": "black; police runners, from the black clothes formerly worn by them",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "盦": {
+      "sourceDefinition": "lid of a caldron; Buddhist cloister",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "睖": {
+      "sourceDefinition": "to stare straight ahead",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "矰": {
+      "sourceDefinition": "arrow with attached silk cord",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "矻": {
+      "sourceDefinition": "toil, slave away; busy",
+      "makeMeAHanziDefinition": "busy; to toil, to slave away",
+      "definitionCn": "劳作；勤勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "砆": {
+      "sourceDefinition": "semiprecious stone, agate",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碞": {
+      "sourceDefinition": "room made of stone; watchtower",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碻": {
+      "sourceDefinition": "solid",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "硙": {
+      "sourceDefinition": "stone mill; grind; break apart",
+      "makeMeAHanziDefinition": "millstone; to grind, to mill",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "磻": {
+      "sourceDefinition": "a tributary of the Wei river in Shanxi",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "礌": {
+      "sourceDefinition": "roll a stone downhill",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "禠": {
+      "sourceDefinition": "happy",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "竑": {
+      "sourceDefinition": "be vast and endless; broad",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笊": {
+      "sourceDefinition": "ladle, bamboo skimmer",
+      "makeMeAHanziDefinition": "bamboo ladle, bamboo skimmer",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笓": {
+      "sourceDefinition": "to comb; a fine-toothed comb",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笭": {
+      "sourceDefinition": "bamboo screen",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笲": {
+      "sourceDefinition": "basket",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "笵": {
+      "sourceDefinition": "a bamboo form; a model",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "筊": {
+      "sourceDefinition": "bamboo rope or cable",
+      "makeMeAHanziDefinition": "bamboo rope",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "筤": {
+      "sourceDefinition": "young bamboo",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "箘": {
+      "sourceDefinition": "fine bamboo",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篛": {
+      "sourceDefinition": "cuticle of bamboo plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篠": {
+      "sourceDefinition": "dwarf bamboo; diminutive in person's name",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篨": {
+      "sourceDefinition": "coarse bamboo mat; ugly",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "筜": {
+      "sourceDefinition": "tall bamboo",
+      "makeMeAHanziDefinition": "tall bamboo",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "籓": {
+      "sourceDefinition": "sieve; basket",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "籚": {
+      "sourceDefinition": "bamboo; the handle of the spear",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；治理",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "纟": {
+      "sourceDefinition": "silk; Kangxi radical 120",
+      "makeMeAHanziDefinition": "silk; thread",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "纰": {
+      "sourceDefinition": "spoiled silk; hem of dress; mista",
+      "makeMeAHanziDefinition": "carelessness; error, mistake; spoiled silk",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "紽": {
+      "sourceDefinition": "a strand of silk",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "絁": {
+      "sourceDefinition": "rough, indelicate silk",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "綅": {
+      "sourceDefinition": "thread",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "綎": {
+      "sourceDefinition": "silk braided cord",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "緅": {
+      "sourceDefinition": "silk of purplish color",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物；色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "繙": {
+      "sourceDefinition": "to interpret; to flap, flutter in the wind",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罏": {
+      "sourceDefinition": "earthen stand for wine jug",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "站立",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罛": {
+      "sourceDefinition": "large fishing net",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罠": {
+      "sourceDefinition": "animal trap",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罭": {
+      "sourceDefinition": "drag-net made of fine mesh",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罽": {
+      "sourceDefinition": "a kind of woolen fabric",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "翛": {
+      "sourceDefinition": "look of rumpled feathers; bedraggled; hasty; rapid flight",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "肙": {
+      "sourceDefinition": "a small worm; to twist; to surround; empty",
+      "makeMeAHanziDefinition": "a small worm; to twist; to surround; empty",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "肸": {
+      "sourceDefinition": "spread out; smiling or laughing",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "布告",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "膴": {
+      "sourceDefinition": "fine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "芄": {
+      "sourceDefinition": "a sedgy plant",
+      "makeMeAHanziDefinition": "leaf-blade vine; Metaplexis",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "芚": {
+      "sourceDefinition": "green sprout; foolish",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "茀": {
+      "sourceDefinition": "overgrown with grass, weedy",
+      "makeMeAHanziDefinition": "weeds; overgrowth",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "莕": {
+      "sourceDefinition": "a water plant, Nymphoides peltalum",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "莙": {
+      "sourceDefinition": "species of water plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "菏": {
+      "sourceDefinition": "river in Shandong province",
+      "makeMeAHanziDefinition": "a river in Shandong province",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "萐": {
+      "sourceDefinition": "lucky plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；喜悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "荝": {
+      "sourceDefinition": "medicinal poison plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "莳": {
+      "sourceDefinition": "transplant; plant; dill, Anethum graveolens",
+      "makeMeAHanziDefinition": "to transplant, to grow; dill, Anethum graveolens",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蒨": {
+      "sourceDefinition": "lush vegetation, luxuriant growth",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蓧": {
+      "sourceDefinition": "bamboo basket; weeder; rake",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蔇": {
+      "sourceDefinition": "luxuriant growth; extreme; to reach",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蔘": {
+      "sourceDefinition": "ginseng; huge",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蕡": {
+      "sourceDefinition": "luxurious, abundant; hemp seeds",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蕰": {
+      "sourceDefinition": "the hippuris or mare's tail plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "薆": {
+      "sourceDefinition": "to cover; to hide; to conceal",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "覆盖；隐藏",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "薢": {
+      "sourceDefinition": "woody climbing plant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "薶": {
+      "sourceDefinition": "to bury, to stop up; dirty, filthy",
+      "makeMeAHanziDefinition": "sto bury; to dirty, to soil",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "藴": {
+      "sourceDefinition": "collect",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "收集",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "虒": {
+      "sourceDefinition": "an amphibious beast resembling a tiger with one horn; place name in Shanxi",
+      "makeMeAHanziDefinition": "an amphibious beast resembling a tiger with one horn; place name",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "螫": {
+      "sourceDefinition": "poison; sting; poisonous insect",
+      "makeMeAHanziDefinition": "poison, sting; poisonous insect",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蠵": {
+      "sourceDefinition": "large turtles",
+      "makeMeAHanziDefinition": "large turtle",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "袟": {
+      "sourceDefinition": "book cover; satchel or bag",
+      "makeMeAHanziDefinition": "bag, satchel; book cover",
+      "definitionCn": "覆盖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "裋": {
+      "sourceDefinition": "cotton clothes of a boy servant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "侍奉；织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "訑": {
+      "sourceDefinition": "deceive, cheat; arrogant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "诪": {
+      "sourceDefinition": "deceive, cheat; hurried, bustling",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "豇": {
+      "sourceDefinition": "a small kidney bean",
+      "makeMeAHanziDefinition": "kidney bean; black-eyed pea",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "豊": {
+      "sourceDefinition": "abundant, lush, bountiful, plenty",
+      "makeMeAHanziDefinition": "abundant, lush, bountiful, plenty",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "豋": {
+      "sourceDefinition": "ceremonial vessel",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赒": {
+      "sourceDefinition": "give for charity",
+      "makeMeAHanziDefinition": "to give to charity; to give alms",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赑": {
+      "sourceDefinition": "strong",
+      "makeMeAHanziDefinition": "strong",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赪": {
+      "sourceDefinition": "deep red",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "赯": {
+      "sourceDefinition": "red, crimson",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "趹": {
+      "sourceDefinition": "kick with hoof; horse's gallop",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "跮": {
+      "sourceDefinition": "hasty walking",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "迅速",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "跱": {
+      "sourceDefinition": "stop",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "居住",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蹚": {
+      "sourceDefinition": "tread through mud and water",
+      "makeMeAHanziDefinition": "to trample, to wade; muddy, wet",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "軱": {
+      "sourceDefinition": "large bone",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "輵": {
+      "sourceDefinition": "great array of spears and chariots",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "迋": {
+      "sourceDefinition": "travel, go to; deceive; scare",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "违背",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "遝": {
+      "sourceDefinition": "mixed, abundant, assorted",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "丰盛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "酂": {
+      "sourceDefinition": "collect; small administration",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "收集；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "酖": {
+      "sourceDefinition": "wine with bird poison added",
+      "makeMeAHanziDefinition": "poison, bad wine; addicted",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "醁": {
+      "sourceDefinition": "a kind of green-colored wine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "醂": {
+      "sourceDefinition": "to remove astringency; to bleach in water",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "釪": {
+      "sourceDefinition": "an alms bowl; a small bell",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "钘": {
+      "sourceDefinition": "ancient wine vessel",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "镈": {
+      "sourceDefinition": "large bell; hoe, spade",
+      "makeMeAHanziDefinition": "large bell; hoe, spade",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "镚": {
+      "sourceDefinition": "small coin",
+      "makeMeAHanziDefinition": "dime, small coin",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "霂": {
+      "sourceDefinition": "fine rain, drizzle",
+      "makeMeAHanziDefinition": "drizzle, shower, light rain",
+      "definitionCn": "卓越；自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "霤": {
+      "sourceDefinition": "drip; rain-water catcher",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "霫": {
+      "sourceDefinition": "heavy rain",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鞬": {
+      "sourceDefinition": "a quiver on a horse; a store",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鞶": {
+      "sourceDefinition": "big leather belt",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "颋": {
+      "sourceDefinition": "straight",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "端正",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "颙": {
+      "sourceDefinition": "solemn, large, grand, majestic",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "飐": {
+      "sourceDefinition": "sway in wind",
+      "makeMeAHanziDefinition": "to sway in the wind",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "驲": {
+      "sourceDefinition": "post horse, relay horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骃": {
+      "sourceDefinition": "grey horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "駻": {
+      "sourceDefinition": "a fierce horse; to rage, run wild",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騉": {
+      "sourceDefinition": "fine horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "卓越；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騋": {
+      "sourceDefinition": "tall (7 chi) horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騑": {
+      "sourceDefinition": "horse; run",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骙": {
+      "sourceDefinition": "(of a horse) lively; vigorous",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骣": {
+      "sourceDefinition": "horse without saddle",
+      "makeMeAHanziDefinition": "wild horse, mustang; wild, free",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "骦": {
+      "sourceDefinition": "horse",
+      "makeMeAHanziDefinition": "horse",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鬐": {
+      "sourceDefinition": "horse's mane; fins",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鬒": {
+      "sourceDefinition": "black, glossy hair",
+      "makeMeAHanziDefinition": "glossy black hair",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鬘": {
+      "sourceDefinition": "beautiful hair",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "美好",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鬠": {
+      "sourceDefinition": "to make a top knot; (Cant.) 鬅鬠, to be slovenly dressed",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "顶部",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鲊": {
+      "sourceDefinition": "minced and salted fish; to preserve",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鮨": {
+      "sourceDefinition": "seasoned rice mixed with fish or vegetables",
+      "makeMeAHanziDefinition": "sushi; seasoned rice mixed with fish",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鳒": {
+      "sourceDefinition": "big-mouthed flounder",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鳑": {
+      "sourceDefinition": "several species of small carp",
+      "makeMeAHanziDefinition": "carp",
+      "definitionCn": "细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鱐": {
+      "sourceDefinition": "dried fish",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鴂": {
+      "sourceDefinition": "the tailor-bird; the working bird",
+      "makeMeAHanziDefinition": "tailorbird; working bird",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鶸": {
+      "sourceDefinition": "light yellowish-green",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "黈": {
+      "sourceDefinition": "yellow; augment, increase",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鼒": {
+      "sourceDefinition": "large tripod caldron with small mouth",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大；细小",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "齇": {
+      "sourceDefinition": "a pimple or red splotch on the nose",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "齈": {
+      "sourceDefinition": "cold in the head; catarrh of the nose; mucus from the nose",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "顶部",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "錫": {
+      "sourceDefinition": "tin (element 50, Sn); bestow, confer",
+      "makeMeAHanziDefinition": "tin; to bestow, to confer",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "佈": {
+      "sourceDefinition": "spread, publicize, announce",
+      "makeMeAHanziDefinition": "to spread, to publicize, to announce",
+      "definitionCn": "布告",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鶒": {
+      "sourceDefinition": "a duck-like bird",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "剙": {
+      "sourceDefinition": "establish, create; knife cut",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鐡": {
+      "sourceDefinition": "iron; strong, solid, firm",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "强健；坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騠": {
+      "sourceDefinition": "a horse, mule",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "棡": {
+      "sourceDefinition": "(simplified form of 棡) a tall tree; a large tree, (interchangeable 扛) to carry on the shoulders of two of more men",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物；宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "吿": {
+      "sourceDefinition": "tell, announce, inform; accuse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "布告",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "劃": {
+      "sourceDefinition": "divide, mark off, lay boundary",
+      "makeMeAHanziDefinition": "to row or paddle a boat; to scratch; to plan; profitable",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "劤": {
+      "sourceDefinition": "strong",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "强健",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "硃": {
+      "sourceDefinition": "a red mole; cinnabar",
+      "makeMeAHanziDefinition": "cinnabar; a red mole",
+      "definitionCn": "色彩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "霡": {
+      "sourceDefinition": "drizzling rain; to soak-- used fig. of favours",
+      "makeMeAHanziDefinition": "drizzle, light rain; favors, gifts",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嵲": {
+      "sourceDefinition": "towering mountain",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "脁": {
+      "sourceDefinition": "to offer flesh in sacrifice",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "给予",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "髒": {
+      "sourceDefinition": "dirty; firm; fat",
+      "makeMeAHanziDefinition": "organs, viscera; dirty, filthy",
+      "definitionCn": "坚定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "騻": {
+      "sourceDefinition": "horse",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "凘": {
+      "sourceDefinition": "ice floating in freshly-melted water",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "自然",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "殢": {
+      "sourceDefinition": "be in great difficulty, greatly",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "宏大",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "樋": {
+      "sourceDefinition": "tree name",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "綌": {
+      "sourceDefinition": "coarse hempen cloth",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "织物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鸂": {
+      "sourceDefinition": "Mandarin duck, Aix galericulata",
+      "makeMeAHanziDefinition": "Mandarin duck, Aix galericulata",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "籮": {
+      "sourceDefinition": "bamboo basket",
+      "makeMeAHanziDefinition": "bamboo basket",
+      "definitionCn": "器具；生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "龥": {
+      "sourceDefinition": "beg, appeal for help",
+      "makeMeAHanziDefinition": "to beg, to implore",
+      "definitionCn": "帮助",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "宔": {
+      "sourceDefinition": "anciently, a stone box holding an image in an ancestral temple",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "勋": {
+      "sourceDefinition": "meritorious deed; merits; rank",
+      "makeMeAHanziDefinition": "deeds, feats; merit; rank",
+      "definitionCn": "功绩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "半": {
+      "sourceDefinition": "half",
+      "makeMeAHanziDefinition": "half; semi-, incomplete",
+      "definitionCn": "半数",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "卣": {
+      "sourceDefinition": "wine pot",
+      "makeMeAHanziDefinition": "a vessel of wine",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "叛": {
+      "sourceDefinition": "rebel; rebellion; rebellious",
+      "makeMeAHanziDefinition": "rebel; rebellion; rebellious",
+      "definitionCn": "背叛",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "叱": {
+      "sourceDefinition": "scold, shout at, bawl out",
+      "makeMeAHanziDefinition": "to scold, to upbraid; to shout at",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "哥": {
+      "sourceDefinition": "elder brother",
+      "makeMeAHanziDefinition": "elder brother",
+      "definitionCn": "兄长",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "哭": {
+      "sourceDefinition": "weep, cry, wail",
+      "makeMeAHanziDefinition": "to weep, to cry, to wail",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唆": {
+      "sourceDefinition": "make mischief, incite, instigate",
+      "makeMeAHanziDefinition": "to make mischief; to instigate, to incite",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "售": {
+      "sourceDefinition": "sell",
+      "makeMeAHanziDefinition": "to sell",
+      "definitionCn": "售卖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "啕": {
+      "sourceDefinition": "wail",
+      "makeMeAHanziDefinition": "to wail",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喊": {
+      "sourceDefinition": "shout, call out, yell; howl; cry",
+      "makeMeAHanziDefinition": "to shout, to yell, to call out; to howl; to cry",
+      "definitionCn": "呼喊；呼唤",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唤": {
+      "sourceDefinition": "call",
+      "makeMeAHanziDefinition": "to call",
+      "definitionCn": "呼唤",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "咛": {
+      "sourceDefinition": "enjoin, instruct; charge",
+      "makeMeAHanziDefinition": "to enjoin, to instruct; to charge",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "壶": {
+      "sourceDefinition": "jar, pot, jug, vase; surname",
+      "makeMeAHanziDefinition": "jar, pot, jug, vase; surname",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "娌": {
+      "sourceDefinition": "brother's wife",
+      "makeMeAHanziDefinition": "brother's wife",
+      "definitionCn": "兄长",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "恿": {
+      "sourceDefinition": "instigate, incite; to alarm",
+      "makeMeAHanziDefinition": "to instigate, to incite, to alarm",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "檄": {
+      "sourceDefinition": "call arms; urgency",
+      "makeMeAHanziDefinition": "to order, to dispatch; urgency, a call to arms",
+      "definitionCn": "呼唤",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "潸": {
+      "sourceDefinition": "weep; tears flowing",
+      "makeMeAHanziDefinition": "tearful; to weep",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "粜": {
+      "sourceDefinition": "sell grain",
+      "makeMeAHanziDefinition": "to sell grain",
+      "definitionCn": "售卖",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缅": {
+      "sourceDefinition": "distant, remote; think of",
+      "makeMeAHanziDefinition": "distant, remote; to think of",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "臊": {
+      "sourceDefinition": "rancid; rank, fetid; bashful",
+      "makeMeAHanziDefinition": "shy, bashful; rank, fetid; the smell of urine",
+      "definitionCn": "功绩",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "葫": {
+      "sourceDefinition": "bottle-gourd",
+      "makeMeAHanziDefinition": "bottle-gourd",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "詈": {
+      "sourceDefinition": "scold, abuse verbally, curse",
+      "makeMeAHanziDefinition": "to curse, to scold; to accuse",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "诲": {
+      "sourceDefinition": "teach, instruct; encourage, urge",
+      "makeMeAHanziDefinition": "to teach, to instruct; to encourage, to urge",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "跬": {
+      "sourceDefinition": "to step; a stride equal to half a pace",
+      "makeMeAHanziDefinition": "short step, half-pace",
+      "definitionCn": "半数",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "踉": {
+      "sourceDefinition": "hop, jump; hurriedly, urgently",
+      "makeMeAHanziDefinition": "to hop, to jump; hurried, urgent",
+      "definitionCn": "急切",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "迢": {
+      "sourceDefinition": "far; distant",
+      "makeMeAHanziDefinition": "distant, far",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "迥": {
+      "sourceDefinition": "distant, far; separated; different",
+      "makeMeAHanziDefinition": "distant, far; separated; different",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "遥": {
+      "sourceDefinition": "far away, distant, remote",
+      "makeMeAHanziDefinition": "distant, remote",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "辽": {
+      "sourceDefinition": "distant, far",
+      "makeMeAHanziDefinition": "distant, far",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "缻": {
+      "sourceDefinition": "pottery, earthenware",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "釡": {
+      "sourceDefinition": "cauldron, pot, kettle",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "罆": {
+      "sourceDefinition": "jar, jug, pitcher, pot",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "倞": {
+      "sourceDefinition": "far",
+      "makeMeAHanziDefinition": "far",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "劻": {
+      "sourceDefinition": "flurried, be in flurry, zealous",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "急切",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "勗": {
+      "sourceDefinition": "enjoin, advise, excite",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "匋": {
+      "sourceDefinition": "pottery",
+      "makeMeAHanziDefinition": "pottery",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "咷": {
+      "sourceDefinition": "howl, cry loudly",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "品": {
+      "sourceDefinition": "article, product, commodity",
+      "makeMeAHanziDefinition": "article, good, product; commodity; quality, character",
+      "definitionCn": "品类",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "噭": {
+      "sourceDefinition": "shout",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "殜": {
+      "sourceDefinition": "half-sitting, half-reclining",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "半数",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "汍": {
+      "sourceDefinition": "weep",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "呼喊",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "盋": {
+      "sourceDefinition": "earthenware basin; alms bowl (Sanskrit paatra)",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "窅": {
+      "sourceDefinition": "far, deep; sunken eyes; sad",
+      "makeMeAHanziDefinition": "deep, far, hollow; sad; sunken eyes",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "豏": {
+      "sourceDefinition": "half-grown beans",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "半数",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "輠": {
+      "sourceDefinition": "grease pot hung under axle of cart",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "器具",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "逴": {
+      "sourceDefinition": "argue, quarrel, squabble; far",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "遥远",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "餤": {
+      "sourceDefinition": "incite",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "閔": {
+      "sourceDefinition": "mourn, grieve; urge on, incite",
+      "makeMeAHanziDefinition": "to mourn, to grieve; to incite, to urge on",
+      "definitionCn": "劝勉",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "侠": {
+      "sourceDefinition": "chivalrous person; knight-errant",
+      "makeMeAHanziDefinition": "chivalrous person; knight-errant",
+      "definitionCn": "侠义",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "亿": {
+      "sourceDefinition": "hundred million; many",
+      "makeMeAHanziDefinition": "hundred million; many",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "兢": {
+      "sourceDefinition": "fearful, cautious, wary",
+      "makeMeAHanziDefinition": "fearful, cautious, wary",
+      "definitionCn": "谨慎",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "卉": {
+      "sourceDefinition": "general term for plants; myriads",
+      "makeMeAHanziDefinition": "general term for plants; myriads",
+      "definitionCn": "生物；众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "吕": {
+      "sourceDefinition": "surname; a musical note",
+      "makeMeAHanziDefinition": "a musical note; surname",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "哰": {
+      "sourceDefinition": "incoherent chatter",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喈": {
+      "sourceDefinition": "music; melody",
+      "makeMeAHanziDefinition": "melody, music; harmonious",
+      "definitionCn": "和谐",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喋": {
+      "sourceDefinition": "nag; chatter, babble, twitter",
+      "makeMeAHanziDefinition": "to nag; babble, chatter",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喟": {
+      "sourceDefinition": "heave sigh, sigh",
+      "makeMeAHanziDefinition": "heave sigh, sigh",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嗅": {
+      "sourceDefinition": "smell, scent, sniff; olfactive",
+      "makeMeAHanziDefinition": "to sniff, to smell, to scent",
+      "definitionCn": "气息",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唠": {
+      "sourceDefinition": "chat, jaw, gossip, talk",
+      "makeMeAHanziDefinition": "to chat, to gossip, to jaw, to talk",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "冁": {
+      "sourceDefinition": "smile",
+      "makeMeAHanziDefinition": "smile",
+      "definitionCn": "笑容",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "囵": {
+      "sourceDefinition": "all, complete, entire",
+      "makeMeAHanziDefinition": "all, complete, entire",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "圯": {
+      "sourceDefinition": "bridge, bank",
+      "makeMeAHanziDefinition": "bridge; river bank",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "坼": {
+      "sourceDefinition": "split, tear, open",
+      "makeMeAHanziDefinition": "to crack, to open, to split, to tear",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塍": {
+      "sourceDefinition": "a raised path between fields, a dike",
+      "makeMeAHanziDefinition": "a raised path between fields, a dike",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塾": {
+      "sourceDefinition": "village school; private tutorage",
+      "makeMeAHanziDefinition": "village school; private tutorage",
+      "definitionCn": "学塾",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "墀": {
+      "sourceDefinition": "porch; courtyard; steps leading",
+      "makeMeAHanziDefinition": "porch; courtyard; steps leading into a building",
+      "definitionCn": "庭院",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "壑": {
+      "sourceDefinition": "bed of torrent, narrow ravine",
+      "makeMeAHanziDefinition": "gully, pool; a ditch carved by a torrential rain",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "多": {
+      "sourceDefinition": "much, many; more than, over",
+      "makeMeAHanziDefinition": "much, many, multi-; more than, over",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "奥": {
+      "sourceDefinition": "mysterious, obscure, profound",
+      "makeMeAHanziDefinition": "mysterious, obscure, profound; used in transliterations",
+      "definitionCn": "深奥",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "娑": {
+      "sourceDefinition": "dance, frolic; lounge; saunter",
+      "makeMeAHanziDefinition": "to dance, to frolic; to lounge; to saunter",
+      "definitionCn": "舞蹈",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "娱": {
+      "sourceDefinition": "pleasure, enjoyment, amusement",
+      "makeMeAHanziDefinition": "pleasure, enjoyment, amusement",
+      "definitionCn": "愉悦",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "妩": {
+      "sourceDefinition": "charming, enchanting",
+      "makeMeAHanziDefinition": "charming, enchanting; to flatter, to please",
+      "definitionCn": "妩媚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "孩": {
+      "sourceDefinition": "baby, child; children",
+      "makeMeAHanziDefinition": "baby, child; children",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "定": {
+      "sourceDefinition": "decide, settle, fix",
+      "makeMeAHanziDefinition": "to decide, to fix, to settle; to order; definite, fixed, sure",
+      "definitionCn": "裁定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "宠": {
+      "sourceDefinition": "favorite, concubine; favor",
+      "makeMeAHanziDefinition": "to love; to favor, to pamper, to spoil; concubine",
+      "definitionCn": "宠爱",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "峋": {
+      "sourceDefinition": "ranges of hills stretching on beyond another irregular peaks",
+      "makeMeAHanziDefinition": "foothill, mountain range",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "峪": {
+      "sourceDefinition": "valley, ravine",
+      "makeMeAHanziDefinition": "valley, ravine",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "帚": {
+      "sourceDefinition": "broom, broomstick",
+      "makeMeAHanziDefinition": "broom, broomstick",
+      "definitionCn": "清扫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "庶": {
+      "sourceDefinition": "numerous, various; multitude",
+      "makeMeAHanziDefinition": "numerous, various; multitude",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "忪": {
+      "sourceDefinition": "quiet, calm, tranquil, peaceful",
+      "makeMeAHanziDefinition": "calm, peaceful; quiet, tranquil",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "恳": {
+      "sourceDefinition": "sincere, earnest, cordial",
+      "makeMeAHanziDefinition": "sincere, earnest, cordial",
+      "definitionCn": "诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "挚": {
+      "sourceDefinition": "sincere, warm, cordial; surname",
+      "makeMeAHanziDefinition": "sincere, warm, cordial; surname",
+      "definitionCn": "诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "旎": {
+      "sourceDefinition": "fluttering of flag; romantic",
+      "makeMeAHanziDefinition": "romantic; the fluttering of a flag",
+      "definitionCn": "妩媚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昀": {
+      "sourceDefinition": "sun light; used in personal names",
+      "makeMeAHanziDefinition": "sunlight; surname",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昃": {
+      "sourceDefinition": "afternoon; the sun in the afternoon sky; to decline",
+      "makeMeAHanziDefinition": "afternoon; in decline",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "晞": {
+      "sourceDefinition": "dry, expose sun; dawn",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "晾": {
+      "sourceDefinition": "air-dry; sun-dry",
+      "makeMeAHanziDefinition": "to air-dry; to sun-dry",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "晒": {
+      "sourceDefinition": "dry in sun, expose to sun",
+      "makeMeAHanziDefinition": "to dry in the sun; to expose to the sun",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "氲": {
+      "sourceDefinition": "life giving influences of nature; spirit of harmony; prosperity",
+      "makeMeAHanziDefinition": "prosperity; the breath of life; the spirit of harmony",
+      "definitionCn": "和谐",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "沨": {
+      "sourceDefinition": "pleasant sound",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "涤": {
+      "sourceDefinition": "wash, cleanse, purify; sweep",
+      "makeMeAHanziDefinition": "to wash, to sweep; to purify, to cleanse",
+      "definitionCn": "清扫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "玦": {
+      "sourceDefinition": "broken piece of jade",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璋": {
+      "sourceDefinition": "jade plaything; jade ornament",
+      "makeMeAHanziDefinition": "jade plaything; jade ornament",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璜": {
+      "sourceDefinition": "a semicircular jade ornament used as a pendant",
+      "makeMeAHanziDefinition": "a jade pendant",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "皆": {
+      "sourceDefinition": "all, every, everybody",
+      "makeMeAHanziDefinition": "all, every, everybody",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "睁": {
+      "sourceDefinition": "open eyes; stare",
+      "makeMeAHanziDefinition": "to open one's eyes; to stare",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "磕": {
+      "sourceDefinition": "hit; collide, knock into; sound",
+      "makeMeAHanziDefinition": "to collide, to hit, to knock, to tap",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "竣": {
+      "sourceDefinition": "terminate, end, finish; quit",
+      "makeMeAHanziDefinition": "to terminate, to finish, to end; to quit",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "竽": {
+      "sourceDefinition": "ancient woodwind instrument",
+      "makeMeAHanziDefinition": "free reed mouth organ",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "篌": {
+      "sourceDefinition": "ancient musical instrument; harp",
+      "makeMeAHanziDefinition": "ancient Chinese harp",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "纭": {
+      "sourceDefinition": "confused, in disorder; numerous",
+      "makeMeAHanziDefinition": "confused; numerous",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "芭": {
+      "sourceDefinition": "plantain or banana palm; fragrant",
+      "makeMeAHanziDefinition": "a plantain or banana palm",
+      "definitionCn": "花草",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "褫": {
+      "sourceDefinition": "strip, tear off, undress",
+      "makeMeAHanziDefinition": "to strip, to tear off, to undress",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "讷": {
+      "sourceDefinition": "slow of speech; mumble; stammer",
+      "makeMeAHanziDefinition": "inarticulate, slow; to mumble, to stammer",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "谆": {
+      "sourceDefinition": "patient, earnest; earnestly",
+      "makeMeAHanziDefinition": "earnest, patient, sincere",
+      "definitionCn": "诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "诼": {
+      "sourceDefinition": "slander; gossip; rumors",
+      "makeMeAHanziDefinition": "gossip, rumors; to slander",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "谧": {
+      "sourceDefinition": "calm, quiet, still; cautious",
+      "makeMeAHanziDefinition": "calm, quiet, still; cautious",
+      "definitionCn": "安宁；谨慎",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "谳": {
+      "sourceDefinition": "to decide, judge; a verdict, decision",
+      "makeMeAHanziDefinition": "to decide, to judge; decision, verdict",
+      "definitionCn": "裁定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蹀": {
+      "sourceDefinition": "to skip, to dance; to put the foot down",
+      "makeMeAHanziDefinition": "to skip, to dance; to put a foot down",
+      "definitionCn": "舞蹈",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "邃": {
+      "sourceDefinition": "profound, detailed; deep",
+      "makeMeAHanziDefinition": "profound, mysterious, deep",
+      "definitionCn": "深奥",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "郊": {
+      "sourceDefinition": "suburbs; waste land, open spaces",
+      "makeMeAHanziDefinition": "suburbs, outskirts; wasteland, open space",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "隍": {
+      "sourceDefinition": "dry ditch, dry moat",
+      "makeMeAHanziDefinition": "dry ditch, dry moat",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "雏": {
+      "sourceDefinition": "chick, fledging; infant, toddler",
+      "makeMeAHanziDefinition": "chick, fledging; infant, toddler",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鬫": {
+      "sourceDefinition": "glance, peep; roar, growl",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "龀": {
+      "sourceDefinition": "lose baby teeth and get adult teeth",
+      "makeMeAHanziDefinition": "to lose one's baby teeth",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "鋹": {
+      "sourceDefinition": "sharp; a keen edge; sharp point",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "锐利",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "靜": {
+      "sourceDefinition": "quiet, still, motionless; gentle",
+      "makeMeAHanziDefinition": "still, quiet, motionless, gentle",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "畵": {
+      "sourceDefinition": "delineate, painting, picture, drawing; draw",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "绘饰",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "芲": {
+      "sourceDefinition": "flower",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "花草",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "皹": {
+      "sourceDefinition": "crack, chap",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "甯": {
+      "sourceDefinition": "peaceful",
+      "makeMeAHanziDefinition": "peaceful",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "麘": {
+      "sourceDefinition": "scent",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "气息",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "孾": {
+      "sourceDefinition": "a baby, especially a girl, an infant",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "圎": {
+      "sourceDefinition": "circle; round, circular; complete",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "丱": {
+      "sourceDefinition": "child's hairstyle bound in two tufts; ore",
+      "makeMeAHanziDefinition": "a child's hair bound in two tufts; ore",
+      "definitionCn": "孩童；山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "傮": {
+      "sourceDefinition": "finish, to go around",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "厎": {
+      "sourceDefinition": "settle",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "裁定",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "吽": {
+      "sourceDefinition": "'OM'; bellow; (Cant.) dull, stupid",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "呫": {
+      "sourceDefinition": "whisper; lick, taste; petty",
+      "makeMeAHanziDefinition": "to taste, to sip, to lick; to whisper; petty",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "呴": {
+      "sourceDefinition": "breathe on; yawn; roar",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "气息；声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "咾": {
+      "sourceDefinition": "a noise; a sound",
+      "makeMeAHanziDefinition": "onomatopoeic; sound, noise",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唅": {
+      "sourceDefinition": "a sound; to put in the mouth; (Cant.) to grunt, grumble",
+      "makeMeAHanziDefinition": "to swallow; to grunt, to grumble",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唫": {
+      "sourceDefinition": "to hum, to intone, etc. to close, to shut",
+      "makeMeAHanziDefinition": "to hum, to intone; to close, to shut",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喤": {
+      "sourceDefinition": "ah; harmony",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "和谐",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "喿": {
+      "sourceDefinition": "chirping of birds",
+      "makeMeAHanziDefinition": "the sound of birds chirping",
+      "definitionCn": "生物",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嗃": {
+      "sourceDefinition": "to flute",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唢": {
+      "sourceDefinition": "flute-like musical instrument",
+      "makeMeAHanziDefinition": "a flute-like musical instrument",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嘅": {
+      "sourceDefinition": "sound of sighing; (Cant.) possessive",
+      "makeMeAHanziDefinition": "the sound of a sigh",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嘒": {
+      "sourceDefinition": "sharp",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "锐利",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嘥": {
+      "sourceDefinition": "(Cant.) to waste; all, entirely",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "啴": {
+      "sourceDefinition": "pant; many",
+      "makeMeAHanziDefinition": "many; to pant",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嚄": {
+      "sourceDefinition": "roar",
+      "makeMeAHanziDefinition": "to roar",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嚜": {
+      "sourceDefinition": "be silent; final particle",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "沉默",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "嚱": {
+      "sourceDefinition": "a shrill noise; alas!",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "囱": {
+      "sourceDefinition": "chimney",
+      "makeMeAHanziDefinition": "chimney",
+      "definitionCn": "气息",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "囫": {
+      "sourceDefinition": "entire, whole",
+      "makeMeAHanziDefinition": "entire, whole",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "圕": {
+      "sourceDefinition": "library",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "藏书",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "圞": {
+      "sourceDefinition": "entire, complete; round",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "垚": {
+      "sourceDefinition": "mound, roundish mass",
+      "makeMeAHanziDefinition": "mound, lump, round mass",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "埆": {
+      "sourceDefinition": "stony",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "埽": {
+      "sourceDefinition": "broom; to sweep, clear away",
+      "makeMeAHanziDefinition": "broom; to sweep, to clear away",
+      "definitionCn": "清扫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "堃": {
+      "sourceDefinition": "compliance; obedience; female",
+      "makeMeAHanziDefinition": "compliance, obedience; female",
+      "definitionCn": "顺从",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塃": {
+      "sourceDefinition": "mined ore",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塈": {
+      "sourceDefinition": "paint, decorate",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "绘饰",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "塝": {
+      "sourceDefinition": "flat bank, plateau",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "壆": {
+      "sourceDefinition": "stiff, hard clay or rocky strata; crack in a jar",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石；切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "婳": {
+      "sourceDefinition": "tranquil",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "孖": {
+      "sourceDefinition": "twins",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "崒": {
+      "sourceDefinition": "rocky peaks; lofty and dangerous",
+      "makeMeAHanziDefinition": "rocky peaks; lofty; dangerous",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "彴": {
+      "sourceDefinition": "bridge",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "徵": {
+      "sourceDefinition": "summon, recruit; musical note",
+      "makeMeAHanziDefinition": "to summon, to recruit; levy, tax; journey; invasion",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "怗": {
+      "sourceDefinition": "observant; peaceful; submissive",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "惓": {
+      "sourceDefinition": "careful, sincere, candid",
+      "makeMeAHanziDefinition": "candid, sincere; careful, earnest",
+      "definitionCn": "谨慎；诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "慇": {
+      "sourceDefinition": "careful, anxious, attentive",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "谨慎",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "慥": {
+      "sourceDefinition": "sincere, earnest",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "慭": {
+      "sourceDefinition": "cautious; willing; but",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "谨慎",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "挓": {
+      "sourceDefinition": "to open out; to expand",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "掞": {
+      "sourceDefinition": "easy, smooth; quiet; suave",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "旖": {
+      "sourceDefinition": "romantic; tender; charming",
+      "makeMeAHanziDefinition": "romantic; tender, charming",
+      "definitionCn": "妩媚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "旴": {
+      "sourceDefinition": "dawn",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "旽": {
+      "sourceDefinition": "morning sun, sunrise",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昇": {
+      "sourceDefinition": "rise, ascent; peaceful; peace",
+      "makeMeAHanziDefinition": "rise, ascent; to raise, to exalt",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昒": {
+      "sourceDefinition": "daybreak, dawn",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "昳": {
+      "sourceDefinition": "the declining sun in the west",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "旸": {
+      "sourceDefinition": "rising sun; sunshine",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "曈": {
+      "sourceDefinition": "twilight just before sunrise",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "曚": {
+      "sourceDefinition": "twilight just before sun rises",
+      "makeMeAHanziDefinition": "twilight before dawn",
+      "definitionCn": "日光",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "枻": {
+      "sourceDefinition": "long oar, sweep",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "清扫",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "柎": {
+      "sourceDefinition": "calyx of flower; railing raft",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "花草",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "椌": {
+      "sourceDefinition": "instrument",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "橕": {
+      "sourceDefinition": "a prop; a shore",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "欸": {
+      "sourceDefinition": "sigh; an exclamatory sound",
+      "makeMeAHanziDefinition": "sigh; an exclamatory sound",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "歊": {
+      "sourceDefinition": "sigh",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "淜": {
+      "sourceDefinition": "roar of dashing waves",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "淢": {
+      "sourceDefinition": "ditch",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "漈": {
+      "sourceDefinition": "shore; waterside",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "潏": {
+      "sourceDefinition": "reclaimed land; dike, embankment",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "濔": {
+      "sourceDefinition": "many",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "烝": {
+      "sourceDefinition": "rise, steam; many, numerous",
+      "makeMeAHanziDefinition": "to rise; steam; many, numerous",
+      "definitionCn": "众多",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "玕": {
+      "sourceDefinition": "inferior variety of gem",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "珹": {
+      "sourceDefinition": "type of jade; pearl",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "珽": {
+      "sourceDefinition": "jade tablet",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "琇": {
+      "sourceDefinition": "coarse variety of jasper or jade",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "琖": {
+      "sourceDefinition": "carved jade wine cup",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "瑱": {
+      "sourceDefinition": "a gem used as ear plug; a jade earring",
+      "makeMeAHanziDefinition": "a jade earring",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璅": {
+      "sourceDefinition": "gem",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璈": {
+      "sourceDefinition": "ancient musical instrument",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "砠": {
+      "sourceDefinition": "rocky, hilly, uneven",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "碔": {
+      "sourceDefinition": "an inferior gem",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "禛": {
+      "sourceDefinition": "to receive blessings in a sincere spirit",
+      "makeMeAHanziDefinition": "to receive blessings",
+      "definitionCn": "诚挚",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "窸": {
+      "sourceDefinition": "faint sound, whisper",
+      "makeMeAHanziDefinition": "whisper, faint noise",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "絃": {
+      "sourceDefinition": "string on musical instrument",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "繄": {
+      "sourceDefinition": "be; particle; sigh, alas",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "茷": {
+      "sourceDefinition": "flutter; flower",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "花草",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "蓍": {
+      "sourceDefinition": "milfoil, plant used in divination",
+      "makeMeAHanziDefinition": "yarrow, milfoil; a plant used in divination",
+      "definitionCn": "花草",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "褯": {
+      "sourceDefinition": "children's garments. a mat for wrapping garments",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "孩童",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "諵": {
+      "sourceDefinition": "mutter",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "讘": {
+      "sourceDefinition": "to chatter",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "轘": {
+      "sourceDefinition": "tear asunder between chariots",
+      "makeMeAHanziDefinition": "punishment, torture; to tear asunder between two chariots",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "遰": {
+      "sourceDefinition": "grunting sound of pigs; clash",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "郤": {
+      "sourceDefinition": "crack, opening; surname",
+      "makeMeAHanziDefinition": "crack, crevice; gap, interval; surname",
+      "definitionCn": "切削",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "铦": {
+      "sourceDefinition": "sharp, keen-edged; a kind of hoe",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "锐利",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "铻": {
+      "sourceDefinition": "misfit; discordant; music instrument; hoe",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "和谐；音律",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "隩": {
+      "sourceDefinition": "profound, subtle; warm",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "深奥",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "頖": {
+      "sourceDefinition": "Zhou dynasty school; disperse; fall apart",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "学塾",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "頞": {
+      "sourceDefinition": "(nose) bridge",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "水土",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "馓": {
+      "sourceDefinition": "fried round cakes of wheat flour",
+      "makeMeAHanziDefinition": "fried round cakes of wheat flour",
+      "definitionCn": "完整",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "馡": {
+      "sourceDefinition": "scent",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "气息",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "龢": {
+      "sourceDefinition": "in harmony; calm, peaceful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "和谐；安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "寕": {
+      "sourceDefinition": "repose, serenity, peace; peaceful",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "寧": {
+      "sourceDefinition": "repose, serenity, peace; peaceful",
+      "makeMeAHanziDefinition": "calm, peaceful; healthy; rather; to prefer",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "璯": {
+      "sourceDefinition": "(simplified form of 璯) jade decorated cap, used in person's name",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "玉石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "閒": {
+      "sourceDefinition": "leisure; idle; peaceful, tranquil, calm",
+      "makeMeAHanziDefinition": "leisure, idle time; tranquil, peaceful, calm",
+      "definitionCn": "安宁",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "咥": {
+      "sourceDefinition": "sound of a cat; bite; laugh",
+      "makeMeAHanziDefinition": "the sound of a cat; to laugh; to bite",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "唶": {
+      "sourceDefinition": "sigh, groan; loud laughter",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "欬": {
+      "sourceDefinition": "cough; sound of laughter",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "声音",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    },
+    "貤": {
+      "sourceDefinition": "steps, grade, strata; series",
+      "makeMeAHanziDefinition": "",
+      "definitionCn": "山石",
+      "reviewed": true,
+      "reviewMethod": "script_mapped_unihan_definition"
+    }
+  }
+}

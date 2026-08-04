@@ -1,0 +1,32 @@
+{
+  "source": {
+    "name": "Chinese Wiktionary",
+    "dumpDate": "2026-07-01",
+    "file": "zhwiktionary-20260701-pages-articles.xml.bz2",
+    "downloadUrl": "https://dumps.wikimedia.org/zhwiktionary/20260701/zhwiktionary-20260701-pages-articles.xml.bz2",
+    "sha1": "2c866dafae0a95da3850d8e269f0366d1338d418",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0/",
+    "transformation": "Modern Chinese definition candidates extracted from single-character pages; pronunciation, etymology, variants, translations, examples, and non-Chinese sections are excluded. Every record remains unreviewed until selected manually."
+  },
+  "reviewPolicy": {
+    "status": "automatic_triage_only",
+    "transformation": "Unreviewed Chinese Wiktionary candidates are scored for manual review priority. Draft definitions are not production data and must not be applied without human review.",
+    "decisions": [
+      "likely_usable",
+      "manual_review",
+      "reject"
+    ]
+  },
+  "summary": {
+    "totalCandidates": 949,
+    "reviewedSupplements": 649,
+    "terminalRejected": 42,
+    "dictionaryUsableSkipped": 258,
+    "evaluatedCandidates": 0,
+    "likelyUsable": 0,
+    "manualReview": 0,
+    "rejected": 0
+  },
+  "entries": {}
+}
