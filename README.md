@@ -13,14 +13,15 @@ A Vue 3 application that analyzes Chinese names through character definitions, c
 ### Features
 
 - **Hanzi-Specialized Analysis**: Optimized for 2-4 character Chinese names in the current `U+4E00-U+9FA5` validator range, with automatic surname/given-name segmentation.
-- **Deep Dictionary Integration**: Powered by authoritative sources like Xinhua Dictionary, providing precise Simplified Chinese definitions.
+- **Deep Dictionary Integration**: Uses Chinese-first dictionary data with a reviewed CC-CEDICT supplement overlay for missing or damaged definitions.
 - **Context-Aware Readings**: Applies single and compound surname pronunciations only after surname segmentation, including polyphonic surnames such as 乐, 翟, 华, and 覃.
 - **Cultural Context**: Includes Five Elements, literary references, gender bias, and naming connotations.
+- **Optional Guangyun View**: An opt-in character-card section displays source-separated Guangyun fanqie, rhyme metadata, and historical glosses without treating them as modern or naming meanings.
 - **Local AI Model (ONNX)**: Uses a custom-trained 10-label classifier (Scholarly, Heroic, Serene, etc.) with WebGPU hardware acceleration.
-- **Layered Local Inference**: ONNX predicts the 10 tone labels. Tauri first tries a downloaded native Qwen2.5 GGUF; native unavailability or non-timeout failure permits Ollama, while a native timeout goes directly to deterministic text.
-- **Grounded AI Narratives**: Qwen receives only parsed character facts and explicit fact boundaries. Unsupported biography, history, pinyin leakage, prompt repetition, or undersized output is rejected in favor of deterministic local text.
+- **Layered Local Inference**: ONNX predicts the 10 tone labels. Tauri first tries a downloaded native Qwen2.5 GGUF; a missing native model permits Ollama, while native timeout, runtime, and quality failures are reported explicitly.
+- **Grounded AI Narratives**: Qwen receives only parsed character facts and explicit fact boundaries. Unsupported biography, history, pinyin leakage, prompt repetition, or invalid output length triggers a corrective retry rather than a deterministic result presented as Qwen output.
 - **Curated Literary Context**: Source-specific character allusions may enrich the analysis, while famous-person matching is deliberately excluded from automatic name interpretation.
-- **Controlled Inference Lifecycle**: Worker, Ollama, and native requests have bounded timeouts, cancellation, cleanup, and at most two attempts.
+- **Controlled Inference Lifecycle**: Worker, Ollama, and native requests have bounded timeouts, cancellation, and cleanup. Native Qwen attempts at most three times; ONNX Worker inference remains limited to two attempts.
 - **Privacy & History**: 100% local processing; history is stored in browser localStorage.
 - **Open Feedback Loop**: Integrated GitHub feedback system with automated environment diagnostics.
 
@@ -146,5 +147,6 @@ The tag-triggered Windows workflow runs version validation, feature tests, unit 
 
 ## Data Sources & License | 数据来源与证书
 
-- Dictionary data: CC-CEDICT & Xinhua Dictionary.
+- Dictionary supplements: CC-CEDICT, official 2026-08-02 release, [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). Reviewed Simplified Chinese translations preserve their source lines and English glosses in a reproducible overlay.
+- Legacy consolidated definitions remain subject to provenance review; new supplementation does not use scraped Xinhua or Kangxi mirrors with an unclear redistribution chain.
 - License: [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

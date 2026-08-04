@@ -405,6 +405,7 @@ async fn generate_internal_summary(
     request_id: String,
     name: String,
     context: String,
+    attempt: u32,
 ) -> Result<String, String> {
     let cancelled = Arc::new(AtomicBool::new(false));
     register_inference(state.inner(), &request_id, &cancelled)?;
@@ -422,7 +423,7 @@ async fn generate_internal_summary(
     let cancelled_for_task = Arc::clone(&cancelled);
     let task_result = tauri::async_runtime::spawn_blocking(move || {
         let state = handle.state::<AppState>();
-        generate_summary(state.inner(), &cancelled_for_task, name, context)
+        generate_summary(state.inner(), &cancelled_for_task, name, context, attempt)
     })
     .await;
     state.inference_active.store(false, Ordering::Release);
@@ -440,6 +441,7 @@ fn generate_summary(
     cancelled: &Arc<AtomicBool>,
     _name: String,
     context: String,
+    attempt: u32,
 ) -> Result<String, String> {
     if cancelled.load(Ordering::Acquire) {
         return Err("Inference cancelled".to_string());
@@ -463,13 +465,20 @@ fn generate_summary(
     if !matches!(fs::metadata(&path), Ok(metadata) if metadata.len() == MODEL_SIZE) {
         return Err("Model file is missing or has an unexpected size".to_string());
     }
-    runtime.generate(&path, &prompt, cancelled, 200)
+    runtime.generate(
+        &path,
+        &prompt,
+        cancelled,
+        200,
+        20260728_u32.wrapping_add(attempt.saturating_sub(1)),
+    )
 }
 
 fn main() {
     let runtime = LlamaRuntime::new().expect("failed to initialize llama.cpp backend");
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_opener::init())
         .manage(AppState {
             runtime: Mutex::new(runtime),
             cancellations: Mutex::new(HashMap::new()),

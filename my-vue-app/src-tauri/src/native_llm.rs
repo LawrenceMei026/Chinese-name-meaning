@@ -29,6 +29,7 @@ impl LlamaRuntime {
         prompt: &str,
         cancelled: &AtomicBool,
         max_tokens: usize,
+        seed: u32,
     ) -> Result<String, String> {
         if cancelled.load(Ordering::Acquire) {
             return Err("Inference cancelled".to_string());
@@ -72,7 +73,7 @@ impl LlamaRuntime {
         let mut sampler = LlamaSampler::chain_simple([
             LlamaSampler::top_k(40),
             LlamaSampler::temp(0.7),
-            LlamaSampler::dist(20260728),
+            LlamaSampler::dist(seed),
         ]);
         let mut decoder = encoding_rs::UTF_8.new_decoder();
         let mut response = String::new();
@@ -120,6 +121,7 @@ mod tests {
             "unused prompt",
             &AtomicBool::new(true),
             1,
+            20260728,
         );
 
         assert_eq!(result, Err("Inference cancelled".to_string()));

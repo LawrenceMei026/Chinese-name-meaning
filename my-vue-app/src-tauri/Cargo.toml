@@ -1,6 +1,6 @@
 [package]
 name = "chinese-name-meaning-explorer"
-version = "0.1.5"
+version = "0.1.6"
 description = "A Chinese Name Meaning Explorer with internal LLM"
 authors = ["Qingyang Mei"]
 edition = "2021"
@@ -22,6 +22,7 @@ encoding_rs = "0.8.35"
 llama-cpp-2 = { version = "=0.1.152", default-features = false }
 sysinfo = "0.30"
 tauri-plugin-shell = "2.0.0"
+tauri-plugin-opener = "2"
 
 [target.'cfg(windows)'.dependencies]
 windows-sys = { version = "0.61", features = ["Win32_Storage_FileSystem"] }

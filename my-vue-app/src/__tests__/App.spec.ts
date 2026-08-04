@@ -58,6 +58,8 @@ describe('App', () => {
     expect(wrapper.find('p.field-help').text()).toContain('支持 2-4 个汉字姓名')
     expect(wrapper.find('section.empty-state').text()).toContain('等待解析')
     expect(wrapper.find('input#name-input').attributes('aria-invalid')).toBe('false')
+    expect(wrapper.find('input#show-guangyun').exists()).toBe(true)
+    expect((wrapper.find('input#show-guangyun').element as HTMLInputElement).checked).toBe(false)
   })
 
   it('uses the package version in feedback diagnostics', async () => {
@@ -145,6 +147,48 @@ describe('App', () => {
     const saved = JSON.parse(localStorage.getItem('analysis-history-v1') ?? '[]')
     expect(saved[0].aiResult.summary).toBe('本地回退结果。')
     expect(wrapper.find('.ai-panel').exists()).toBe(true)
+  })
+
+  it('shows native Qwen quality errors without replacing their recovery guidance', async () => {
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    vi.mocked(runLocalAiAnalysis).mockRejectedValue(
+      new Error('原生 Qwen 输出未通过事实检查，请重新分析。'),
+    )
+    localStorage.setItem('analysis-history-v1', JSON.stringify([{
+      id: 'history-1',
+      input: '欧阳娜娜',
+      createdAt: 1710000000000,
+      result: { ...sampleResult, original: '欧阳娜娜' },
+    }]))
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.history-button').trigger('click')
+
+    await wrapper.find('button.ai-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.ai-error').text()).toBe('原生 Qwen 输出未通过事实检查，请重新分析。')
+  })
+
+  it('shows native Qwen runtime errors without replacing their recovery guidance', async () => {
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    vi.mocked(runLocalAiAnalysis).mockRejectedValue(
+      new Error('原生 Qwen 运行失败，请重试。'),
+    )
+    localStorage.setItem('analysis-history-v1', JSON.stringify([{
+      id: 'history-1',
+      input: '李明华',
+      createdAt: 1710000000000,
+      result: sampleResult,
+    }]))
+    const wrapper = mount(App)
+    await wrapper.vm.$nextTick()
+    await wrapper.find('.history-button').trigger('click')
+
+    await wrapper.find('button.ai-btn').trigger('click')
+    await wrapper.vm.$nextTick()
+
+    expect(wrapper.find('.ai-error').text()).toBe('原生 Qwen 运行失败，请重试。')
   })
 
   it('cancels an in-flight AI analysis from the same button', async () => {

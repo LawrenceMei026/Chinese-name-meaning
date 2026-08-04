@@ -70,8 +70,9 @@ export function hasMeaningfulDefinition(definition: string | undefined): boolean
   const trimmed = definition?.trim()
   return Boolean(
     trimmed
-    && !/^[()（）,，。;；?？\s]+$/.test(trimmed)
-    && !/^(?:暂无中文释义|义未详)$/u.test(trimmed),
+    && !/^[\p{P}\p{S}\s]+$/u.test(trimmed)
+    && !/(?:暂无中文释义|义未详|字义未详)/u.test(trimmed)
+    && !/^(?:形声|会意|象形|指事)(?:。|[()（）]|小篆字形)*$/u.test(trimmed),
   )
 }
 

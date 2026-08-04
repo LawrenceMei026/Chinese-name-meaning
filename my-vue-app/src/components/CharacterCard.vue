@@ -1,9 +1,17 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { formatPinyin } from '../services/nameAnalyzer'
+import type { GuangyunEntry } from '../data/guangyun'
 import type { AnalyzedChar } from '../types'
 
-const props = defineProps<{ data: AnalyzedChar }>()
+const props = withDefaults(defineProps<{
+  data: AnalyzedChar
+  guangyunEntries?: GuangyunEntry[]
+  showGuangyun?: boolean
+}>(), {
+  guangyunEntries: () => [],
+  showGuangyun: false,
+})
 
 const pinyin = computed(() =>
   props.data.entry ? formatPinyin(props.data.entry.pinyin) : null,
@@ -65,6 +73,23 @@ const primaryMeaning = computed(() => props.data.entry?.definition_cn ?? null)
         {{ data.cultural.literaryRef }}
       </blockquote>
     </div>
+
+    <section v-if="showGuangyun" class="guangyun-section" aria-label="广韵切音与古义">
+      <h4>《广韵》切音与古义</h4>
+      <p v-if="props.guangyunEntries.length === 0" class="guangyun-empty">当前字头未匹配到《广韵》记录。</p>
+      <article v-for="entry in props.guangyunEntries" :key="entry.id" class="guangyun-entry">
+        <div class="guangyun-meta">
+          <span v-if="entry.headword !== data.char" class="guangyun-headword">原字头：{{ entry.rawHeadword }}</span>
+          <span v-if="entry.fanqie">反切：{{ entry.fanqie }}切</span>
+          <span v-if="entry.directReading">直音：{{ entry.directReading }}</span>
+          <span>韵目：{{ entry.rhyme }}</span>
+          <span>音韵地位：{{ entry.phonologicalPosition }}</span>
+        </div>
+        <p v-if="entry.gloss" class="guangyun-gloss"><strong>古义原文：</strong>{{ entry.gloss }}</p>
+        <p v-if="entry.headwordNote" class="guangyun-note"><strong>字头说明：</strong>{{ entry.headwordNote }}</p>
+        <p v-if="entry.glossReference" class="guangyun-note"><strong>释义参照：</strong>{{ entry.glossReference }}</p>
+      </article>
+    </section>
   </div>
 </template>
 
@@ -207,6 +232,52 @@ const primaryMeaning = computed(() => props.data.entry?.definition_cn ?? null)
   color: #6b5b2a;
   font-style: italic;
   line-height: 1.6;
+}
+
+.guangyun-section {
+  border-top: 1px solid #e7dfd2;
+  margin-top: 0.9rem;
+  padding-top: 0.85rem;
+}
+
+.guangyun-section h4 {
+  color: #6f4e37;
+  font-family: 'Noto Serif SC', 'Songti SC', serif;
+  font-size: 0.92rem;
+  margin-bottom: 0.65rem;
+}
+
+.guangyun-entry {
+  background: #faf7f1;
+  border: 1px solid #eee4d4;
+  border-radius: 7px;
+  margin-top: 0.55rem;
+  padding: 0.7rem;
+}
+
+.guangyun-meta {
+  color: #786650;
+  display: flex;
+  flex-wrap: wrap;
+  font-size: 0.76rem;
+  gap: 0.3rem 0.75rem;
+}
+
+.guangyun-headword {
+  font-weight: 600;
+}
+
+.guangyun-gloss,
+.guangyun-note,
+.guangyun-empty {
+  color: #51483e;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  margin-top: 0.45rem;
+}
+
+.guangyun-note {
+  color: #7b7063;
 }
 
 @media (max-width: 640px) {

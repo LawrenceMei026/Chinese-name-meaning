@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
 import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory, formatModelDownloadError, getModelDirectory, setModelDirectory } from './services/localInference'
+import { CC_BY_SA_URL, CC_CEDICT_URL, openExternalUrl, REPOSITORY_URL } from './services/externalLinks'
 import CharacterCard from './components/CharacterCard.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
+import type { GuangyunEntry } from './data/guangyun'
 
 const HISTORY_KEY = 'analysis-history-v1'
 const HISTORY_LIMIT = 6
@@ -15,6 +17,11 @@ const loading = ref(false)
 const aiLoading = ref(false)
 const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
+const showGuangyun = ref(false)
+const guangyunError = ref<string | null>(null)
+const guangyunLoaded = ref(false)
+const guangyunLoading = ref(false)
+const guangyunLookup = shallowRef<(char: string) => GuangyunEntry[]>(() => [])
 const history = ref<AnalysisHistoryEntry[]>([])
 const activeHistoryEntryId = ref<string | null>(null)
 
@@ -27,6 +34,22 @@ const isDownloading = ref(false)
 const lowMemoryWarning = ref(false)
 const modelDirectory = ref('')
 let aiController: AbortController | null = null
+
+watch(showGuangyun, async enabled => {
+  if (!enabled || guangyunLoading.value || guangyunLoaded.value) return
+  guangyunLoading.value = true
+  guangyunError.value = null
+  try {
+    const { getGuangyunEntries, loadGuangyunData } = await import('./data/guangyun')
+    await loadGuangyunData()
+    guangyunLookup.value = getGuangyunEntries
+    guangyunLoaded.value = true
+  } catch {
+    guangyunError.value = '《广韵》数据载入失败，请重新勾选后重试。'
+  } finally {
+    guangyunLoading.value = false
+  }
+})
 
 const inputId = 'name-input'
 const helpId = 'name-input-help'
@@ -164,7 +187,11 @@ async function handleAiAnalysis() {
     updateActiveHistoryEntry(aiResult.value)
   } catch (caught) {
     if (caught instanceof DOMException && caught.name === 'AbortError') return
-    aiError.value = 'AI 深度分析暂时不可用，请稍后重试。'
+    const expectedMessage = caught instanceof Error
+      && /^(?:原生 Qwen 输出未通过事实检查，请重新分析。|原生 Qwen 生成超时，请重试。|原生 Qwen 运行失败，请重试。)$/u.test(caught.message)
+      ? caught.message
+      : null
+    aiError.value = expectedMessage ?? 'AI 深度分析暂时不可用，请稍后重试。'
   } finally {
     if (aiController === controller) {
       aiController = null
@@ -183,8 +210,8 @@ function reset() {
   activeHistoryEntryId.value = null
 }
 
-function handleFeedback() {
-  const repoUrl = 'https://github.com/wtggfv/chinese-name-meaning/issues/new'
+async function handleFeedback() {
+  const repoUrl = `${REPOSITORY_URL}/issues/new`
   const title = encodeURIComponent('用户反馈：[在此输入简短描述]')
 
   // 收集简单的环境信息，方便排查 AI 推理问题
@@ -204,7 +231,27 @@ function handleFeedback() {
     `- 用户代理: ${envInfo.userAgent}\n`
   )
 
-  window.open(`${repoUrl}?title=${title}&body=${body}&labels=feedback`, '_blank')
+  try {
+    await openExternalUrl(`${repoUrl}?title=${title}&body=${body}&labels=feedback`, isTauri)
+  } catch {
+    alert('无法打开系统浏览器，请稍后重试。')
+  }
+}
+
+async function handleRepository() {
+  try {
+    await openExternalUrl(REPOSITORY_URL, isTauri)
+  } catch {
+    alert('无法打开系统浏览器，请稍后重试。')
+  }
+}
+
+async function handleCredit(url: string) {
+  try {
+    await openExternalUrl(url, isTauri)
+  } catch {
+    alert('无法打开系统浏览器，请稍后重试。')
+  }
 }
 
 async function handleActionDownload() {
@@ -352,7 +399,15 @@ onUnmounted(() => {
             <span v-else>解析</span>
           </button>
         </div>
-        <p :id="helpId" class="field-help">支持 2-4 个汉字姓名。</p>
+        <div class="search-options">
+          <p :id="helpId" class="field-help">支持 2-4 个汉字姓名。</p>
+          <label class="guangyun-toggle" for="show-guangyun">
+            <input id="show-guangyun" v-model="showGuangyun" type="checkbox" />
+            显示《广韵》切音和古义
+            <span v-if="guangyunLoading" class="guangyun-loading">载入中…</span>
+          </label>
+        </div>
+        <p v-if="guangyunError" class="guangyun-error" role="alert">{{ guangyunError }}</p>
         <p v-if="error" :id="errorId" class="error-msg" role="alert">{{ error }}</p>
       </form>
 
@@ -390,6 +445,8 @@ onUnmounted(() => {
             v-for="(char, i) in result.chars"
             :key="i"
             :data="char"
+            :guangyun-entries="guangyunLookup(char.char)"
+            :show-guangyun="showGuangyun && guangyunLoaded"
           />
         </div>
 
@@ -425,13 +482,13 @@ onUnmounted(() => {
 
     <footer class="app-footer">
       <div class="footer-links">
-        <button class="feedback-link" @click="handleFeedback">💬 提交反馈</button>
+        <button class="feedback-link" @click="handleFeedback">提交反馈</button>
         <span class="divider">|</span>
-        <a href="https://github.com/wtggfv/chinese-name-meaning" target="_blank" rel="noopener noreferrer">项目源码</a>
+        <button class="feedback-link" @click="handleRepository">项目源码</button>
       </div>
       <div class="footer-credits">
-        字典数据来自 <a href="https://cc-cedict.org" target="_blank" rel="noopener noreferrer">CC-CEDICT</a>,
-        证书来自 <a href="https://creativecommons.org/licenses/by-sa/4.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0</a>.
+        字典数据来自 <button class="credit-link" type="button" @click="handleCredit(CC_CEDICT_URL)">CC-CEDICT</button>,
+        证书来自 <button class="credit-link" type="button" @click="handleCredit(CC_BY_SA_URL)">CC BY-SA 4.0</button>.
       </div>
     </footer>
   </div>
@@ -673,10 +730,44 @@ body {
 }
 
 .field-help {
-  margin-top: 0.5rem;
   color: #7c6b57;
   font-size: 0.85rem;
   line-height: 1.5;
+}
+
+.search-options {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.guangyun-toggle {
+  align-items: center;
+  color: #6f4e37;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 0.85rem;
+  gap: 0.4rem;
+}
+
+.guangyun-toggle input {
+  accent-color: #8b2c2c;
+  height: 1rem;
+  width: 1rem;
+}
+
+.guangyun-loading {
+  color: #8b7b69;
+  font-size: 0.78rem;
+}
+
+.guangyun-error {
+  color: #a22d2d;
+  font-size: 0.82rem;
+  margin-top: 0.45rem;
 }
 
 .analyze-btn,
@@ -987,9 +1078,18 @@ body {
   color: #ddd;
 }
 
-.app-footer a {
+.credit-link {
+  background: none;
+  border: none;
   color: #8b6a4a;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
   text-decoration: none;
+}
+
+.credit-link:hover {
+  text-decoration: underline;
 }
 
 .app-footer a:hover,

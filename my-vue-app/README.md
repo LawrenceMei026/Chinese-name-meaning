@@ -56,21 +56,26 @@ my-vue-app/
 
 ## Data sources
 
-- Dictionary data comes from CC-CEDICT and is loaded at runtime from `public/data/`, resolved relative to the Vite base path so subpath deployments keep working.
+- The legacy consolidated dictionary is loaded at runtime from `public/data/`, resolved relative to the Vite base path so subpath deployments keep working. Its older merged definitions remain subject to provenance review; new repairs use the separately traceable CC-CEDICT overlay below.
+- Reviewed repairs for missing or unusable character definitions are stored separately in `src/data/ccCedictDefinitionSupplements.json`. Each record preserves its original CC-CEDICT line, selected English glosses, reviewed Simplified Chinese translation, and review state. Source metadata pins the official 2026-08-02 release and SHA-256 under CC BY-SA 4.0.
+- Run `npm run update:dictionary-supplements` to apply the reviewed overlay. The importer changes only missing, placeholder, punctuation-only, or formation-only definitions and refuses to overwrite a different usable definition. `npm run check:dictionary-supplements` verifies that `chars.json` is reproducible from the overlay and runs during every build.
 - `public/data/surnames.json` stores single-character surname readings. `src/data/compoundSurnamePinyin.json` stores only compound readings that cannot be inferred safely from ordinary character readings.
 - Blank, placeholder, and punctuation-only dictionary definitions are suppressed at runtime rather than presented as name meanings.
-- Cultural annotations are stored in `src/data/cultural.json` and read through `src/data/cultural.ts`.
+- Verified cultural annotations are stored in `src/data/cultural.json` and read through `src/data/cultural.ts`; unverified Kangxi fanqie, variant, and pronunciation metadata is excluded rather than presented as a name meaning.
 - The UI and normalized dictionary definitions are primarily Simplified Chinese.
-- `src/__tests__/nameDataQuality.spec.ts` loads the production JSON files and guards real polyphonic surname and dirty-definition cases.
+- `scripts/check-cultural-data.mjs` and `src/__tests__/nameDataQuality.spec.ts` load production JSON and guard fanqie leakage, phonetic-only meanings, real polyphonic surnames, dirty definitions, supplement provenance, and complete modern-dictionary coverage for reviewed cultural characters.
+- The optional `显示《广韵》切音和古义` control is off by default. When enabled, the app loads the bundled `public/data/guangyun.json` asset and character cards display historical headwords, fanqie, direct readings, rhyme metadata, raw glosses, and references in a separate section. This data never enters modern `definition_cn`, cultural meanings, ONNX features, or Qwen prompts.
+- `scripts/update-guangyun-data.mjs` pins `tshet-uinh-data` commit `21585e22c8a730ca2fd175112f4d18e16d5ce578` and verifies the `廣韻.csv` SHA-256 before generation. The source is CC0 1.0. Simplified lookup aliases come only from a checksummed CC-CEDICT snapshot; the source headword remains unchanged. Run `npm run update:guangyun-data` to regenerate and `npm run check:guangyun-data` to verify the committed offline artifact.
 
 ## Local AI
 
 The optional AI layer is orchestrated by `src/services/localInference.ts`.
 
 - The bundled ONNX model runs in a serialized Web Worker and produces 10 tone labels. Worker health checks and inference use a 10-second timeout, with at most two attempts. Workers are replaced after timeout, abort, construction/postMessage failure, or a Worker-level error; a normal inference error response returns `null` without forcing replacement.
-- In Tauri, a validated native Qwen2.5 GGUF is preferred for the narrative. Native generation is single-flight, uses a 60-second timeout, sends backend cancellation, waits up to 5 seconds before a timeout retry, and attempts at most twice.
+- In Tauri, a validated native Qwen2.5 GGUF is preferred for the narrative. Native generation is single-flight, uses a 60-second timeout, sends backend cancellation, waits up to 5 seconds before a timeout retry, and attempts at most three times.
 - Native and Ollama prompts share the same grounded fact packet: surname/given-name roles, sanitized dictionary meanings, reviewed cultural fields, and ONNX tone labels. The prompt treats these as a closed fact set and prohibits inferred biography or historical identity.
-- Generated narratives are accepted only when they meet the Chinese length and format contract and contain no unsupported biographical, historical, political, national, pinyin, or prompt-repetition signals. Rejected output falls back to deterministic local text.
+- Generated narratives are accepted only when they meet the Chinese length and format contract and contain no unsupported biographical, historical, political, national, pinyin, or prompt-repetition signals.
+- When a downloaded native model returns an invalid narrative, the app retries Qwen with corrective context up to three times. Exhaustion is shown as a retryable error instead of silently presenting deterministic text as AI output.
 - Qwen facts and deterministic fallback text prefer curated naming glosses over dictionary etymology, so labels such as `会意`, oracle-bone notes, and generic "点睛" boilerplate are not presented as name meanings.
 - Literary references are character-level, reviewed facts. Historical-person identity is intentionally not inferred from a matching full name; any future historical lookup must remain a separate opt-in feature with claim-level sources.
 - When native inference is unavailable without timing out, Ollama is tried sequentially at `localhost:11434` and then `127.0.0.1:11434`, with a 45-second timeout per address. The equivalent addresses are not called in parallel, preventing duplicate generation.
@@ -84,6 +89,7 @@ The optional AI layer is orchestrated by `src/services/localInference.ts`.
 - The installer does not bundle GGUF weights. The app downloads a 491,400,032-byte Qwen2.5 0.5B Q4_K_M model. The dialog pre-fills `%LOCALAPPDATA%\Chinese Name Meaning Explorer\models`, accepts another absolute directory such as `D:\ChineseNameModels`, and persists the selection in the app data settings.
 - The Hugging Face URL is pinned to a full revision, with an integrity-equivalent mirror fallback. The downloader checks HTTP status and content length, streams SHA-256 validation into a `.part` file, uses a cross-process lock, and atomically renames only a verified model.
 - `src-tauri/capabilities/default.json` grants the main window only the event listen/unlisten permissions needed for download progress. `npm run check:tauri-acl` guards this requirement in local and release builds.
+- Desktop repository, feedback, and credit links use the Tauri opener plugin so they launch in the system browser rather than inside the WebView.
 - When the model is missing, the download dialog warns systems reporting less than 6GB RAM. The warning does not block download or later native inference.
 
 ## Getting started

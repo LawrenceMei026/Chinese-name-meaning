@@ -24,6 +24,7 @@ const NATIVE_CANCEL_GRACE_MS = 5_000
 const NATIVE_CANCEL_COMMAND_TIMEOUT_MS = 2_000
 const RETRY_DELAY_MS = 250
 const MAX_ATTEMPTS = 2
+const NATIVE_MAX_ATTEMPTS = 3
 const OLLAMA_URLS = [
   'http://localhost:11434/api/generate',
   'http://127.0.0.1:11434/api/generate',
@@ -158,6 +159,10 @@ function buildFeatureText(result: AnalyzedName) {
 
 export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedName): string {
   const factualDraft = buildLocalSummary(labels, result, 'model')
+  const given = result.chars.filter(char => char.role === 'given')
+  const givenCharacters = given.map(char => char.char)
+  const unknownCharacters = given.filter(char => !namingMeaning(char)).map(char => char.char)
+  const repeatedCharacter = givenCharacters.length > 1 && new Set(givenCharacters).size === 1
 
   return [
     '任务：只润色基础文稿，不介绍人物，不增加事实。',
@@ -166,21 +171,21 @@ export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedNam
     '必须完整保留文稿中的姓名字义和已注明出处的文化联想。',
     '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途或命运推断。',
     '不得在姓名后重复名字用字或添加“字”“号”等身份句式。',
+    repeatedCharacter ? `“${givenCharacters[0]}”是叠字名，只解释一次字义，不要把同一个“${givenCharacters[0]}”字解释两次。` : '',
+    unknownCharacters.length > 0 ? `“${unknownCharacters.join('”“')}”没有可核实的名字字义，不得解释、联想或补写这些字的含义；只能保留基础文稿中的结构描述。` : '',
     '不得输出拼音、英文、标题、列表或解释过程。',
     '输出80至130个汉字，只输出润色后的正文。',
-  ].join('\n')
+  ].filter(Boolean).join('\n')
 }
 
-export function isGroundedSummary(summary: string, result?: AnalyzedName): boolean {
+export function groundedSummaryRejection(summary: string, result?: AnalyzedName): string | null {
   const text = summary.trim()
-  if (
-    [...text].length < 80
-    || /[A-Za-z]/.test(text)
-    || /(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)
-    || /(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)
-  ) return false
+  const length = [...text].length
+  if (/[A-Za-z]/.test(text)) return '包含英文或拼音。'
+  if (/(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)) return '复述了提示词或生成要求。'
+  if (/(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)) return '加入了基础文稿之外的身份、成就或命运推断。'
   const claimsBiography = /(?:^|[，。；\s])(?:字|号)(?:为|曰|叫作|名为)?[\u3400-\u9fff]{1,4}(?=[，。；\s]|$)|(?:著名|杰出|历史上).{0,12}(?:人物|名将|将军|政治家|军事家|诗人|文人|官员)/u.test(text)
-  if (claimsBiography) return false
+  if (claimsBiography) return '虚构了字号或人物身份。'
   if (result) {
     const givenName = result.chars.filter(char => char.role === 'given').map(char => char.char).join('')
     if (
@@ -189,22 +194,39 @@ export function isGroundedSummary(summary: string, result?: AnalyzedName): boole
       || text.startsWith(`${result.original}，${givenName}字`)
       || text.startsWith(`${result.original},${givenName}字`)
       || (text.startsWith(`${result.original}（`) && /）[，,\s]*(?:字|号)/u.test(text))
-    ) return false
+    ) return '把名字用字误写成了人物字号。'
+    const unknownCharacters = result.chars
+      .filter(char => char.role === 'given' && !namingMeaning(char))
+      .map(char => char.char)
+    for (const char of unknownCharacters) {
+      const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      if (new RegExp(`(?:“${escaped}”|${escaped}字)(?:有|取|表示|象征|寓意|带有|体现)`, 'u').test(text)) {
+        return `为缺少可靠释义的“${char}”补写了含义。`
+      }
+    }
   }
   if (
     /(?:生于|出生于|祖籍|籍贯)|(?:北京|上海|天津|重庆|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|海南|四川|贵州|云南|陕西|甘肃|青海|河北|山西|辽宁|吉林|黑龙江|内蒙古|广西|西藏|宁夏|新疆|香港|澳门|台湾)[\u3400-\u9fff]{0,6}人|(?:书法|文学|政治|军事).{0,10}(?:造诣|成就)|(?:他的|她的)(?:作品|诗歌|生平|事迹)|(?:被誉为|被尊为|人称|号称)/u.test(text)
-  ) return false
-  return !/(?:春秋|战国|秦汉|汉唐|秦朝|汉朝|汉代|唐朝|唐代|宋朝|宋代|明朝|明代|清朝|清代|古代|先贤|史载|相传)/u.test(text)
+  ) return '虚构了出生信息、生平、作品或成就。'
+  if (/(?:春秋|战国|秦汉|汉唐|秦朝|汉朝|汉代|唐朝|唐代|宋朝|宋代|明朝|明代|清朝|清代|古代|先贤|史载|相传)/u.test(text)) return '加入了基础文稿之外的历史背景。'
+  if (length < 80) return `长度不足：当前${length}个字符，至少需要80个字符。`
+  if (length > 130) return `长度超出：当前${length}个字符，最多允许130个字符。`
+  return null
+}
+
+export function isGroundedSummary(summary: string, result?: AnalyzedName): boolean {
+  return groundedSummaryRejection(summary, result) === null
 }
 
 function cleanDefinition(text: string): string {
   if (!text) return ''
-  const unusable = /(?:会意|形声|象形|指事|转注|假借|甲骨文|金文|小篆|俗字|异体|本义|从[\u3400-\u9fff]|见“|亦作|义同)/u
+  if (/(?:会意|形声|象形|指事|小篆字形)/u.test(text)) return ''
+  const unusable = /(?:会意|形声|象形|指事|转注|假借|甲骨文|金文|小篆|部首|俗字|异体|本义|从[\u3400-\u9fff]|见“|亦作|义同|《说文》|之形|(?:上面|下面).{0,12}(?:人|小儿|字)|移.{0,12}下|表示与.{0,12}有关|容量单位|计量单位|十斗为一石|也名|--|[“”]{2})/u
   const segments = text
     .replace(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s\d]+/, '')
     .split(/[。；;！？!，,]/)
     .map(segment => segment.replace(/^[()（）\s]+|[()（）\s]+$/g, '').trim())
-    .filter(segment => segment.length > 1 && !unusable.test(segment))
+    .filter(segment => segment.length > 1 && !/[”」』〉]$/u.test(segment) && !unusable.test(segment))
   return segments[0]?.slice(0, 24) ?? ''
 }
 
@@ -221,14 +243,37 @@ export function buildLocalSummary(labels: string[], result: AnalyzedName, source
   const meanings = givenChars
     .map(char => ({ char: char.char, meaning: namingMeaning(char) }))
     .filter(item => item.meaning)
+    .filter((item, index, items) => items.findIndex(candidate => candidate.char === item.char) === index)
     .slice(0, 2)
+  const repeatedCharacter = givenChars.length > 1 && new Set(givenChars.map(char => char.char)).size === 1
+  const literaryRef = givenChars
+    .map(char => char.cultural?.literaryRef?.trim())
+    .find(reference => reference && /《[^》]+》/.test(reference))
   const meaningText = meanings.length > 1
     ? `“${meanings[0]!.char}”有${meanings[0]!.meaning}之意，“${meanings[1]!.char}”则带有${meanings[1]!.meaning}的意味。`
     : meanings.length === 1
       ? `“${meanings[0]!.char}”有${meanings[0]!.meaning}之意。`
       : ''
-  const singleCharacterText = meanings.length === 1
-    ? `单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达${meanings[0]!.meaning}，也让名字保有不张扬的分寸。`
+  const singleCharacterText = givenChars.length === 1 && meanings.length === 1
+    ? literaryRef
+      ? '单字为名使语意集中，姓与名衔接简洁，读来利落而有分寸。'
+      : `单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达${meanings[0]!.meaning}，也让名字保有不张扬的分寸。`
+    : ''
+  const repeatedCharacterText = repeatedCharacter && meanings.length === 1
+    ? literaryRef
+      ? `叠字为名强化了“${meanings[0]!.char}”的意象，也形成轻盈节奏，读来亲切而有辨识度。`
+      : `叠字为名使“${meanings[0]!.char}”的意象得到自然强化，也形成轻盈舒展的节奏；重复而不繁复，读来亲切柔和，并让名字更有辨识度。`
+    : ''
+  const repeatedUnknownText = repeatedCharacter && meanings.length === 0
+    ? '叠字结构形成清晰而轻盈的节奏，重复用字增强了姓名的连贯感与辨识度；当前资料没有可直接采用的字义，因此不补充未经核实的含义。'
+    : ''
+  const incompleteMeaningText = !repeatedCharacter && meanings.length < givenChars.length
+    ? meanings.length === 0
+      ? '当前资料没有可直接采用的名字字义，因此只作保守的结构描述，不补充未经核实的含义。'
+      : '现有资料只覆盖其中一个名字用字，因此不对另一字补充未经核实的含义；已知字义与整体结构衔接自然。'
+    : ''
+  const pairedMeaningText = meanings.length > 1 && !literaryRef
+    ? '两层含义衔接自然，既各自清楚，也共同构成完整连贯而不过度引申的表达。'
     : ''
   const descriptors: Record<(typeof FEATURE_CONTRACT.labels)[number], string> = {
     '书卷': '清朗而有书卷气',
@@ -246,13 +291,10 @@ export function buildLocalSummary(labels: string[], result: AnalyzedName, source
   const vibeText = meanings.length > 1 && vibes.length > 1
     ? `名字中的两个用字彼此映照，整体${vibes[0]}，也保留了${vibes[1]}的分寸。`
     : `名字整体${vibes[0] || '平和自然'}${vibes[1] ? `，也保留了${vibes[1]}的分寸` : ''}，读来舒展而协调。`
-  const literaryRef = givenChars
-    .map(char => char.cultural?.literaryRef?.trim())
-    .find(reference => reference && /《[^》]+》/.test(reference))
   const referenceText = literaryRef
     ? `文化联想上，${literaryRef.replace(/^可联想到/u, '可联系').replace(/[。；;]+$/u, '')}，使名字的意涵更有层次。`
     : ''
-  const summary = `在“${result.original}”中，${meaningText}${singleCharacterText}${vibeText}${referenceText}`
+  const summary = `在“${result.original}”中，${meaningText}${singleCharacterText}${repeatedCharacterText}${repeatedUnknownText}${incompleteMeaningText}${pairedMeaningText}${vibeText}${referenceText}`
   return source === 'fallback' ? `${summary} (本地解析)` : summary
 }
 
@@ -411,7 +453,17 @@ async function cancelNativeSummary(requestId: string) {
 
 type NativeSummaryResult = {
   summary: string | null
-  timedOut: boolean
+  failure: 'none' | 'timeout' | 'quality' | 'runtime'
+}
+
+function correctiveSummaryPrompt(originalPrompt: string, rejected: string, reason: string): string {
+  return [
+    originalPrompt,
+    `上一次输出未通过检查，具体原因：${reason}`,
+    `不合格输出：${rejected.slice(0, 300)}`,
+    '不得沿用其中的虚构身份、经历、字号、出生信息、提示复述或生硬的“某字”句式。',
+    '重新输出符合原始基础文稿、80至130个汉字的正文。',
+  ].join('\n')
 }
 
 async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ available: boolean; timedOut: boolean }> {
@@ -434,12 +486,13 @@ async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ ava
 }
 
 async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<NativeSummaryResult> {
-  if (!isTauri()) return { summary: null, timedOut: false }
+  if (!isTauri()) return { summary: null, failure: 'none' }
   const model = await checkNativeModelForInference(signal)
-  if (!model.available) return { summary: null, timedOut: model.timedOut }
+  if (!model.available) return { summary: null, failure: model.timedOut ? 'timeout' : 'none' }
 
-  const context = buildGroundedSummaryPrompt(labels, result)
-  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
+  const originalContext = buildGroundedSummaryPrompt(labels, result)
+  let context = originalContext
+  for (let attempt = 0; attempt < NATIVE_MAX_ATTEMPTS; attempt += 1) {
     throwIfAborted(signal)
     const requestId = crypto.randomUUID()
     const request = requestController(NATIVE_TIMEOUT_MS, signal)
@@ -447,13 +500,23 @@ async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal
       requestId,
       name: result.original,
       context,
+      attempt: attempt + 1,
     })
     const aborted = new Promise<never>((_, reject) => {
       request.controller.signal.addEventListener('abort', () => reject(request.controller.signal.reason ?? abortError()), { once: true })
     })
     try {
       const summary = await Promise.race([generation, aborted])
-      return { summary: isGroundedSummary(summary, result) ? summary : null, timedOut: false }
+      const rejection = groundedSummaryRejection(summary, result)
+      if (!rejection) {
+        return { summary, failure: 'none' }
+      }
+      context = correctiveSummaryPrompt(originalContext, summary, rejection)
+      if (attempt + 1 < NATIVE_MAX_ATTEMPTS) {
+        await delay(RETRY_DELAY_MS, signal)
+        continue
+      }
+      return { summary: null, failure: 'quality' }
     } catch {
       if (request.controller.signal.aborted) {
         if (signal?.aborted) {
@@ -461,25 +524,25 @@ async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal
           throw abortError()
         }
         const cancellationSent = await cancelNativeSummary(requestId)
-        if (!cancellationSent) return { summary: null, timedOut: true }
+        if (!cancellationSent) return { summary: null, failure: 'timeout' }
         const stopped = await Promise.race([
           generation.then(() => true, () => true),
           delay(NATIVE_CANCEL_GRACE_MS).then(() => false),
         ])
-        if (!stopped) return { summary: null, timedOut: true }
-        if (attempt + 1 < MAX_ATTEMPTS) {
+        if (!stopped) return { summary: null, failure: 'timeout' }
+        if (attempt + 1 < NATIVE_MAX_ATTEMPTS) {
           await delay(RETRY_DELAY_MS, signal)
           continue
         }
-        return { summary: null, timedOut: request.didTimeout() }
+        return { summary: null, failure: request.didTimeout() ? 'timeout' : 'runtime' }
       }
-      if (attempt + 1 >= MAX_ATTEMPTS) return { summary: null, timedOut: false }
+      if (attempt + 1 >= NATIVE_MAX_ATTEMPTS) return { summary: null, failure: 'runtime' }
       await delay(RETRY_DELAY_MS, signal)
     } finally {
       request.cleanup()
     }
   }
-  return { summary: null, timedOut: false }
+  return { summary: null, failure: 'runtime' }
 }
 
 async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<string | null> {
@@ -568,11 +631,14 @@ export async function runLocalAiAnalysis(result: AnalyzedName, options: Inferenc
   const native = await fetchNativeSummary(labels, result, signal).catch((error): NativeSummaryResult => {
     throwIfAborted(signal)
     console.error('[Inference] Tauri native LLM failed:', error)
-    return { summary: null, timedOut: false }
+    return { summary: null, failure: 'runtime' }
   })
   let generatedSummary = native.summary
   let summarySource: 'native' | 'ollama' | 'fallback' = native.summary ? 'native' : 'fallback'
-  if (!generatedSummary && !native.timedOut) {
+  if (native.failure === 'timeout') throw new Error('原生 Qwen 生成超时，请重试。')
+  if (native.failure === 'quality') throw new Error('原生 Qwen 输出未通过事实检查，请重新分析。')
+  if (native.failure === 'runtime') throw new Error('原生 Qwen 运行失败，请重试。')
+  if (!generatedSummary) {
     generatedSummary = await fetchOllamaSummary(labels, result, signal)
     if (generatedSummary) summarySource = 'ollama'
   }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { AnalyzedName } from '../types'
+import type { AnalyzedName, CulturalData } from '../types'
 
 type TauriWindow = Window & { __TAURI_INTERNALS__?: unknown }
 
@@ -76,6 +76,36 @@ const yueYi: AnalyzedName = {
   ],
 }
 
+const ouyangNana: AnalyzedName = {
+  original: '欧阳娜娜',
+  chars: [
+    { char: '欧', role: 'surname', entry: null, cultural: null },
+    { char: '阳', role: 'surname', entry: null, cultural: null },
+    {
+      char: '娜',
+      role: 'given',
+      entry: { pinyin: 'na4', tones: '4', definition_cn: '女子人名用字' },
+      cultural: {
+        element: '火',
+        connotation: '婀娜、柔美与舒展；常写姿态轻盈、线条优雅。',
+        genderBias: 'feminine',
+        localGloss: '婀娜、柔美、舒展',
+      },
+    },
+    {
+      char: '娜',
+      role: 'given',
+      entry: { pinyin: 'na4', tones: '4', definition_cn: '女子人名用字' },
+      cultural: {
+        element: '火',
+        connotation: '婀娜、柔美与舒展；常写姿态轻盈、线条优雅。',
+        genderBias: 'feminine',
+        localGloss: '婀娜、柔美、舒展',
+      },
+    },
+  ],
+}
+
 describe('grounded name summary prompts', () => {
   it('supplies parsed facts and prohibits unsupported biography', async () => {
     const { buildGroundedSummaryPrompt } = await import('../services/localInference')
@@ -136,6 +166,164 @@ describe('deterministic name summaries', () => {
     expect(summary).not.toContain('殳')
     expect([...summary].length).toBeGreaterThanOrEqual(80)
     expect(prompt).toContain('不得在姓名后重复名字用字或添加“字”“号”')
+  })
+
+  it('grounds repeated-character given names without duplicating the same definition', async () => {
+    const { buildGroundedSummaryPrompt, buildLocalSummary } = await import('../services/localInference')
+    const summary = buildLocalSummary(['典雅', '书卷'], ouyangNana, 'model')
+    const prompt = buildGroundedSummaryPrompt(['典雅', '书卷'], ouyangNana)
+
+    expect(summary.match(/“娜”有婀娜、柔美、舒展之意/gu)).toHaveLength(1)
+    expect(summary).toContain('叠字为名')
+    expect(summary).toContain('节奏')
+    expect([...summary].length).toBeGreaterThanOrEqual(80)
+    expect(prompt).toContain('不要把同一个“娜”字解释两次')
+  })
+
+  it('does not present dictionary fragments as naming meanings', async () => {
+    const { buildLocalSummary } = await import('../services/localInference')
+    const fragmented: AnalyzedName = {
+      original: '苏轼',
+      chars: [
+        { char: '苏', role: 'surname', entry: null, cultural: null },
+        { char: '轼', role: 'given', entry: { pinyin: 'shi4', tones: '4', definition_cn: '《说文》一说本作“”' }, cultural: null },
+      ],
+    }
+
+    const summary = buildLocalSummary(['新颖', '坚毅'], fragmented, 'model')
+
+    expect(summary).toContain('没有可直接采用的名字字义')
+    expect(summary).not.toContain('《说文》')
+    expect([...summary].length).toBeGreaterThanOrEqual(80)
+  })
+
+  it('filters character-formation and measurement fragments from two-character names', async () => {
+    const { buildLocalSummary } = await import('../services/localInference')
+    const fragmented: AnalyzedName = {
+      original: '王儿石',
+      chars: [
+        { char: '王', role: 'surname', entry: null, cultural: null },
+        { char: '儿', role: 'given', entry: { pinyin: 'er2', tones: '2', definition_cn: '上面象小儿张口哭笑' }, cultural: null },
+        { char: '石', role: 'given', entry: { pinyin: 'shi2', tones: '2', definition_cn: '十斗为一石' }, cultural: null },
+      ],
+    }
+
+    const summary = buildLocalSummary(['自然', '深邃'], fragmented, 'model')
+
+    expect(summary).toContain('没有可直接采用的名字字义')
+    expect(summary).not.toContain('小儿张口')
+    expect(summary).not.toContain('十斗为一石')
+  })
+
+  it('does not salvage fragments from formation-only definitions', async () => {
+    const { buildGroundedSummaryPrompt, buildLocalSummary } = await import('../services/localInference')
+    const zhangSuqin: AnalyzedName = {
+      original: '张素琴',
+      chars: [
+        { char: '张', role: 'surname', entry: { pinyin: 'zhang1', tones: '1', definition_cn: ')' }, cultural: null },
+        { char: '素', role: 'given', entry: { pinyin: 'su4', tones: '4', definition_cn: '会意。小篆字形。上是垂”,下是糸。糸,丝。织物光润则易于下垂。)' }, cultural: null },
+        { char: '琴', role: 'given', entry: { pinyin: 'qin2', tones: '2', definition_cn: '本作珡”。象形。小篆字形,象乐器形,上面玨”象弦和弦柱,下面象琴身。俗称古琴)' }, cultural: null },
+      ],
+    }
+
+    const summary = buildLocalSummary(['新颖', '灵动'], zhangSuqin, 'model')
+    const prompt = buildGroundedSummaryPrompt(['新颖', '灵动'], zhangSuqin)
+
+    expect(summary).toContain('没有可直接采用的名字字义')
+    expect(summary).not.toMatch(/下是|象乐器形|糸|琴身/u)
+    expect(prompt).not.toMatch(/下是|象乐器形|糸|琴身/u)
+    expect(prompt).toContain('“素”“琴”没有可核实的名字字义')
+
+    const { groundedSummaryRejection } = await import('../services/localInference')
+    expect(groundedSummaryRejection(
+      '在“张素琴”中，“素”有质朴纯洁之意，“琴”带有琴音雅致的意味。两个名字用字相互映照，使整体结构自然舒展，读来轻盈清朗，也寄托从容平和、温润坚定的美好愿景，含蓄之中保有鲜明而协调的节奏。',
+      zhangSuqin,
+    )).toBe('为缺少可靠释义的“素”补写了含义。')
+  })
+
+  it('gives repeated-character names a grounded structure when no meaning is usable', async () => {
+    const { buildLocalSummary } = await import('../services/localInference')
+    const fragmented: AnalyzedName = {
+      original: '林玲玲',
+      chars: [
+        { char: '林', role: 'surname', entry: null, cultural: null },
+        { char: '玲', role: 'given', entry: { pinyin: 'ling2', tones: '2', definition_cn: '形〉' }, cultural: null },
+        { char: '玲', role: 'given', entry: { pinyin: 'ling2', tones: '2', definition_cn: '形〉' }, cultural: null },
+      ],
+    }
+
+    const summary = buildLocalSummary(['新颖', '灵动'], fragmented, 'model')
+
+    expect(summary).toContain('叠字结构')
+    expect(summary).toContain('不补充未经核实的含义')
+    expect(summary).not.toContain('形〉')
+    expect([...summary].length).toBeGreaterThanOrEqual(80)
+  })
+
+  it('uses a naming meaning instead of fanqie notation for 一', async () => {
+    const cultural = await import('../data/cultural.json')
+    const { buildLocalSummary } = await import('../services/localInference')
+    const wangYi: AnalyzedName = {
+      original: '王一',
+      chars: [
+        { char: '王', role: 'surname', entry: null, cultural: null },
+        { char: '一', role: 'given', entry: null, cultural: cultural.default['一'] as CulturalData },
+      ],
+    }
+
+    const summary = buildLocalSummary(['灵动'], wangYi, 'model')
+
+    expect(summary).toContain('“一”有专一、纯粹、万物之始之意')
+    expect(summary).not.toContain('於悉切')
+    expect(summary).not.toContain('益悉切')
+  })
+
+  it('keeps every cultural entry free of phonetic metadata in generated summaries', async () => {
+    const cultural = await import('../data/cultural.json')
+    const { buildLocalSummary } = await import('../services/localInference')
+    const failures = []
+
+    for (const [char, data] of Object.entries(cultural.default)) {
+      const analyzed: AnalyzedName = {
+        original: `王${char}`,
+        chars: [
+          { char: '王', role: 'surname', entry: null, cultural: null },
+          { char, role: 'given', entry: null, cultural: data as CulturalData },
+        ],
+      }
+      const summary = buildLocalSummary(['典雅'], analyzed, 'model')
+
+      if (!summary.includes((data as CulturalData).localGloss ?? '')) failures.push(`${char}: missing gloss`)
+      if (/(?:反切|切；名字里常取|俗.{0,4}字|古文.{0,4}字)/u.test(summary)) {
+        failures.push(`${char}: ${summary}`)
+      }
+    }
+    expect(failures).toEqual([])
+  })
+
+  it('keeps all cultural two-character combinations free of phonetic metadata', async () => {
+    const cultural = await import('../data/cultural.json')
+    const { buildLocalSummary } = await import('../services/localInference')
+    const entries = Object.entries(cultural.default) as Array<[string, CulturalData]>
+    const forbidden = /(?:反切|切；名字里常取|俗.{0,4}字|古文.{0,4}字|^(?:音.{1,4}|同.{1,4})之意)/u
+    const failures = []
+
+    for (const [firstChar, firstData] of entries) {
+      for (const [secondChar, secondData] of entries) {
+        const analyzed: AnalyzedName = {
+          original: `王${firstChar}${secondChar}`,
+          chars: [
+            { char: '王', role: 'surname', entry: null, cultural: null },
+            { char: firstChar, role: 'given', entry: null, cultural: firstData },
+            { char: secondChar, role: 'given', entry: null, cultural: secondData },
+          ],
+        }
+        const summary = buildLocalSummary(['典雅', '自然'], analyzed, 'model')
+
+        if (forbidden.test(summary)) failures.push(`${firstChar}${secondChar}: ${summary}`)
+      }
+    }
+    expect(failures).toEqual([])
   })
 })
 
@@ -393,6 +581,33 @@ describe('local inference worker recovery', () => {
     expect(analysis.summarySource).toBe('native')
   })
 
+  it('retries a rejected native output with corrective context', async () => {
+    ;(window as TauriWindow).__TAURI_INTERNALS__ = {}
+    const rejected = '李明华，字华，出生于书香门第。'
+    const corrected = '在“李明华”中，“明”有明亮、清楚、开朗之意，“华”则带有华美、光彩、繁盛的意味。名字中的两个用字彼此映照，整体清朗而有书卷气，也保留了端正雅致的分寸，读来舒展自然，意涵清楚而不失层次。'
+    const contexts: string[] = []
+    invokeMock.mockImplementation((command: string, args?: { context?: string }) => {
+      if (command === 'check_model_exists') return Promise.resolve(true)
+      if (command === 'generate_internal_summary') {
+        contexts.push(args?.context ?? '')
+        return Promise.resolve(contexts.length === 1 ? rejected : corrected)
+      }
+      return Promise.reject(new Error(`Unexpected command: ${command}`))
+    })
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+
+    const analysisPromise = runLocalAiAnalysis(liMinghua)
+    await vi.runAllTimersAsync()
+    const analysis = await analysisPromise
+
+    expect(analysis.summary).toBe(corrected)
+    expect(analysis.summarySource).toBe('native')
+    expect(contexts).toHaveLength(2)
+    expect(contexts[1]).toContain(rejected)
+    expect(contexts[1]).toContain('上一次输出未通过检查，具体原因')
+    expect(contexts[1]).toContain('虚构了字号或人物身份')
+  })
+
   it('cancels the complete inference chain through AbortSignal', async () => {
     const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>((_url, init) => new Promise((_resolve, reject) => {
       init?.signal?.addEventListener('abort', () => reject(new DOMException('Cancelled', 'AbortError')), { once: true })
@@ -437,11 +652,12 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
+    const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
-    await analysisPromise
+    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
 
-    expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(2)
-    expect(invokeMock.mock.calls.filter(call => call[0] === 'cancel_internal_summary')).toHaveLength(2)
+    expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(3)
+    expect(invokeMock.mock.calls.filter(call => call[0] === 'cancel_internal_summary')).toHaveLength(3)
   })
 
   it('does not overlap an uncancellable timed-out native model check', async () => {
@@ -453,11 +669,28 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
+    const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
-    const analysis = await analysisPromise
 
     expect(invokeMock.mock.calls.filter(call => call[0] === 'check_model_exists')).toHaveLength(1)
-    expect(analysis.summary).toContain('本地解析')
+    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
+  })
+
+  it('reports native runtime failures separately from rejected model output', async () => {
+    ;(window as TauriWindow).__TAURI_INTERNALS__ = {}
+    invokeMock.mockImplementation((command: string) => {
+      if (command === 'check_model_exists') return Promise.resolve(true)
+      if (command === 'generate_internal_summary') return Promise.reject(new Error('Failed to load model'))
+      return Promise.reject(new Error(`Unexpected command: ${command}`))
+    })
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+
+    const analysisPromise = runLocalAiAnalysis(result)
+    const rejected = analysisPromise.catch(error => error)
+    await vi.runAllTimersAsync()
+
+    expect(await rejected).toEqual(new Error('原生 Qwen 运行失败，请重试。'))
+    expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(3)
   })
 
   it('cancels native inference without retrying after a user abort', async () => {
@@ -501,12 +734,12 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
+    const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
-    const analysis = await analysisPromise
+    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
 
     expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(1)
     expect(invokeMock.mock.calls.filter(call => call[0] === 'cancel_internal_summary')).toHaveLength(1)
     expect(fetchMock).not.toHaveBeenCalled()
-    expect(analysis.summary).toContain('本地解析')
   })
 })

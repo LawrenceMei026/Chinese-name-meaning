@@ -1,18 +1,23 @@
 {
   "name": "my-vue-app",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run check:version && npm run check:tauri-acl && run-p type-check \"build-only {@}\" --",
+    "build": "npm run check:version && npm run check:dictionary-supplements && npm run check:guangyun-data && npm run check:cultural-data && npm run check:tauri-acl && run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:features": "node scripts/test-python-features.mjs && vitest --run src/__tests__/nameFeatures.spec.ts",
     "test:onnx": "node scripts/smoke-onnx.mjs",
     "check:version": "node scripts/check-version.mjs",
+    "check:dictionary-supplements": "node scripts/apply-dictionary-supplements.mjs --check",
+    "check:guangyun-data": "node scripts/update-guangyun-data.mjs --check",
+    "check:cultural-data": "node scripts/check-cultural-data.mjs",
     "check:tauri-acl": "node scripts/check-tauri-acl.mjs",
     "version": "node scripts/sync-version.mjs && npm run check:version",
+    "update:dictionary-supplements": "node scripts/apply-dictionary-supplements.mjs",
+    "update:guangyun-data": "node scripts/update-guangyun-data.mjs",
     "build-only": "vite build",
     "type-check": "vue-tsc --build",
     "lint": "run-s lint:*",
@@ -28,6 +33,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "^2.11.1",
+    "@tauri-apps/plugin-opener": "^2.5.4",
     "onnxruntime-web": "^1.20.1",
     "vue": "^3.5.32"
   },
