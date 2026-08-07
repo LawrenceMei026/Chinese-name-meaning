@@ -123,6 +123,8 @@ mod tests {
     #[test]
     fn cancellation_prevents_model_loading() {
         let mut runtime = LlamaRuntime::new().expect("runtime should initialize");
+        assert!(runtime.loaded_path.is_none());
+
         let result = runtime.generate(
             Path::new("missing.gguf"),
             "unused prompt",
@@ -132,12 +134,5 @@ mod tests {
         );
 
         assert_eq!(result, Err("Inference cancelled".to_string()));
-    }
-
-    #[test]
-    fn runtime_starts_without_loaded_model_path() {
-        let runtime = LlamaRuntime::new().expect("runtime should initialize");
-
-        assert!(runtime.loaded_path.is_none());
     }
 }
