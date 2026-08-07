@@ -120,7 +120,7 @@ describe('grounded name summary prompts', () => {
   it('rejects unsupported biographical claims from generated text', async () => {
     const { isGroundedSummary } = await import('../services/localInference')
 
-    expect(isGroundedSummary('“明”字取光明通达之意，与清朗意境相映，使名字呈现澄澈开阔的气质；明亮并非浮于表面的耀眼，而是内心清醒、待人坦荡的温润表达，寄托行事坚定、思路通达且前路明朗的美好愿景。', result)).toBe(true)
+    expect(isGroundedSummary('在“李明”中，“明”有明亮之意。单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达明亮，也让名字保有不张扬的分寸。名字整体清朗而有书卷气，也保留了端正雅致的分寸，读来舒展而协调。', result)).toBe(true)
     expect(isGroundedSummary('乐毅，字子渊，是春秋时期著名军事家。', result)).toBe(false)
     expect(isGroundedSummary('单于明，汉唐以来多有所指，意为光耀先贤，象征国家兴盛。', result)).toBe(false)
     expect(isGroundedSummary('结合具体字义生成一段100字左右的文雅姓名意境分析。', result)).toBe(false)
@@ -128,7 +128,8 @@ describe('grounded name summary prompts', () => {
     expect(isGroundedSummary('李明字文彬，在书法方面有深厚造诣，他的作品典雅而富有诗意，深受读者喜爱。', result)).toBe(false)
     expect(isGroundedSummary('李明（明）字孔明，号卧龙，人称卧龙先生，以智慧和才华著称，被誉为一代名士。', result)).toBe(false)
     expect(isGroundedSummary('李明，明字，明亮、清楚而开朗，名字整体清朗舒展，也保留了温润雅致的分寸。', result)).toBe(false)
-    expect(isGroundedSummary('“明”字清澈开朗，与温润宜人的气质相映；名字整体简洁舒展，既有内心明净的含蓄表达，也寄托待人坦荡、思路通达、步履从容的美好愿景，在平和之中保有坚定而清醒的力量。', result)).toBe(true)
+    expect(isGroundedSummary('在“李明”中，“明”有明亮之意。单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达明亮，也让名字保有不张扬的分寸。名字整体清朗而有书卷气，读来舒展而协调。', result)).toBe(true)
+    expect(isGroundedSummary('在“李明”中，“明”有明亮之意。名字整体清朗舒展，也寄托待人坦荡、思路通达、步履从容的美好愿景，在平和之中保有坚定而清醒的力量。', result)).toBe(false)
   })
 })
 
@@ -412,11 +413,36 @@ describe('local inference worker recovery', () => {
     await vi.runAllTimersAsync()
     const analysis = await analysisPromise
 
-    expect(analysis.source).toBe('fallback')
+    expect(analysis.labelSource).toBe('fallback')
     expect(analysis.summarySource).toBe('fallback')
     expect(analysis.labels.every(label => ['书卷', '宏伟', '豪迈', '恬静', '典雅', '新颖', '灵动', '坚毅', '自然', '深邃'].includes(label))).toBe(true)
     expect(FakeWorker.instances).toHaveLength(2)
     expect(FakeWorker.instances.every(worker => worker.terminated)).toBe(true)
+  })
+
+  it('marks label provenance as none when model abstains and rules do not match', async () => {
+    const { runLocalAiAnalysis } = await import('../services/localInference')
+    vi.stubGlobal('Worker', class extends FakeWorker {
+      constructor() {
+        super()
+        this.respondToInfer = false
+      }
+    })
+    const unmatched: AnalyzedName = {
+      original: '李仉',
+      chars: [
+        { char: '李', role: 'surname', entry: null, cultural: null },
+        { char: '仉', role: 'given', entry: null, cultural: null },
+      ],
+    }
+
+    const analysisPromise = runLocalAiAnalysis(unmatched)
+    await vi.runAllTimersAsync()
+    const analysis = await analysisPromise
+
+    expect(analysis.labelSource).toBe('none')
+    expect(analysis.labels).toEqual([])
+    expect(analysis.summarySource).toBe('fallback')
   })
 
   it('creates a new worker after a health-check timeout', async () => {
@@ -483,7 +509,7 @@ describe('local inference worker recovery', () => {
     await vi.runAllTimersAsync()
     const resolved = await Promise.all(analyses)
 
-    expect(resolved.every(analysis => analysis.source === 'fallback')).toBe(true)
+    expect(resolved.every(analysis => analysis.labelSource === 'fallback')).toBe(true)
     expect(FakeWorker.instances).toHaveLength(4)
     expect(FakeWorker.instances.every(worker => worker.terminated)).toBe(true)
   })
@@ -502,8 +528,8 @@ describe('local inference worker recovery', () => {
     await vi.runAllTimersAsync()
 
     const [firstAnalysis, thirdAnalysis] = await Promise.all([first, third])
-    expect(firstAnalysis.source).toBe('fallback')
-    expect(thirdAnalysis.source).toBe('fallback')
+    expect(firstAnalysis.labelSource).toBe('fallback')
+    expect(thirdAnalysis.labelSource).toBe('fallback')
     expect(FakeWorker.instances).toHaveLength(4)
   })
 
@@ -515,12 +541,15 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
+    const expectation = expect(analysisPromise).rejects.toMatchObject({
+      name: 'InferenceError',
+      code: 'deadline-exceeded',
+      message: 'AI 深度分析超时，请重试。',
+    })
     await vi.runAllTimersAsync()
-    const analysis = await analysisPromise
-
+    await expectation
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls.every(call => call[1]?.signal?.aborted)).toBe(true)
-    expect(analysis.summary).toContain('本地解析')
   })
 
   it('tries equivalent Ollama addresses sequentially on the standard port', async () => {
@@ -529,7 +558,7 @@ describe('local inference worker recovery', () => {
     fetchMock.mockImplementationOnce(() => new Promise<Response>(resolve => { resolveFirst = resolve }))
     fetchMock.mockResolvedValueOnce({
       ok: true,
-      json: async () => ({ response: '“明”字取光明通达之意，与清朗意境相映，使名字呈现澄澈开阔的气质；明亮并非浮于表面的耀眼，而是内心清醒、待人坦荡的温润表达，寄托行事坚定、思路通达且前路明朗的美好愿景。' }),
+      json: async () => ({ response: '在“李明”中，“明”有明亮之意。单字为名使语意集中，姓与名衔接简洁，读来利落有力；这个字既清楚表达明亮，也让名字保有不张扬的分寸。名字整体清朗而有书卷气，读来舒展而协调。' }),
     } as Response)
     vi.stubGlobal('fetch', fetchMock)
     vi.stubGlobal('Worker', class extends FakeWorker {
@@ -554,13 +583,13 @@ describe('local inference worker recovery', () => {
 
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls[1]?.[0]).toBe('http://127.0.0.1:11434/api/generate')
-    expect(analysis.summary).toContain('“明”字取光明通达之意')
+    expect(analysis.summary).toContain('在“李明”中')
     expect(analysis.summarySource).toBe('ollama')
   })
 
   it('reports a grounded native Qwen summary independently from ONNX labels', async () => {
     ;(window as TauriWindow).__TAURI_INTERNALS__ = {}
-    const nativeSummary = '“明”有明亮、清楚、开朗之意，与清朗气质自然相合；“华”带有华美、光彩、繁盛的意味，使名字更显舒展。两字相连，整体端正雅致，又有温润的书卷气，寄托心性澄澈、待人坦荡、步履从容的美好愿景。'
+    const nativeSummary = '在“李明华”中，“明”有明亮、清楚、开朗之意，“华”则带有华美、光彩、繁盛的意味。两字相连，整体端正雅致，也保留了清朗而有书卷气的分寸；文化联想上，可联系《大学》中的“明德”，使名字意涵更有层次。'
     invokeMock.mockImplementation((command: string) => {
       if (command === 'check_model_exists') return Promise.resolve(true)
       if (command === 'generate_internal_summary') return Promise.resolve(nativeSummary)
@@ -574,12 +603,13 @@ describe('local inference worker recovery', () => {
 
     expect(analysis.summary).toBe(nativeSummary)
     expect(analysis.summarySource).toBe('native')
+    expect(analysis.generationStatus).toBe('complete')
   })
 
   it('retries a rejected native output with corrective context', async () => {
     ;(window as TauriWindow).__TAURI_INTERNALS__ = {}
     const rejected = '李明华，字华，出生于书香门第。'
-    const corrected = '在“李明华”中，“明”有明亮、清楚、开朗之意，“华”则带有华美、光彩、繁盛的意味。名字中的两个用字彼此映照，整体清朗而有书卷气，也保留了端正雅致的分寸，读来舒展自然，意涵清楚而不失层次。'
+    const corrected = '在“李明华”中，“明”有明亮、清楚、开朗之意，“华”则带有华美、光彩、繁盛的意味。名字中的两个用字彼此映照，整体清朗而有书卷气，也保留了端正雅致的分寸；文化联想上，可联系《大学》中的“明德”，使名字意涵更有层次。'
     const contexts: string[] = []
     invokeMock.mockImplementation((command: string, args?: { context?: string }) => {
       if (command === 'check_model_exists') return Promise.resolve(true)
@@ -597,9 +627,10 @@ describe('local inference worker recovery', () => {
 
     expect(analysis.summary).toBe(corrected)
     expect(analysis.summarySource).toBe('native')
+    expect(analysis.generationStatus).toBe('complete')
     expect(contexts).toHaveLength(2)
-    expect(contexts[1]).toContain(rejected)
-    expect(contexts[1]).toContain('上一次输出未通过检查，具体原因')
+    expect(contexts[1]).not.toContain(rejected)
+    expect(contexts[1]).toContain('上一次输出未通过检查，拒绝代码')
     expect(contexts[1]).toContain('虚构了字号或人物身份')
   })
 
@@ -649,7 +680,11 @@ describe('local inference worker recovery', () => {
     const analysisPromise = runLocalAiAnalysis(result)
     const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
-    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
+    await expect(rejected).resolves.toMatchObject({
+      name: 'InferenceError',
+      code: 'deadline-exceeded',
+      message: 'AI 深度分析超时，请重试。',
+    })
 
     expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(3)
     expect(invokeMock.mock.calls.filter(call => call[0] === 'cancel_internal_summary')).toHaveLength(3)
@@ -668,10 +703,14 @@ describe('local inference worker recovery', () => {
     await vi.runAllTimersAsync()
 
     expect(invokeMock.mock.calls.filter(call => call[0] === 'check_model_exists')).toHaveLength(1)
-    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
+    await expect(rejected).resolves.toMatchObject({
+      name: 'InferenceError',
+      code: 'native-timeout',
+      message: '原生 Qwen 生成超时，请重试。',
+    })
   })
 
-  it('reports native runtime failures separately from rejected model output', async () => {
+  it('degrades safely after native runtime failures', async () => {
     ;(window as TauriWindow).__TAURI_INTERNALS__ = {}
     invokeMock.mockImplementation((command: string) => {
       if (command === 'check_model_exists') return Promise.resolve(true)
@@ -681,10 +720,12 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
-    const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
+    const analysis = await analysisPromise
 
-    expect(await rejected).toEqual(new Error('原生 Qwen 运行失败，请重试。'))
+    expect(analysis.summarySource).toBe('fallback')
+    expect(analysis.generationStatus).toBe('degraded')
+    expect(analysis.summary).toContain('本地解析')
     expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(3)
   })
 
@@ -731,7 +772,11 @@ describe('local inference worker recovery', () => {
     const analysisPromise = runLocalAiAnalysis(result)
     const rejected = analysisPromise.catch(error => error)
     await vi.runAllTimersAsync()
-    expect(await rejected).toEqual(new Error('原生 Qwen 生成超时，请重试。'))
+    await expect(rejected).resolves.toMatchObject({
+      name: 'InferenceError',
+      code: 'native-timeout',
+      message: '原生 Qwen 生成超时，请重试。',
+    })
 
     expect(invokeMock.mock.calls.filter(call => call[0] === 'generate_internal_summary')).toHaveLength(1)
     expect(invokeMock.mock.calls.filter(call => call[0] === 'cancel_internal_summary')).toHaveLength(1)

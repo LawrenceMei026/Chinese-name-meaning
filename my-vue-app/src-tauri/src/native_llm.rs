@@ -5,12 +5,13 @@ use llama_cpp_2::model::params::LlamaModelParams;
 use llama_cpp_2::model::{AddBos, LlamaModel};
 use llama_cpp_2::sampling::LlamaSampler;
 use std::num::NonZeroU32;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 
 pub struct LlamaRuntime {
     backend: LlamaBackend,
     model: Option<LlamaModel>,
+    loaded_path: Option<PathBuf>,
 }
 
 impl LlamaRuntime {
@@ -20,6 +21,7 @@ impl LlamaRuntime {
         Ok(Self {
             backend,
             model: None,
+            loaded_path: None,
         })
     }
 
@@ -34,11 +36,16 @@ impl LlamaRuntime {
         if cancelled.load(Ordering::Acquire) {
             return Err("Inference cancelled".to_string());
         }
+        if self.loaded_path.as_deref() != Some(model_path) {
+            self.model = None;
+            self.loaded_path = None;
+        }
         if self.model.is_none() {
             let model =
                 LlamaModel::load_from_file(&self.backend, model_path, &LlamaModelParams::default())
                     .map_err(|error| format!("Failed to load GGUF model: {error}"))?;
             self.model = Some(model);
+            self.loaded_path = Some(model_path.to_path_buf());
         }
         if cancelled.load(Ordering::Acquire) {
             return Err("Inference cancelled".to_string());
@@ -125,5 +132,12 @@ mod tests {
         );
 
         assert_eq!(result, Err("Inference cancelled".to_string()));
+    }
+
+    #[test]
+    fn runtime_starts_without_loaded_model_path() {
+        let runtime = LlamaRuntime::new().expect("runtime should initialize");
+
+        assert!(runtime.loaded_path.is_none());
     }
 }

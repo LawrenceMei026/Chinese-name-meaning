@@ -61,7 +61,7 @@ export function pickFallbackLabels(text: string): string[] {
   if (/[刚强勇健毅峰军武力锋威定松柏岩钧]/.test(text)) labels.push('坚毅')
   if (/[山川岳林森沐汐阳月雪云雨溪木禾竹]/.test(text)) labels.push('自然')
   if (/[远幽潜深玄微妙默思冥理道索究渊鉴]/.test(text)) labels.push('深邃')
-  return labels.length ? [...new Set(labels)].slice(0, 3) : ['书卷']
+  return labels.length ? [...new Set(labels)].slice(0, 3) : []
 }
 
 function containsAny(value: string, candidates: string[]) {

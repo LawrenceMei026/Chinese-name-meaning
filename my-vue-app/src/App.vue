@@ -2,6 +2,8 @@
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from 'vue'
 import { analyzeName, preloadDictionary } from './services/nameAnalyzer'
 import { runLocalAiAnalysis, checkNativeModel, startModelDownload, checkSystemMemory, formatModelDownloadError, getModelDirectory, setModelDirectory } from './services/localInference'
+import { InferenceError } from './services/localInference'
+import type { InferencePhase } from './services/localInference'
 import { CC_BY_SA_URL, CC_CEDICT_URL, openExternalUrl, REPOSITORY_URL } from './services/externalLinks'
 import CharacterCard from './components/CharacterCard.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
@@ -9,6 +11,7 @@ import type { GuangyunEntry } from './data/guangyun'
 
 const HISTORY_KEY = 'analysis-history-v1'
 const HISTORY_LIMIT = 6
+const HISTORY_SCHEMA_VERSION = 2 as const
 
 const input = ref('')
 const result = ref<AnalyzedName | null>(null)
@@ -17,6 +20,7 @@ const loading = ref(false)
 const aiLoading = ref(false)
 const error = ref<string | null>(null)
 const aiError = ref<string | null>(null)
+const aiPhase = ref<InferencePhase | null>(null)
 const showGuangyun = ref(false)
 const guangyunError = ref<string | null>(null)
 const guangyunLoaded = ref(false)
@@ -56,17 +60,97 @@ const helpId = 'name-input-help'
 const errorId = 'name-input-error'
 const isBusy = computed(() => loading.value || aiLoading.value)
 const isTauri = '__TAURI_INTERNALS__' in window
+const activeHistoryEntry = computed(() => history.value.find(entry => entry.id === activeHistoryEntryId.value) ?? null)
+const aiStatusText = computed(() => {
+  switch (aiPhase.value) {
+    case 'preparing-facts':
+      return '正在整理已核实的姓名事实…'
+    case 'classifying':
+      return '正在分析姓名风格标签…'
+    case 'validating-native-model':
+      return '正在检查本地模型状态…'
+    case 'generating-native':
+      return '正在使用原生 Qwen 生成补充分析…'
+    case 'generating-ollama':
+      return '原生模型不可用，正在尝试 Ollama…'
+    case 'using-deterministic-fallback':
+      return '生成模型不可用，正在切换到确定性分析…'
+    case 'completed':
+      return '分析完成。'
+    default:
+      return '正在调用本地模型生成补充分析…'
+  }
+})
+const aiLabelSourceText = computed(() => {
+  if (!aiResult.value) return ''
+  switch (aiResult.value.labelSource) {
+    case 'model':
+      return '标签来源：本地模型'
+    case 'fallback':
+      return '标签来源：规则回退'
+    case 'none':
+      return '标签来源：未形成可靠标签'
+  }
+})
+const aiSummarySourceText = computed(() => {
+  if (!aiResult.value) return ''
+  switch (aiResult.value.summarySource) {
+    case 'native':
+      return '摘要来源：原生 Qwen'
+    case 'ollama':
+      return '摘要来源：Ollama'
+    case 'fallback':
+      return '摘要来源：本地回退'
+  }
+})
+const aiValidationStatusText = computed(() => activeHistoryEntry.value?.legacy
+  ? '校验状态：旧版结果'
+  : '校验状态：当前规则')
 
 function isHistoryEntry(value: unknown): value is AnalysisHistoryEntry {
   if (!value || typeof value !== 'object') return false
   const entry = value as AnalysisHistoryEntry
+  const aiResult = entry.aiResult
+  const schemaVersion = (entry as { schemaVersion?: unknown }).schemaVersion
+  const isVersioned = schemaVersion === HISTORY_SCHEMA_VERSION
+  const isLegacy = schemaVersion == null
+
+  const validAiResult = aiResult == null || (
+    typeof aiResult === 'object'
+    && Array.isArray(aiResult.labels)
+    && aiResult.labels.every(label => typeof label === 'string')
+    && typeof aiResult.summary === 'string'
+    && (aiResult.labelSource === 'model' || aiResult.labelSource === 'fallback' || aiResult.labelSource === 'none')
+    && (aiResult.summarySource === 'native' || aiResult.summarySource === 'ollama' || aiResult.summarySource === 'fallback')
+    && (aiResult.generationStatus == null || aiResult.generationStatus === 'complete' || aiResult.generationStatus === 'degraded')
+    && (
+      aiResult.provenance == null || (
+        typeof aiResult.provenance === 'object'
+        && aiResult.provenance.schemaVersion === 1
+        && typeof aiResult.provenance.generatedAt === 'number'
+      )
+    )
+  )
+
   return typeof entry.id === 'string'
     && typeof entry.input === 'string'
     && typeof entry.createdAt === 'number'
+    && (isVersioned || isLegacy)
     && typeof entry.result === 'object'
     && entry.result !== null
     && typeof entry.result.original === 'string'
     && Array.isArray(entry.result.chars)
+    && validAiResult
+}
+
+function normalizeHistoryEntry(entry: AnalysisHistoryEntry): AnalysisHistoryEntry {
+  if (entry.schemaVersion === HISTORY_SCHEMA_VERSION) return entry
+
+  return {
+    ...entry,
+    schemaVersion: HISTORY_SCHEMA_VERSION,
+    legacy: true,
+  }
 }
 
 function readHistory(): AnalysisHistoryEntry[] {
@@ -75,7 +159,7 @@ function readHistory(): AnalysisHistoryEntry[] {
     if (!raw) return []
     const parsed = JSON.parse(raw) as unknown
     if (!Array.isArray(parsed)) return []
-    return parsed.filter(isHistoryEntry).slice(0, HISTORY_LIMIT)
+    return parsed.filter(isHistoryEntry).map(normalizeHistoryEntry).slice(0, HISTORY_LIMIT)
   } catch {
     return []
   }
@@ -155,12 +239,15 @@ async function handleSubmit() {
     const analyzed = await analyzeName(name)
     result.value = analyzed
     const now = Date.now()
-    persistHistoryEntry({
+    const entry: AnalysisHistoryEntry = {
+      schemaVersion: HISTORY_SCHEMA_VERSION,
       id: `${now}-${history.value.length}`,
       input: name,
       createdAt: now,
       result: analyzed,
-    })
+    }
+    persistHistoryEntry(entry)
+    activeHistoryEntryId.value = entry.id
   } catch {
     error.value = '字符数据加载失败，请检查网络连接后重试。'
   } finally {
@@ -181,21 +268,28 @@ async function handleAiAnalysis() {
   aiController = controller
   aiLoading.value = true
   aiError.value = null
+  aiPhase.value = 'preparing-facts'
 
   try {
-    aiResult.value = await runLocalAiAnalysis(result.value, { signal: controller.signal })
+    aiResult.value = await runLocalAiAnalysis(result.value, {
+      signal: controller.signal,
+      onPhaseChange(phase) {
+        aiPhase.value = phase
+      },
+    })
     updateActiveHistoryEntry(aiResult.value)
   } catch (caught) {
     if (caught instanceof DOMException && caught.name === 'AbortError') return
-    const expectedMessage = caught instanceof Error
-      && /^(?:原生 Qwen 输出未通过事实检查，请重新分析。|原生 Qwen 生成超时，请重试。|原生 Qwen 运行失败，请重试。)$/u.test(caught.message)
-      ? caught.message
-      : null
-    aiError.value = expectedMessage ?? 'AI 深度分析暂时不可用，请稍后重试。'
+    if (caught instanceof InferenceError) {
+      aiError.value = caught.message
+      return
+    }
+    aiError.value = 'AI 深度分析暂时不可用，请稍后重试。'
   } finally {
     if (aiController === controller) {
       aiController = null
       aiLoading.value = false
+      aiPhase.value = null
     }
   }
 }
@@ -207,6 +301,7 @@ function reset() {
   aiResult.value = null
   error.value = null
   aiError.value = null
+  aiPhase.value = null
   activeHistoryEntryId.value = null
 }
 
@@ -439,7 +534,7 @@ onUnmounted(() => {
             <button class="reset-btn" type="button" @click="reset" aria-label="清除并重新开始">✕ 清除</button>
           </div>
         </div>
-        <div v-if="aiLoading" class="ai-status" role="status" aria-live="polite">正在调用本地模型生成补充分析…</div>
+        <div v-if="aiLoading" class="ai-status" role="status" aria-live="polite">{{ aiStatusText }}</div>
         <div class="cards">
           <CharacterCard
             v-for="(char, i) in result.chars"
@@ -457,9 +552,16 @@ onUnmounted(() => {
             <h3 class="ai-title">AI 深度分析</h3>
             <span class="ai-badge">{{ aiResult.summarySource === 'native' ? '原生 Qwen' : aiResult.summarySource === 'ollama' ? 'Ollama' : '本地回退' }}</span>
           </div>
-          <div class="ai-labels">
+          <p v-if="activeHistoryEntry?.legacy" class="ai-legacy-note">这是旧版分析结果，建议重新分析以使用当前校验与来源标记。</p>
+          <div class="ai-provenance">
+            <p class="ai-provenance-item">{{ aiLabelSourceText }}</p>
+            <p class="ai-provenance-item">{{ aiSummarySourceText }}</p>
+            <p class="ai-provenance-item">{{ aiValidationStatusText }}</p>
+          </div>
+          <div v-if="aiResult.labelSource !== 'none'" class="ai-labels">
             <span v-for="label in aiResult.labels" :key="label" class="ai-label">{{ label }}</span>
           </div>
+          <p v-else class="ai-label-note">当前未形成可靠的风格标签，以下分析仅基于已核实的字义与结构。</p>
           <p class="ai-summary">{{ aiResult.summary }}</p>
         </section>
       </section>
@@ -473,6 +575,7 @@ onUnmounted(() => {
           <li v-for="entry in history" :key="entry.id" class="history-item">
             <button type="button" class="history-button" @click="restoreHistoryEntry(entry)">
               <span class="history-name">{{ entry.input }}</span>
+              <span v-if="entry.legacy" class="history-legacy">旧版</span>
               <span class="history-meta">{{ formatHistoryTime(entry.createdAt) }}</span>
             </button>
           </li>

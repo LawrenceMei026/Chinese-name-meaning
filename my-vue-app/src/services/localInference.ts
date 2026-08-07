@@ -3,6 +3,7 @@ import { listen } from '@tauri-apps/api/event';
 import { FEATURE_CONTRACT, pickFallbackLabels, toFeatureInput } from '../model/nameFeatures'
 import type { FeatureInput } from '../model/nameFeatures'
 import type { AnalyzedName, AiAnalysisResult } from '../types'
+import { buildGroundingFactPacket, namingMeaningDetails, type GroundingFactPacket } from './groundingFacts'
 
 type WorkerRequest = {
   id: number
@@ -17,12 +18,16 @@ type WorkerResponse = {
 }
 
 const MODEL_VERSION = 'onnx-v1'
-const WORKER_TIMEOUT_MS = 10_000
-const OLLAMA_TIMEOUT_MS = 45_000
-const NATIVE_TIMEOUT_MS = 60_000
+const WORKER_TIMEOUT_MS = 8_000
+const OLLAMA_TIMEOUT_MS = 30_000
+const NATIVE_TIMEOUT_MS = 35_000
 const NATIVE_CANCEL_GRACE_MS = 5_000
 const NATIVE_CANCEL_COMMAND_TIMEOUT_MS = 2_000
+const INFERENCE_DEADLINE_MS = 75_000
 const RETRY_DELAY_MS = 250
+const FINAL_FALLBACK_RESERVE_MS = 2_000
+const OLLAMA_RESERVE_MS = OLLAMA_TIMEOUT_MS + RETRY_DELAY_MS
+const NATIVE_CANCEL_RESERVE_MS = NATIVE_CANCEL_GRACE_MS + NATIVE_CANCEL_COMMAND_TIMEOUT_MS + RETRY_DELAY_MS
 const MAX_ATTEMPTS = 2
 const NATIVE_MAX_ATTEMPTS = 3
 const OLLAMA_URLS = [
@@ -38,7 +43,35 @@ const pendingByWorker = new Map<Worker, Set<() => void>>()
 let workerQueue = Promise.resolve()
 
 export type InferenceOptions = {
+  onPhaseChange?: (phase: InferencePhase) => void
   signal?: AbortSignal
+}
+
+export type InferenceFailureCode =
+  | 'deadline-exceeded'
+  | 'native-timeout'
+  | 'native-quality'
+  | 'native-runtime'
+  | 'ollama-unavailable'
+  | 'inference-unavailable'
+
+export type InferencePhase =
+  | 'preparing-facts'
+  | 'classifying'
+  | 'validating-native-model'
+  | 'generating-native'
+  | 'generating-ollama'
+  | 'using-deterministic-fallback'
+  | 'completed'
+
+export class InferenceError extends Error {
+  code: InferenceFailureCode
+
+  constructor(code: InferenceFailureCode, message: string) {
+    super(message)
+    this.name = 'InferenceError'
+    this.code = code
+  }
 }
 
 function abortError() {
@@ -47,6 +80,38 @@ function abortError() {
 
 function throwIfAborted(signal?: AbortSignal) {
   if (signal?.aborted) throw abortError()
+}
+
+function deadlineError() {
+  return new InferenceError('deadline-exceeded', 'AI 深度分析超时，请重试。')
+}
+
+function withInferenceDeadline(signal?: AbortSignal) {
+  const controller = new AbortController()
+  let timedOut = false
+  const startedAt = Date.now()
+  const cancel = () => controller.abort(signal?.reason ?? abortError())
+  const timeout = setTimeout(() => {
+    timedOut = true
+    controller.abort(deadlineError())
+  }, INFERENCE_DEADLINE_MS)
+  signal?.addEventListener('abort', cancel, { once: true })
+
+  return {
+    signal: controller.signal,
+    didTimeout: () => timedOut,
+    remainingMs() {
+      return Math.max(1, INFERENCE_DEADLINE_MS - (Date.now() - startedAt))
+    },
+    cleanup() {
+      clearTimeout(timeout)
+      signal?.removeEventListener('abort', cancel)
+    },
+  }
+}
+
+function budgetForStage(remainingMs: number, stageLimitMs: number, reserveMs = 0) {
+  return Math.max(1, Math.min(stageLimitMs, remainingMs - reserveMs))
 }
 
 function delay(ms: number, signal?: AbortSignal) {
@@ -136,40 +201,38 @@ async function withWorkerSlot<T>(operation: () => Promise<T>, signal?: AbortSign
   return result
 }
 
-function buildFeatureText(result: AnalyzedName) {
-  const charParts = result.chars.map(char => {
-    const entry = char.entry
-    const cultural = char.cultural
-    const meanings = entry?.definition_cn ?? '未收录'
-    const culture = cultural
-      ? [cultural.element ? `${cultural.element}行` : '', cultural.connotation ?? '', cultural.genderBias ?? '']
-          .filter(Boolean)
-          .join('；')
-      : '无文化标签'
+function buildFeatureText(packet: GroundingFactPacket) {
+  const charParts = packet.characters
+    .filter(char => char.role === 'given')
+    .map(char => {
+      const meanings = char.meaning ?? '未收录'
+      const culture = [char.connotation ?? '', char.localGloss ?? '']
+        .filter(Boolean)
+        .join('；') || '无标签'
 
-    return `${char.char}(${char.role})：${meanings}｜${culture}`
-  })
+      return `${char.char}(${char.role})：${meanings}｜${culture}`
+    })
 
   return [
-    `姓名：${result.original}`,
+    `姓名：${packet.name}`,
     ...charParts,
     `模型版本：${MODEL_VERSION}`,
   ].join('\n')
 }
 
 export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedName): string {
+  const packet = buildGroundingFactPacket(result)
   const factualDraft = buildLocalSummary(labels, result, 'model')
-  const given = result.chars.filter(char => char.role === 'given')
-  const givenCharacters = given.map(char => char.char)
-  const unknownCharacters = given.filter(char => !namingMeaning(char)).map(char => char.char)
-  const repeatedCharacter = givenCharacters.length > 1 && new Set(givenCharacters).size === 1
+  const givenCharacters = packet.characters.filter(char => char.role === 'given').map(char => char.char)
+  const unknownCharacters = packet.characters.filter(char => char.role === 'given' && !char.meaning).map(char => char.char)
+  const repeatedCharacter = packet.structure.isRepeatedGivenName
 
   return [
     '任务：只润色基础文稿，不介绍人物，不增加事实。',
     `基础文稿：${factualDraft}`,
-    `开头必须保留为：在“${result.original}”中，`,
+    `开头必须保留为：在“${packet.name}”中，`,
     '必须完整保留文稿中的姓名字义和已注明出处的文化联想。',
-    '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途或命运推断。',
+    '禁止出现字号、人称、出生、籍贯、人物身份、生平、作品、成就、书香门第、国家、民族、政治、军事、仕途、命运、性格、行为或前途推断。',
     '不得在姓名后重复名字用字或添加“字”“号”等身份句式。',
     repeatedCharacter ? `“${givenCharacters[0]}”是叠字名，只解释一次字义，不要把同一个“${givenCharacters[0]}”字解释两次。` : '',
     unknownCharacters.length > 0 ? `“${unknownCharacters.join('”“')}”没有可核实的名字字义，不得解释、联想或补写这些字的含义；只能保留基础文稿中的结构描述。` : '',
@@ -178,39 +241,95 @@ export function buildGroundedSummaryPrompt(labels: string[], result: AnalyzedNam
   ].filter(Boolean).join('\n')
 }
 
-export function groundedSummaryRejection(summary: string, result?: AnalyzedName): string | null {
-  const text = summary.trim()
+export type SummaryRejectionCode =
+  | 'wrong-opening'
+  | 'name-missing'
+  | 'known-meaning-missing'
+  | 'literary-reference-missing'
+  | 'unknown-meaning-invented'
+  | 'unsupported-personality-claim'
+  | 'biography-claim'
+  | 'historical-claim'
+  | 'prompt-leak'
+  | 'invalid-script'
+  | 'too-short'
+  | 'too-long'
+
+export type SummaryRejection = {
+  code: SummaryRejectionCode
+  detail: string
+}
+
+function normalizeSummary(summary: string): string {
+  return summary.replace(/\s+/g, '').trim()
+}
+
+function meaningAnchors(meaning: string): string[] {
+  return meaning
+    .split(/[、，；和与及]/)
+    .map(part => part.trim())
+    .filter(part => part.length >= 2)
+}
+
+function unsupportedPersonalityClaim(text: string): boolean {
+  return /(?:内心|待人|行事|步履|前路|命运|前途|心性|品格|人格|胸襟|志向|气度|人生|未来|事业|成才|成就|成功|愿景)/u.test(text)
+}
+
+export function groundedSummaryRejection(summary: string, result?: AnalyzedName): SummaryRejection | null {
+  const text = normalizeSummary(summary)
   const length = [...text].length
-  if (/[A-Za-z]/.test(text)) return '包含英文或拼音。'
-  if (/(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)) return '复述了提示词或生成要求。'
-  if (/(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)) return '加入了基础文稿之外的身份、成就或命运推断。'
+  if (/[A-Za-z]|\d|[\[\]{}=:_]/.test(text)) return { code: 'invalid-script', detail: '包含非预期脚本、数字或字段样式字符。' }
+  if (/(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)) return { code: 'prompt-leak', detail: '复述了提示词或生成要求。' }
+  if (/(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)) return { code: 'biography-claim', detail: '加入了基础文稿之外的身份、成就或命运推断。' }
   const claimsBiography = /(?:^|[，。；\s])(?:字|号)(?:为|曰|叫作|名为)?[\u3400-\u9fff]{1,4}(?=[，。；\s]|$)|(?:著名|杰出|历史上).{0,12}(?:人物|名将|将军|政治家|军事家|诗人|文人|官员)/u.test(text)
-  if (claimsBiography) return '虚构了字号或人物身份。'
+  if (claimsBiography) return { code: 'biography-claim', detail: '虚构了字号或人物身份。' }
   if (result) {
-    const givenName = result.chars.filter(char => char.role === 'given').map(char => char.char).join('')
+    const packet = buildGroundingFactPacket(result)
+    if (!text.startsWith(`在“${packet.name}”中，`)) return { code: 'wrong-opening', detail: '未保留要求的开头。' }
+    if (!text.includes(packet.name)) return { code: 'name-missing', detail: '正文缺少完整姓名。' }
+    const givenName = packet.givenName
     if (
-      text.startsWith(`${result.original}字`)
-      || text.startsWith(`${result.original}号`)
-      || text.startsWith(`${result.original}，${givenName}字`)
-      || text.startsWith(`${result.original},${givenName}字`)
-      || (text.startsWith(`${result.original}（`) && /）[，,\s]*(?:字|号)/u.test(text))
-    ) return '把名字用字误写成了人物字号。'
-    const unknownCharacters = result.chars
-      .filter(char => char.role === 'given' && !namingMeaning(char))
-      .map(char => char.char)
+      text.startsWith(`${packet.name}字`)
+      || text.startsWith(`${packet.name}号`)
+      || text.startsWith(`${packet.name}，${givenName}字`)
+      || text.startsWith(`${packet.name},${givenName}字`)
+      || (text.startsWith(`${packet.name}（`) && /）[，,\s]*(?:字|号)/u.test(text))
+    ) return { code: 'biography-claim', detail: '把名字用字误写成了人物字号。' }
+
+    const givenCharacters = packet.characters.filter(char => char.role === 'given')
+    for (const char of givenCharacters) {
+      if (!text.includes(`“${char.char}”`) && !text.includes(char.char)) {
+        return { code: 'known-meaning-missing', detail: `缺少名字用字“${char.char}”的事实覆盖。` }
+      }
+      if (char.meaning) {
+        const anchors = meaningAnchors(char.meaning)
+        if (anchors.length > 0 && !anchors.some(anchor => text.includes(anchor))) {
+          return { code: 'known-meaning-missing', detail: `未保留“${char.char}”的已知字义。` }
+        }
+      }
+      if (char.literaryReference) {
+        const referenceMatch = char.literaryReference.match(/《[^》]+》[^。；，]*/u)?.[0]
+        if (referenceMatch && !text.includes(referenceMatch)) {
+          return { code: 'literary-reference-missing', detail: `未保留“${char.char}”的文化出处。` }
+        }
+      }
+    }
+
+    const unknownCharacters = givenCharacters.filter(char => !char.meaning).map(char => char.char)
     for (const char of unknownCharacters) {
       const escaped = char.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       if (new RegExp(`(?:“${escaped}”|${escaped}字)(?:有|取|表示|象征|寓意|带有|体现)`, 'u').test(text)) {
-        return `为缺少可靠释义的“${char}”补写了含义。`
+        return { code: 'unknown-meaning-invented', detail: `为缺少可靠释义的“${char}”补写了含义。` }
       }
     }
   }
   if (
     /(?:生于|出生于|祖籍|籍贯)|(?:北京|上海|天津|重庆|江苏|浙江|安徽|福建|江西|山东|河南|湖北|湖南|广东|海南|四川|贵州|云南|陕西|甘肃|青海|河北|山西|辽宁|吉林|黑龙江|内蒙古|广西|西藏|宁夏|新疆|香港|澳门|台湾)[\u3400-\u9fff]{0,6}人|(?:书法|文学|政治|军事).{0,10}(?:造诣|成就)|(?:他的|她的)(?:作品|诗歌|生平|事迹)|(?:被誉为|被尊为|人称|号称)/u.test(text)
-  ) return '虚构了出生信息、生平、作品或成就。'
-  if (/(?:春秋|战国|秦汉|汉唐|秦朝|汉朝|汉代|唐朝|唐代|宋朝|宋代|明朝|明代|清朝|清代|古代|先贤|史载|相传)/u.test(text)) return '加入了基础文稿之外的历史背景。'
-  if (length < 80) return `长度不足：当前${length}个字符，至少需要80个字符。`
-  if (length > 130) return `长度超出：当前${length}个字符，最多允许130个字符。`
+  ) return { code: 'biography-claim', detail: '虚构了出生信息、生平、作品或成就。' }
+  if (/(?:春秋|战国|秦汉|汉唐|秦朝|汉朝|汉代|唐朝|唐代|宋朝|宋代|明朝|明代|清朝|清代|古代|先贤|史载|相传)/u.test(text)) return { code: 'historical-claim', detail: '加入了基础文稿之外的历史背景。' }
+  if (unsupportedPersonalityClaim(text)) return { code: 'unsupported-personality-claim', detail: '加入了字义事实之外的性格、行为或前途推断。' }
+  if (length < 80) return { code: 'too-short', detail: `长度不足：当前${length}个字符，至少需要80个字符。` }
+  if (length > 130) return { code: 'too-long', detail: `长度超出：当前${length}个字符，最多允许130个字符。` }
   return null
 }
 
@@ -218,23 +337,8 @@ export function isGroundedSummary(summary: string, result?: AnalyzedName): boole
   return groundedSummaryRejection(summary, result) === null
 }
 
-function cleanDefinition(text: string): string {
-  if (!text) return ''
-  if (/(?:会意|形声|象形|指事|小篆字形)/u.test(text)) return ''
-  const unusable = /(?:会意|形声|象形|指事|转注|假借|甲骨文|金文|小篆|部首|俗字|异体|本义|从[\u3400-\u9fff]|见“|亦作|义同|《说文》|之形|(?:上面|下面).{0,12}(?:人|小儿|字)|移.{0,12}下|表示与.{0,12}有关|容量单位|计量单位|十斗为一石|也名|--|[“”]{2})/u
-  const segments = text
-    .replace(/^[a-zA-Zāáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜü\s\d]+/, '')
-    .split(/[。；;！？!，,]/)
-    .map(segment => segment.replace(/^[()（）\s]+|[()（）\s]+$/g, '').trim())
-    .filter(segment => segment.length > 1 && !/[”」』〉]$/u.test(segment) && !unusable.test(segment))
-  return segments[0]?.slice(0, 24) ?? ''
-}
-
 function namingMeaning(char: AnalyzedName['chars'][number]): string {
-  const gloss = char.cultural?.localGloss?.trim()
-  if (gloss) return gloss
-  const connotation = char.cultural?.connotation?.split(/[；。]/)[0]?.trim()
-  return connotation || cleanDefinition(char.entry?.definition_cn || '')
+  return namingMeaningDetails(char).meaning ?? ''
 }
 
 export function buildLocalSummary(labels: string[], result: AnalyzedName, source: 'model' | 'fallback') {
@@ -357,7 +461,7 @@ function testWorkerConnection(worker: Worker): Promise<boolean> {
   })
 }
 
-async function inferWorkerAttempt(result: AnalyzedName, signal?: AbortSignal): Promise<string[] | null> {
+async function inferWorkerAttempt(result: AnalyzedName, signal?: AbortSignal, budgetMs?: number): Promise<string[] | null> {
   return withWorkerSlot(async () => {
     throwIfAborted(signal)
     const worker = await raceWithSignal(getWorker(), signal)
@@ -391,7 +495,7 @@ async function inferWorkerAttempt(result: AnalyzedName, signal?: AbortSignal): P
       const handleAbort = () => invalidateWorker(worker)
       const failWorker = () => invalidateWorker(worker)
       const handleError = () => failWorker()
-      const timeout = setTimeout(failWorker, WORKER_TIMEOUT_MS)
+      const timeout = setTimeout(failWorker, Math.max(1, Math.min(WORKER_TIMEOUT_MS, budgetMs ?? WORKER_TIMEOUT_MS)))
       pending.add(settleFailure)
       worker.addEventListener('message', handleMessage)
       worker.addEventListener('error', handleError)
@@ -405,9 +509,9 @@ async function inferWorkerAttempt(result: AnalyzedName, signal?: AbortSignal): P
   }, signal)
 }
 
-async function inferViaWorker(result: AnalyzedName, signal?: AbortSignal): Promise<string[] | null> {
+async function inferViaWorker(result: AnalyzedName, signal?: AbortSignal, budgetMs?: number): Promise<string[] | null> {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt += 1) {
-    const labels = await inferWorkerAttempt(result, signal)
+    const labels = await inferWorkerAttempt(result, signal, budgetMs)
     throwIfAborted(signal)
     if (labels?.length) return labels
     if (attempt + 1 < MAX_ATTEMPTS) await delay(RETRY_DELAY_MS, signal)
@@ -415,18 +519,20 @@ async function inferViaWorker(result: AnalyzedName, signal?: AbortSignal): Promi
   return null
 }
 
-function requestController(timeoutMs: number, signal?: AbortSignal) {
+function requestController(timeoutMs: number, signal?: AbortSignal, budgetMs?: number) {
   const controller = new AbortController()
   let timedOut = false
   const cancel = () => controller.abort(signal?.reason)
+  const effectiveTimeout = Math.max(1, Math.min(timeoutMs, budgetMs ?? timeoutMs))
   const timeout = setTimeout(() => {
     timedOut = true
     controller.abort(new DOMException('Inference timed out', 'TimeoutError'))
-  }, timeoutMs)
+  }, effectiveTimeout)
   signal?.addEventListener('abort', cancel, { once: true })
   return {
     controller,
     didTimeout: () => timedOut,
+    effectiveTimeout,
     cleanup() {
       clearTimeout(timeout)
       signal?.removeEventListener('abort', cancel)
@@ -456,19 +562,20 @@ type NativeSummaryResult = {
   failure: 'none' | 'timeout' | 'quality' | 'runtime'
 }
 
-function correctiveSummaryPrompt(originalPrompt: string, rejected: string, reason: string): string {
+function correctiveSummaryPrompt(originalPrompt: string, rejection: SummaryRejection): string {
   return [
     originalPrompt,
-    `上一次输出未通过检查，具体原因：${reason}`,
-    `不合格输出：${rejected.slice(0, 300)}`,
-    '不得沿用其中的虚构身份、经历、字号、出生信息、提示复述或生硬的“某字”句式。',
+    `上一次输出未通过检查，拒绝代码：${rejection.code}`,
+    `具体原因：${rejection.detail}`,
+    '不要沿用上一次输出中的句式，只依据基础文稿重写。',
+    '不得引入虚构身份、经历、字号、出生信息、提示复述、性格推断或生硬的“某字”句式。',
     '重新输出符合原始基础文稿、80至130个汉字的正文。',
   ].join('\n')
 }
 
-async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ available: boolean; timedOut: boolean }> {
+async function checkNativeModelForInference(signal?: AbortSignal, budgetMs?: number): Promise<{ available: boolean; timedOut: boolean }> {
   throwIfAborted(signal)
-  const modelCheck = requestController(WORKER_TIMEOUT_MS, signal)
+  const modelCheck = requestController(WORKER_TIMEOUT_MS, signal, budgetMs)
   const aborted = new Promise<never>((_, reject) => {
     modelCheck.controller.signal.addEventListener('abort', () => reject(modelCheck.controller.signal.reason ?? abortError()), { once: true })
   })
@@ -485,9 +592,9 @@ async function checkNativeModelForInference(signal?: AbortSignal): Promise<{ ava
   }
 }
 
-async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<NativeSummaryResult> {
+async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal, budgetMs?: number): Promise<NativeSummaryResult> {
   if (!isTauri()) return { summary: null, failure: 'none' }
-  const model = await checkNativeModelForInference(signal)
+  const model = await checkNativeModelForInference(signal, budgetMs)
   if (!model.available) return { summary: null, failure: model.timedOut ? 'timeout' : 'none' }
 
   const originalContext = buildGroundedSummaryPrompt(labels, result)
@@ -495,7 +602,7 @@ async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal
   for (let attempt = 0; attempt < NATIVE_MAX_ATTEMPTS; attempt += 1) {
     throwIfAborted(signal)
     const requestId = crypto.randomUUID()
-    const request = requestController(NATIVE_TIMEOUT_MS, signal)
+    const request = requestController(NATIVE_TIMEOUT_MS, signal, budgetMs)
     const generation = invoke<string>('generate_internal_summary', {
       requestId,
       name: result.original,
@@ -509,9 +616,9 @@ async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal
       const summary = await Promise.race([generation, aborted])
       const rejection = groundedSummaryRejection(summary, result)
       if (!rejection) {
-        return { summary, failure: 'none' }
+        return { summary: normalizeSummary(summary), failure: 'none' }
       }
-      context = correctiveSummaryPrompt(originalContext, summary, rejection)
+      context = correctiveSummaryPrompt(originalContext, rejection)
       if (attempt + 1 < NATIVE_MAX_ATTEMPTS) {
         await delay(RETRY_DELAY_MS, signal)
         continue
@@ -545,12 +652,12 @@ async function fetchNativeSummary(labels: string[], result: AnalyzedName, signal
   return { summary: null, failure: 'runtime' }
 }
 
-async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal): Promise<string | null> {
+async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal?: AbortSignal, budgetMs?: number): Promise<string | null> {
   const prompt = buildGroundedSummaryPrompt(labels, result)
 
   for (const [index, url] of OLLAMA_URLS.entries()) {
     throwIfAborted(signal)
-    const request = requestController(OLLAMA_TIMEOUT_MS, signal)
+    const request = requestController(OLLAMA_TIMEOUT_MS, signal, budgetMs)
     try {
       const response = await fetch(url, {
           method: 'POST',
@@ -565,7 +672,7 @@ async function fetchOllamaSummary(labels: string[], result: AnalyzedName, signal
       })
       if (!response.ok) continue
       const data = await response.json() as { response?: string }
-      const summary = data.response?.trim()
+      const summary = data.response ? normalizeSummary(data.response) : undefined
       if (summary && isGroundedSummary(summary, result)) return summary
     } catch {
       throwIfAborted(signal)
@@ -618,36 +725,88 @@ export function formatModelDownloadError(error: unknown): string {
 }
 
 export async function runLocalAiAnalysis(result: AnalyzedName, options: InferenceOptions = {}): Promise<AiAnalysisResult> {
-  const { signal } = options
-  throwIfAborted(signal)
-  let labels: string[] = [];
-  let source: 'model' | 'fallback' = 'fallback';
+  const { onPhaseChange } = options
+  const deadline = withInferenceDeadline(options.signal)
+  const signal = deadline.signal
+
   try {
-    const modelLabels = await inferViaWorker(result, signal)
-    if (modelLabels?.length && modelLabels[0] !== 'pong') { labels = modelLabels; source = 'model'; }
-  } catch {}
-  throwIfAborted(signal)
-  if (labels.length === 0) { labels = pickFallbackLabels(buildFeatureText(result)); source = 'fallback'; }
-  const native = await fetchNativeSummary(labels, result, signal).catch((error): NativeSummaryResult => {
+    onPhaseChange?.('preparing-facts')
     throwIfAborted(signal)
-    console.error('[Inference] Tauri native LLM failed:', error)
-    return { summary: null, failure: 'runtime' }
-  })
-  let generatedSummary = native.summary
-  let summarySource: 'native' | 'ollama' | 'fallback' = native.summary ? 'native' : 'fallback'
-  if (native.failure === 'timeout') throw new Error('原生 Qwen 生成超时，请重试。')
-  if (native.failure === 'quality') throw new Error('原生 Qwen 输出未通过事实检查，请重新分析。')
-  if (native.failure === 'runtime') throw new Error('原生 Qwen 运行失败，请重试。')
-  if (!generatedSummary) {
-    generatedSummary = await fetchOllamaSummary(labels, result, signal)
-    if (generatedSummary) summarySource = 'ollama'
-  }
-  throwIfAborted(signal)
-  return {
-    labels,
-    summary: generatedSummary || buildLocalSummary(labels, result, source),
-    loadedFromCache: source === 'model',
-    source: source,
-    summarySource,
+    const packet = buildGroundingFactPacket(result)
+    let labels: string[] = [];
+    let labelSource: 'model' | 'fallback' | 'none' = 'none';
+    try {
+      onPhaseChange?.('classifying')
+      const modelLabels = await inferViaWorker(
+        result,
+        signal,
+        budgetForStage(deadline.remainingMs(), WORKER_TIMEOUT_MS * MAX_ATTEMPTS + RETRY_DELAY_MS, OLLAMA_RESERVE_MS + FINAL_FALLBACK_RESERVE_MS),
+      )
+      if (modelLabels?.length && modelLabels[0] !== 'pong') { labels = modelLabels; labelSource = 'model'; }
+    } catch (error) {
+      if (error instanceof InferenceError) throw error
+      throwIfAborted(signal)
+    }
+    throwIfAborted(signal)
+    if (labels.length === 0) {
+      labels = pickFallbackLabels(buildFeatureText(packet))
+      labelSource = labels.length > 0 ? 'fallback' : 'none'
+    }
+    onPhaseChange?.('validating-native-model')
+    const native = await fetchNativeSummary(
+      labels,
+      result,
+      signal,
+      budgetForStage(deadline.remainingMs(), NATIVE_TIMEOUT_MS * 2 + NATIVE_CANCEL_RESERVE_MS, OLLAMA_RESERVE_MS + FINAL_FALLBACK_RESERVE_MS),
+    ).catch((error): NativeSummaryResult => {
+      if (error instanceof InferenceError) throw error
+      throwIfAborted(signal)
+      console.error('[Inference] Tauri native LLM failed:', error)
+      return { summary: null, failure: 'runtime' }
+    })
+    let generatedSummary = native.summary
+    let summarySource: 'native' | 'ollama' | 'fallback' = native.summary ? 'native' : 'fallback'
+    let generationStatus: 'complete' | 'degraded' = native.summary ? 'complete' : 'degraded'
+    if (native.failure === 'timeout') throw new InferenceError('native-timeout', '原生 Qwen 生成超时，请重试。')
+    if (native.summary) onPhaseChange?.('generating-native')
+    if (!generatedSummary) {
+      onPhaseChange?.('generating-ollama')
+      generatedSummary = await fetchOllamaSummary(
+        labels,
+        result,
+        signal,
+        budgetForStage(deadline.remainingMs(), OLLAMA_TIMEOUT_MS + RETRY_DELAY_MS, FINAL_FALLBACK_RESERVE_MS),
+      )
+      if (generatedSummary) {
+        summarySource = 'ollama'
+        generationStatus = 'degraded'
+      }
+    }
+    throwIfAborted(signal)
+    if (!generatedSummary) onPhaseChange?.('using-deterministic-fallback')
+    onPhaseChange?.('completed')
+    return {
+      labels,
+      summary: generatedSummary || buildLocalSummary(labels, result, labelSource === 'model' ? 'model' : 'fallback'),
+      labelSource,
+      summarySource,
+      generationStatus,
+      provenance: {
+        schemaVersion: 1,
+        generatedAt: Date.now(),
+        classifierModelVersion: MODEL_VERSION,
+        groundingPolicyVersion: 'grounding-facts-v1',
+        validatorVersion: 'summary-validator-v2',
+      },
+    }
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'AbortError') {
+      if (deadline.didTimeout()) throw deadlineError()
+      throw error
+    }
+    if (error instanceof InferenceError) throw error
+    throw new InferenceError('inference-unavailable', 'AI 深度分析暂时不可用，请稍后重试。')
+  } finally {
+    deadline.cleanup()
   }
 }

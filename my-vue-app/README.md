@@ -123,6 +123,7 @@ Use Tauri to package the whole app into a Windows `.exe`:
 - `npm run test:features` - run the shared Python and TypeScript feature-contract tests
 - `npm run test:unit -- --run` - run the complete Vitest suite once
 - `npm run test:onnx` - create an ONNX WASM session and execute the bundled classifier
+- `npm run verify` - run the current read-only reliability and release-quality gate set in one command
 - `npm run type-check` - run Vue/TypeScript type checking
 - `npm run lint:check` - run read-only Oxlint and ESLint checks over project-owned source, scripts, and configuration
 - `npm run lint` - run the development autofix lint tasks
@@ -131,6 +132,8 @@ Use Tauri to package the whole app into a Windows `.exe`:
 - `npm run format` - format `src/` with Prettier
 - `npm run tauri:dev` - launch the Tauri desktop shell
 - `npm run tauri:build` - build the Tauri desktop bundle
+
+Use `npm run verify` before merges, release tagging, or after changing local AI, dictionary-supplement, ONNX, or validation logic. Unlike `npm run build`, it keeps the run read-only and executes the current reliability gates together: data consistency checks, feature-contract tests, the complete Vitest suite, type checking, lint checks, and ONNX smoke inference.
 
 ## Release quality gates
 

@@ -1,6 +1,6 @@
 [package]
 name = "chinese-name-meaning-explorer"
-version = "0.1.6"
+version = "0.1.7"
 description = "A Chinese Name Meaning Explorer with internal LLM"
 authors = ["Qingyang Mei"]
 edition = "2021"

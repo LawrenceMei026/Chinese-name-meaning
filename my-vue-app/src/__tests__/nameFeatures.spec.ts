@@ -16,10 +16,12 @@ describe('name feature contract', () => {
     expect(labels.length).toBeGreaterThan(0)
     expect(labels.length).toBeLessThanOrEqual(3)
     expect(labels.every(label => FEATURE_CONTRACT.labels.includes(label))).toBe(true)
-    expect(pickFallbackLabels('未命中任何规则')).toEqual(['书卷'])
+    expect(pickFallbackLabels('未命中任何规则')).toEqual([])
   })
 
   it('matches the deployed model manifest', () => {
+    expect(manifest.modelSize).toBe(16312)
+    expect(manifest.modelSha256).toMatch(/^[a-f0-9]{64}$/u)
     expect(manifest.featureSize).toBe(FEATURE_CONTRACT.size)
     expect(manifest.outputSize).toBe(FEATURE_CONTRACT.labels.length)
     expect(manifest.featureContractVersion).toBe(FEATURE_CONTRACT.version)

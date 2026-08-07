@@ -30,15 +30,24 @@ export interface AnalyzedName {
 export interface AiAnalysisResult {
   labels: string[]
   summary: string
-  loadedFromCache: boolean
-  source: 'model' | 'fallback'
-  summarySource?: 'native' | 'ollama' | 'fallback'
+  labelSource: 'model' | 'fallback' | 'none'
+  summarySource: 'native' | 'ollama' | 'fallback'
+  generationStatus?: 'complete' | 'degraded'
+  provenance?: {
+    schemaVersion: 1
+    generatedAt: number
+    classifierModelVersion?: string
+    groundingPolicyVersion?: string
+    validatorVersion?: string
+  }
 }
 
 export interface AnalysisHistoryEntry {
+  schemaVersion: 2
   id: string
   input: string
   createdAt: number
   result: AnalyzedName
+  legacy?: boolean
   aiResult?: AiAnalysisResult | null
 }

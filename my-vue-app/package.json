@@ -1,6 +1,6 @@
 {
   "name": "my-vue-app",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "private": true,
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "test:unit": "vitest",
     "test:features": "node scripts/test-python-features.mjs && vitest --run src/__tests__/nameFeatures.spec.ts",
     "test:onnx": "node scripts/smoke-onnx.mjs",
+    "verify": "run-s check:version check:dictionary-supplements check:xinhua-supplements check:unihan-supplements check:zhwiktionary-supplements check:name-meaning-coverage check:guangyun-data check:cultural-data check:tauri-acl test:features \"test:unit -- --run\" type-check lint:check test:onnx",
     "check:version": "node scripts/check-version.mjs",
     "check:dictionary-supplements": "node scripts/apply-dictionary-supplements.mjs --check",
     "check:xinhua-supplements": "node scripts/apply-xinhua-definition-supplements.mjs --check",

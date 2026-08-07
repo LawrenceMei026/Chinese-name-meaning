@@ -24,6 +24,14 @@ struct AppState {
     runtime: Mutex<LlamaRuntime>,
     cancellations: Mutex<HashMap<String, Option<Arc<AtomicBool>>>>,
     inference_active: AtomicBool,
+    validated_model: Mutex<Option<ValidatedModel>>,
+}
+
+#[derive(Clone)]
+struct ValidatedModel {
+    canonical_path: PathBuf,
+    size: u64,
+    modified: Option<SystemTime>,
 }
 
 const MAX_PENDING_CANCELLATIONS: usize = 64;
@@ -111,6 +119,10 @@ fn get_model_path() -> Result<PathBuf, String> {
     Ok(path)
 }
 
+fn canonical_model_path(path: &Path) -> Result<PathBuf, String> {
+    fs::canonicalize(path).map_err(|error| format!("Failed to canonicalize model path: {error}"))
+}
+
 fn save_model_directory(directory: PathBuf) -> Result<PathBuf, String> {
     validate_model_directory(&directory)?;
     fs::create_dir_all(&directory).map_err(|error| format!("无法创建模型下载目录：{error}"))?;
@@ -190,6 +202,58 @@ fn model_is_valid(path: &PathBuf) -> bool {
     format!("{:x}", hasher.finalize()) == MODEL_SHA256
 }
 
+fn validate_model_and_capture(path: &Path) -> Result<ValidatedModel, String> {
+    let canonical_path = canonical_model_path(path)?;
+    let metadata = fs::metadata(&canonical_path)
+        .map_err(|error| format!("Failed to read model metadata: {error}"))?;
+    if metadata.len() != MODEL_SIZE {
+        return Err("Model file is missing or has an unexpected size".to_string());
+    }
+    if !model_is_valid(&canonical_path) {
+        return Err("Model integrity check failed".to_string());
+    }
+    Ok(ValidatedModel {
+        canonical_path,
+        size: metadata.len(),
+        modified: metadata.modified().ok(),
+    })
+}
+
+fn validated_model_matches(cached: &ValidatedModel, metadata: &fs::Metadata, canonical_path: &Path) -> bool {
+    cached.canonical_path == canonical_path
+        && cached.size == metadata.len()
+        && cached.modified == metadata.modified().ok()
+}
+
+fn ensure_validated_model(state: &AppState, path: &Path) -> Result<PathBuf, String> {
+    let canonical_path = canonical_model_path(path)?;
+    let metadata = fs::metadata(&canonical_path)
+        .map_err(|error| format!("Failed to read model metadata: {error}"))?;
+    if metadata.len() != MODEL_SIZE {
+        return Err("Model file is missing or has an unexpected size".to_string());
+    }
+
+    {
+        let cache = state
+            .validated_model
+            .lock()
+            .map_err(|_| "Failed to lock validated model cache")?;
+        if let Some(validated) = cache.as_ref() {
+            if validated_model_matches(validated, &metadata, &canonical_path) {
+                return Ok(canonical_path);
+            }
+        }
+    }
+
+    let validated = validate_model_and_capture(&canonical_path)?;
+    let mut cache = state
+        .validated_model
+        .lock()
+        .map_err(|_| "Failed to lock validated model cache")?;
+    *cache = Some(validated.clone());
+    Ok(validated.canonical_path)
+}
+
 fn acquire_download_lock(path: &PathBuf) -> Result<fs::File, String> {
     let lock_path = path.with_extension("gguf.lock");
     let lock = OpenOptions::new()
@@ -233,9 +297,12 @@ async fn request_model(client: &reqwest::Client) -> Result<reqwest::Response, St
 }
 
 #[tauri::command]
-async fn check_model_exists() -> bool {
-    tauri::async_runtime::spawn_blocking(|| {
-        get_model_path().is_ok_and(|path| model_is_valid(&path))
+async fn check_model_exists(state: State<'_, AppState>) -> bool {
+    tauri::async_runtime::spawn_blocking(move || {
+        get_model_path()
+            .ok()
+            .and_then(|path| ensure_validated_model(state.inner(), &path).ok())
+            .is_some()
     })
     .await
     .unwrap_or(false)
@@ -263,7 +330,7 @@ async fn download_model(handle: AppHandle) -> Result<String, String> {
         tauri::async_runtime::spawn_blocking(move || acquire_download_lock(&lock_path))
             .await
             .map_err(|error| format!("Model download lock task failed: {error}"))??;
-    if model_is_valid(&path) {
+    if ensure_validated_model(&handle.state::<AppState>(), &path).is_ok() {
         return Ok(path.to_string_lossy().to_string());
     }
     if path.exists() {
@@ -461,10 +528,7 @@ fn generate_summary(
         context
     );
 
-    let path = get_model_path()?;
-    if !matches!(fs::metadata(&path), Ok(metadata) if metadata.len() == MODEL_SIZE) {
-        return Err("Model file is missing or has an unexpected size".to_string());
-    }
+    let path = ensure_validated_model(state, &get_model_path()?)?;
     runtime.generate(
         &path,
         &prompt,
@@ -483,6 +547,7 @@ fn main() {
             runtime: Mutex::new(runtime),
             cancellations: Mutex::new(HashMap::new()),
             inference_active: AtomicBool::new(false),
+            validated_model: Mutex::new(None),
         })
         .invoke_handler(tauri::generate_handler![
             check_model_exists,
