@@ -219,7 +219,11 @@ fn validate_model_and_capture(path: &Path) -> Result<ValidatedModel, String> {
     })
 }
 
-fn validated_model_matches(cached: &ValidatedModel, metadata: &fs::Metadata, canonical_path: &Path) -> bool {
+fn validated_model_matches(
+    cached: &ValidatedModel,
+    metadata: &fs::Metadata,
+    canonical_path: &Path,
+) -> bool {
     cached.canonical_path == canonical_path
         && cached.size == metadata.len()
         && cached.modified == metadata.modified().ok()
