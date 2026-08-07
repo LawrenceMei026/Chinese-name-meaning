@@ -278,7 +278,7 @@ function unsupportedPersonalityClaim(text: string): boolean {
 export function groundedSummaryRejection(summary: string, result?: AnalyzedName): SummaryRejection | null {
   const text = normalizeSummary(summary)
   const length = [...text].length
-  if (/[A-Za-z]|\d|[\[\]{}=:_]/.test(text)) return { code: 'invalid-script', detail: '包含非预期脚本、数字或字段样式字符。' }
+  if (/[A-Za-z]|\d|[\]{}=:_[]/.test(text)) return { code: 'invalid-script', detail: '包含非预期脚本、数字或字段样式字符。' }
   if (/(?:输出要求|事实边界|只允许使用|结合具体字义生成|角色=|字义=|读音[：=])/u.test(text)) return { code: 'prompt-leak', detail: '复述了提示词或生成要求。' }
   if (/(?:国家|民族|政治|军事|官场|仕途|事业有成|功成名就|成就非凡)/u.test(text)) return { code: 'biography-claim', detail: '加入了基础文稿之外的身份、成就或命运推断。' }
   const claimsBiography = /(?:^|[，。；\s])(?:字|号)(?:为|曰|叫作|名为)?[\u3400-\u9fff]{1,4}(?=[，。；\s]|$)|(?:著名|杰出|历史上).{0,12}(?:人物|名将|将军|政治家|军事家|诗人|文人|官员)/u.test(text)

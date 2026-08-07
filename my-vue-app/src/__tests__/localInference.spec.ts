@@ -541,13 +541,13 @@ describe('local inference worker recovery', () => {
     const { runLocalAiAnalysis } = await import('../services/localInference')
 
     const analysisPromise = runLocalAiAnalysis(result)
-    const expectation = expect(analysisPromise).rejects.toMatchObject({
+    const rejected = analysisPromise.catch(error => error)
+    await vi.runAllTimersAsync()
+    await expect(rejected).resolves.toMatchObject({
       name: 'InferenceError',
       code: 'deadline-exceeded',
       message: 'AI 深度分析超时，请重试。',
     })
-    await vi.runAllTimersAsync()
-    await expectation
     expect(fetchMock).toHaveBeenCalledTimes(2)
     expect(fetchMock.mock.calls.every(call => call[1]?.signal?.aborted)).toBe(true)
   })

@@ -90,6 +90,8 @@ const aiLabelSourceText = computed(() => {
       return '标签来源：规则回退'
     case 'none':
       return '标签来源：未形成可靠标签'
+    default:
+      return ''
   }
 })
 const aiSummarySourceText = computed(() => {
@@ -101,6 +103,8 @@ const aiSummarySourceText = computed(() => {
       return '摘要来源：Ollama'
     case 'fallback':
       return '摘要来源：本地回退'
+    default:
+      return ''
   }
 })
 const aiValidationStatusText = computed(() => activeHistoryEntry.value?.legacy
