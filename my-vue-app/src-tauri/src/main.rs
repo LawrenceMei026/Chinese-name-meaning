@@ -301,15 +301,11 @@ async fn request_model(client: &reqwest::Client) -> Result<reqwest::Response, St
 }
 
 #[tauri::command]
-async fn check_model_exists(state: State<'_, AppState>) -> bool {
-    tauri::async_runtime::spawn_blocking(move || {
-        get_model_path()
-            .ok()
-            .and_then(|path| ensure_validated_model(state.inner(), &path).ok())
-            .is_some()
-    })
-    .await
-    .unwrap_or(false)
+fn check_model_exists(state: State<'_, AppState>) -> bool {
+    get_model_path()
+        .ok()
+        .and_then(|path| ensure_validated_model(state.inner(), &path).ok())
+        .is_some()
 }
 
 #[tauri::command]
