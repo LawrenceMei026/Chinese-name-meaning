@@ -411,7 +411,10 @@ async fn download_model(handle: AppHandle) -> Result<String, String> {
 
 #[tauri::command]
 async fn check_memory() -> Result<u64, String> {
-    let mut sys = System::new_all();
+    // 只刷新内存信息，避免 System::new_all() 展开全部进程/CPU/磁盘/网络刷新逻辑：
+    // 该路径在 Windows release 编译下会生成约 1MB 的栈帧，超出主线程 1MB 栈，
+    // 触发 __chkstk 栈溢出（0xC00000FD）导致应用启动即崩溃。
+    let mut sys = System::new();
     sys.refresh_memory();
     Ok(sys.total_memory() / 1024 / 1024 / 1024) // 返回 GB
 }
