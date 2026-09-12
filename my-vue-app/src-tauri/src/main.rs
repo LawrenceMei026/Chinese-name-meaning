@@ -191,7 +191,10 @@ fn model_is_valid(path: &PathBuf) -> bool {
         return false;
     };
     let mut hasher = Sha256::new();
-    let mut buffer = [0_u8; 1024 * 1024];
+    // 使用堆缓冲区：此前在栈上分配 1MiB（[0_u8; 1024 * 1024]），
+    // 而 Windows 主线程默认栈仅 1MiB，check_model_exists 在主线程调用时
+    // 会触发 __chkstk 栈溢出（0xC00000FD）导致应用闪退。
+    let mut buffer = vec![0_u8; 64 * 1024];
     loop {
         match file.read(&mut buffer) {
             Ok(0) => break,
