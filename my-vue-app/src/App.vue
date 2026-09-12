@@ -6,8 +6,11 @@ import { InferenceError } from './services/localInference'
 import type { InferencePhase } from './services/localInference'
 import { CC_BY_SA_URL, CC_CEDICT_URL, openExternalUrl, REPOSITORY_URL } from './services/externalLinks'
 import CharacterCard from './components/CharacterCard.vue'
+import NumerologyPanel from './components/NumerologyPanel.vue'
 import type { AnalysisHistoryEntry, AnalyzedName, AiAnalysisResult } from './types'
 import type { GuangyunEntry } from './data/guangyun'
+import { computeNameNumerology } from './services/nameNumerology'
+import type { NameNumerology } from './services/nameNumerology'
 
 const HISTORY_KEY = 'analysis-history-v1'
 const HISTORY_LIMIT = 6
@@ -16,6 +19,7 @@ const HISTORY_SCHEMA_VERSION = 2 as const
 const input = ref('')
 const result = ref<AnalyzedName | null>(null)
 const aiResult = ref<AiAnalysisResult | null>(null)
+const numerology = ref<NameNumerology | null>(null)
 const loading = ref(false)
 const aiLoading = ref(false)
 const error = ref<string | null>(null)
@@ -196,6 +200,8 @@ function restoreHistoryEntry(entry: AnalysisHistoryEntry) {
   input.value = entry.input
   result.value = entry.result
   aiResult.value = entry.aiResult ?? null
+  numerology.value = null
+  void refreshNumerology(entry.result)
   error.value = null
   aiError.value = null
   activeHistoryEntryId.value = entry.id
@@ -215,6 +221,14 @@ function updateActiveHistoryEntry(aiAnalysis: AiAnalysisResult) {
 function clearHistory() {
   history.value = []
   saveHistory(history.value)
+}
+
+async function refreshNumerology(analyzed: AnalyzedName) {
+  try {
+    numerology.value = await computeNameNumerology(analyzed)
+  } catch {
+    numerology.value = null
+  }
 }
 
 async function handleSubmit() {
@@ -252,6 +266,7 @@ async function handleSubmit() {
     }
     persistHistoryEntry(entry)
     activeHistoryEntryId.value = entry.id
+    await refreshNumerology(analyzed)
   } catch {
     error.value = '字符数据加载失败，请检查网络连接后重试。'
   } finally {
@@ -303,6 +318,7 @@ function reset() {
   input.value = ''
   result.value = null
   aiResult.value = null
+  numerology.value = null
   error.value = null
   aiError.value = null
   aiPhase.value = null
@@ -548,6 +564,8 @@ onUnmounted(() => {
             :show-guangyun="showGuangyun && guangyunLoaded"
           />
         </div>
+
+        <NumerologyPanel v-if="numerology" :numerology="numerology" />
 
         <div v-if="aiError" class="ai-error" role="alert">{{ aiError }}</div>
 

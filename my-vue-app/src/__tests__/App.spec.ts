@@ -10,6 +10,10 @@ vi.mock('../services/nameAnalyzer', () => ({
   preloadDictionary: vi.fn<() => Promise<void>>().mockResolvedValue(undefined),
 }))
 
+vi.mock('../services/nameNumerology', () => ({
+  computeNameNumerology: vi.fn<() => Promise<null>>().mockResolvedValue(null),
+}))
+
 vi.mock('../services/localInference', () => ({
   InferenceError: class InferenceError extends Error {
     code: string
